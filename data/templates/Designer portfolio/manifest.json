@@ -1,0 +1,73 @@
+{
+  "id": "designer-portfolio",
+  "name": "Product Designer Portfolio",
+  "version": "1.0.0",
+  "category": "Designer",
+  "author": "Maya Kapoor",
+  "description": "Editorial Swiss-inspired UI/UX & Product Designer portfolio template.",
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png",
+  "entry": "src/index.jsx",
+  "sections": [
+    {
+      "id": "hero",
+      "name": "Hero",
+      "componentPath": "src/sections/Hero.jsx",
+      "required": true
+    },
+    {
+      "id": "about",
+      "name": "About",
+      "componentPath": "src/sections/About.jsx",
+      "required": true
+    },
+    {
+      "id": "projects",
+      "name": "Projects",
+      "componentPath": "src/sections/Projects.jsx",
+      "required": true
+    },
+    {
+      "id": "process",
+      "name": "Design Process",
+      "componentPath": "src/sections/Process.jsx",
+      "required": false
+    },
+    {
+      "id": "experience",
+      "name": "Experience",
+      "componentPath": "src/sections/Experience.jsx",
+      "required": true
+    },
+    {
+      "id": "skills",
+      "name": "Skills & Tools",
+      "componentPath": "src/sections/Skills.jsx",
+      "required": true
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "componentPath": "src/sections/Education.jsx",
+      "required": false
+    },
+    {
+      "id": "certifications",
+      "name": "Certifications & Recognition",
+      "componentPath": "src/sections/Certifications.jsx",
+      "required": false
+    },
+    {
+      "id": "testimonial",
+      "name": "Testimonial",
+      "componentPath": "src/sections/Testimonial.jsx",
+      "required": false
+    },
+    {
+      "id": "contact",
+      "name": "Contact",
+      "componentPath": "src/sections/Contact.jsx",
+      "required": true
+    }
+  ]
+}

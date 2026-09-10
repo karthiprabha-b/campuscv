@@ -1,0 +1,115 @@
+{
+  "id": "executive-lawyer-portfolio",
+  "name": "Executive Legal & Strategic Advisory Portfolio",
+  "version": "1.0.0",
+  "category": "Legal & Executive",
+  "description": "Luxury executive portfolio template tailored for corporate counsel, legal partners, strategic consultants, and executive advisors in high-stakes industries.",
+  "entry": "src/index.jsx",
+  "author": "CampusCV",
+  "theme": {
+    "mode": "light",
+    "primaryColor": "#C89B3C",
+    "backgroundColor": "#FAF8F4",
+    "textColor": "#1A1A1A"
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "name": "Hero Section",
+      "component": "src/sections/Hero.jsx",
+      "description": "Executive hero introduction with headline, summary, avatar portrait, and key metric badges.",
+      "fields": [
+        "name",
+        "title",
+        "hero.smallLabel",
+        "hero.headline",
+        "hero.highlightText",
+        "hero.intro",
+        "hero.summary",
+        "hero.avatarUrl",
+        "hero.badgeYears",
+        "hero.badgeLabel",
+        "hero.badgeSatisfaction",
+        "hero.socials"
+      ]
+    },
+    {
+      "id": "achievements",
+      "name": "Key Metrics & Achievements",
+      "component": "src/sections/Achievements.jsx",
+      "description": "High-impact quantifiable performance indicators and career statistics.",
+      "fields": ["metrics"]
+    },
+    {
+      "id": "about",
+      "name": "About Me & Philosophy",
+      "component": "src/sections/About.jsx",
+      "description": "Executive overview, professional story, core values, credentials, and practice location.",
+      "fields": [
+        "about.story",
+        "about.mission",
+        "about.values",
+        "about.educationShort",
+        "about.location",
+        "about.availability",
+        "about.languages",
+        "about.expertise"
+      ]
+    },
+    {
+      "id": "skills",
+      "name": "Skills & Expertise",
+      "component": "src/sections/Skills.jsx",
+      "description": "Categorized legal proficiencies, strategic methodologies, and governance toolchains.",
+      "fields": ["skills"]
+    },
+    {
+      "id": "projects",
+      "name": "Featured Projects & Case Studies",
+      "component": "src/sections/Projects.jsx",
+      "description": "Portfolio of major deals closed, landmark litigation cases, and advisory engagements.",
+      "fields": ["projects"]
+    },
+    {
+      "id": "services",
+      "name": "Services & Advisory Practice",
+      "component": "src/sections/Services.jsx",
+      "description": "Core advisory capabilities, practice scope, and engagement deliverables.",
+      "fields": ["services"]
+    },
+    {
+      "id": "experience",
+      "name": "Professional Experience",
+      "component": "src/sections/Experience.jsx",
+      "description": "Career timeline, executive roles, law firm partnerships, and key milestones.",
+      "fields": ["experience"]
+    },
+    {
+      "id": "education",
+      "name": "Education & Credentials",
+      "component": "src/sections/Education.jsx",
+      "description": "Academic degrees from top institutions, honors, and bar admissions.",
+      "fields": ["education"]
+    },
+    {
+      "id": "testimonials",
+      "name": "Client & Leader Endorsements",
+      "component": "src/sections/Testimonials.jsx",
+      "description": "Executive recommendations and client reviews with ratings.",
+      "fields": ["testimonials"]
+    },
+    {
+      "id": "contact",
+      "name": "Direct Contact Suite",
+      "component": "src/sections/Contact.jsx",
+      "description": "Direct communications suite including email, telephone, office location, and response window.",
+      "fields": [
+        "contact.email",
+        "contact.phone",
+        "contact.location",
+        "contact.hours",
+        "hero.socials"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+# ── Dependencies (Global & Nested) ─────────────────────────
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# ── Next.js & Build Outputs ────────────────────────────────
+.next/
+**/.next/
+out/
+build/
+dist/
+tsconfig.tsbuildinfo
+
+# ── Databases & Local State ────────────────────────────────
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.traineddata
+data/templates/registry.json
+data/**/*.db
+portfolio.db.backup*
+
+# ── Root Test Scripts & Scratch Files ──────────────────────
+test_*.js
+test_*.ts
+test-*.js
+test-*.ts
+inspect_*.js
+check_*.js
+dump_*.js
+build_*.js
+fix_*.js
+generate_*.js
+update_*.js
+restore_*.js
+run_*.js
+scratch/
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.log
+
+# ── Root ZIPs (Deploy packages / temporary archives) ───────
+/*.zip
+
+# ── Environment & Secrets ──────────────────────────────────
+.env*.local
+.env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

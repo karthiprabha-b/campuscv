@@ -1,0 +1,61 @@
+@import "../../css/variables.css";
+@import "../../css/reset.css";
+@import "../../css/typography.css";
+@import "../../css/layout.css";
+@import "../../css/components.css";
+@import "../../css/responsive.css";
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --cv-accent: var(--campuscv-accent, var(--primary, var(--accent, var(--brand, var(--theme-color, #FF4500)))));
+  --cv-accent-hover: var(--campuscv-accent-hover, #E03E00);
+}
+
+@layer base {
+  *, ::before, ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: var(--campuscv-background, #FAF8F5);
+    color: var(--campuscv-foreground, #111111);
+    font-family: var(--campuscv-font-family, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+    font-size: var(--campuscv-base-font-size, 1rem);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  h1, h2, h3, .font-heading {
+    font-family: var(--campuscv-font-heading, 'Syne', 'Plus Jakarta Sans', system-ui, sans-serif);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--campuscv-background, #FAF8F5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D9D2C9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--campuscv-accent, var(--cv-accent, #FF4500));
+}
+

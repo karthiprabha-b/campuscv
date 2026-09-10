@@ -1,0 +1,50 @@
+{
+  "name": "portly",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:clean": "rmdir /s /q .next 2>nul & next dev",
+    "clean": "rmdir /s /q .next 2>nul",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@babel/standalone": "^8.0.4",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@supabase/supabase-js": "^2.112.3",
+    "@types/babel__standalone": "^7.1.9",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jszip": "^3.4.0",
+    "@types/qrcode": "^1.5.6",
+    "better-sqlite3": "^13.0.2",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.17",
+    "gsap": "^3.15.0",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.460.0",
+    "mammoth": "^1.12.0",
+    "next": "^15.0.3",
+    "pdf-parse": "^2.4.5",
+    "playwright": "^1.62.1",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
+    "react": "^19.0.0-rc",
+    "react-dom": "^19.0.0-rc",
+    "tailwind-merge": "^2.5.4",
+    "tesseract.js": "^7.0.0",
+    "three": "^0.185.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.185.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
+  }
+}

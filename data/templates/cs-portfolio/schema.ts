@@ -1,0 +1,122 @@
+export const editorSchema = [
+  {
+    id: "hero",
+    name: "Hero Section",
+    category: "Hero",
+    fields: [
+      { key: "name", label: "Developer Name", type: "text" },
+      { key: "hero.title", label: "Hero Title", type: "text" },
+      { key: "hero.subtitle", label: "Hero Subtitle / Tagline", type: "text" },
+      { key: "hero.introductionText", label: "Introduction Text", type: "textarea" }
+    ]
+  },
+  {
+    id: "about",
+    name: "About Section",
+    category: "About",
+    fields: [
+      { key: "about.title", label: "About Heading", type: "text" },
+      { key: "about.bio", label: "Bio Paragraph", type: "textarea" },
+      { key: "about.avatarUrl", label: "Avatar Image URL", type: "image" }
+    ]
+  },
+  {
+    id: "specialties",
+    name: "Specialties Section",
+    category: "Specialties",
+    fields: [
+      { key: "specialtiesTitle", label: "Specialties Section Title", type: "text" },
+      { key: "specialtiesSubheading", label: "Specialties Subtitle", type: "text" },
+      {
+        key: "specialties",
+        label: "Specialties List",
+        type: "array",
+        itemSchema: [
+          { key: "title", label: "Specialty Title", type: "text" },
+          { key: "description", label: "Description", type: "textarea" },
+          { key: "num", label: "Badge Number (e.g. 01)", type: "text" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "skills",
+    name: "Tech Stack",
+    category: "Skills",
+    fields: [
+      {
+        key: "skills",
+        label: "Skills / Technologies",
+        type: "tags"
+      }
+    ]
+  },
+  {
+    id: "projects",
+    name: "Projects Section",
+    category: "Projects",
+    fields: [
+      {
+        key: "projects",
+        label: "Projects List",
+        type: "array",
+        itemSchema: [
+          { key: "title", label: "Project Title", type: "text" },
+          { key: "description", label: "Short Summary", type: "textarea" },
+          { key: "fullDesc", label: "Full Architecture Details", type: "textarea" },
+          { key: "image", label: "Cover / Screenshot Image URL", type: "image" },
+          { key: "category", label: "Category (e.g. systems, ai, web)", type: "text" },
+          { key: "tags", label: "Tech Tags (comma separated or list)", type: "tags" },
+          { key: "github", label: "GitHub URL", type: "text" },
+          { key: "live", label: "Live Demo URL", type: "text" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "experience",
+    name: "Experience & Education",
+    category: "Experience",
+    fields: [
+      {
+        key: "experience",
+        label: "Work Experience",
+        type: "array",
+        itemSchema: [
+          { key: "role", label: "Role / Position", type: "text" },
+          { key: "company", label: "Company / Organization", type: "text" },
+          { key: "duration", label: "Duration (e.g. Jun 2025 - Sep 2025)", type: "text" },
+          { key: "bullets", label: "Bullet Points", type: "list" }
+        ]
+      },
+      {
+        key: "education",
+        label: "Education & Degrees",
+        type: "array",
+        itemSchema: [
+          { key: "degree", label: "Degree / Major", type: "text" },
+          { key: "school", label: "University / School", type: "text" },
+          { key: "duration", label: "Duration", type: "text" },
+          { key: "gpa", label: "GPA / Grade", type: "text" },
+          { key: "status", label: "Honors / Status", type: "text" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "contact",
+    name: "Contact & Collaboration",
+    category: "Contact",
+    fields: [
+      { key: "contact.email", label: "Contact Email", type: "text" },
+      { key: "contact.location", label: "Location", type: "text" },
+      { key: "socialLinks.github", label: "GitHub Profile URL", type: "text" },
+      { key: "socialLinks.linkedin", label: "LinkedIn Profile URL", type: "text" },
+      { key: "collaborate.heading", label: "Collaborate Banner Title", type: "text" },
+      { key: "collaborate.text", label: "Collaborate Banner Description", type: "textarea" }
+    ]
+  }
+];
+
+export const schema = editorSchema;
+export default editorSchema;

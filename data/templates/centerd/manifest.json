@@ -1,0 +1,28 @@
+{
+  "id": "centerd",
+  "name": "Centered Portfolio",
+  "version": "1.0.0",
+  "author": "CampusCV",
+  "description": "Minimalist editorial portfolio with fixed left navigation, large numbering watermarks, interactive case study modals, and smooth typography animations.",
+  "category": "Developer",
+  "supportsDarkMode": true,
+  "entry": "src/index.jsx",
+  "sections": [
+    "Hero",
+    "About",
+    "Education",
+    "Experience",
+    "Projects",
+    "Skills",
+    "Certificates",
+    "Contact"
+  ],
+  "themeConfig": {
+    "primaryColor": "#ff534a",
+    "backgroundColor": "#ffffff",
+    "textColor": "#212529"
+  },
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png"
+}
+

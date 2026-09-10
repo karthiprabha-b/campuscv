@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DoctorPortfolioCampusCVSchema",
+  "type": "object",
+  "required": ["name", "primaryTitle", "shortBio", "specializations", "experience", "education", "clinic"],
+  "properties": {
+    "name": { "type": "string" },
+    "honorific": { "type": "string" },
+    "primaryTitle": { "type": "string" },
+    "secondaryTitle": { "type": "string" },
+    "registrationNumber": { "type": "string" },
+    "council": { "type": "string" },
+    "tagline": { "type": "string" },
+    "shortBio": { "type": "string" },
+    "fullBio": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "heroPortrait": { "type": "string", "format": "uri" },
+    "aboutPortrait": { "type": "string", "format": "uri" },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "label"],
+        "properties": {
+          "value": { "type": "string" },
+          "label": { "type": "string" },
+          "subtext": { "type": "string" }
+        }
+      }
+    },
+    "specializations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "shortDescription"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "badge": { "type": "string" },
+          "shortDescription": { "type": "string" },
+          "detailedDescription": { "type": "string" },
+          "conditionsTreated": { "type": "array", "items": { "type": "string" } },
+          "commonProcedures": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "institution", "period"],
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "institution": { "type": "string" },
+          "location": { "type": "string" },
+          "period": { "type": "string" },
+          "department": { "type": "string" },
+          "description": { "type": "string" },
+          "highlights": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["degree", "institution"],
+        "properties": {
+          "id": { "type": "string" },
+          "degree": { "type": "string" },
+          "field": { "type": "string" },
+          "fieldOfStudy": { "type": "string" },
+          "institution": { "type": "string" },
+          "school": { "type": "string" },
+          "university": { "type": "string" },
+          "location": { "type": "string" },
+          "year": { "type": "string" },
+          "period": { "type": "string" },
+          "startDate": { "type": "string" },
+          "endDate": { "type": "string" },
+          "startYear": { "type": "string" },
+          "endYear": { "type": "string" },
+          "graduationYear": { "type": "string" },
+          "honors": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "clinic": {
+      "type": "object",
+      "required": ["name", "addressLine1", "phone", "email"],
+      "properties": {
+        "name": { "type": "string" },
+        "facilityType": { "type": "string" },
+        "addressLine1": { "type": "string" },
+        "addressLine2": { "type": "string" },
+        "city": { "type": "string" },
+        "stateZip": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    }
+  }
+}

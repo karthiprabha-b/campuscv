@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "static-panel",
+    "name": "Static Panel Portfolio",
+    "version": "1.0.0",
+    "entry": "src/index.jsx",
+    "category": "Student",
+    "author": "CampusCV",
+    "description": "Modern two-column developer portfolio with a fixed left static sidebar, spacious scrollable canvas, interactive project & cert modals, and clean editorial typography."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "background",
+      "foreground",
+      "brand-600",
+      "brand-50",
+      "primary",
+      "border"
+    ]
+  },
+  "fields": {
+    "hero.name": {
+      "type": "text",
+      "label": "Full Name"
+    },
+    "hero.role": {
+      "type": "text",
+      "label": "Professional Role / Headline"
+    },
+    "hero.badge": {
+      "type": "text",
+      "label": "Education / Speciality Badge"
+    },
+    "hero.availability": {
+      "type": "text",
+      "label": "Availability Status"
+    },
+    "hero.profileImage": {
+      "type": "image",
+      "label": "Profile Avatar",
+      "styleLocked": true
+    },
+    "hero.coverImage": {
+      "type": "image",
+      "label": "Cover Banner Image",
+      "styleLocked": true
+    },
+    "about.visible": {
+      "type": "boolean",
+      "label": "Show About Section",
+      "default": true
+    },
+    "about.eyebrow": {
+      "type": "text",
+      "label": "About Section Eyebrow"
+    },
+    "about.title": {
+      "type": "text",
+      "label": "About Heading"
+    },
+    "about.headline": {
+      "type": "textarea",
+      "label": "Specialisation & Focus"
+    },
+    "about.bio": {
+      "type": "textarea",
+      "label": "Bio / Summary"
+    },
+    "about.summary": {
+      "type": "textarea",
+      "label": "Bio / Summary"
+    },
+    "about.description": {
+      "type": "textarea",
+      "label": "About Narrative / Bio"
+    },
+    "about.location": {
+      "type": "text",
+      "label": "Location Base"
+    },
+    "education.visible": {
+      "type": "boolean",
+      "label": "Show Education Section",
+      "default": true
+    },
+    "education.eyebrow": {
+      "type": "text",
+      "label": "Education Eyebrow"
+    },
+    "education.description": {
+      "type": "text",
+      "label": "Education Description"
+    },
+    "experience.visible": {
+      "type": "boolean",
+      "label": "Show Experience Section",
+      "default": true
+    },
+    "experience.eyebrow": {
+      "type": "text",
+      "label": "Experience Eyebrow"
+    },
+    "experience.description": {
+      "type": "text",
+      "label": "Experience Description"
+    },
+    "projects.visible": {
+      "type": "boolean",
+      "label": "Show Projects Section",
+      "default": true
+    },
+    "projects.eyebrow": {
+      "type": "text",
+      "label": "Projects Eyebrow"
+    },
+    "projects.description": {
+      "type": "text",
+      "label": "Projects Description"
+    },
+    "skills.visible": {
+      "type": "boolean",
+      "label": "Show Skills Section",
+      "default": true
+    },
+    "skills.eyebrow": {
+      "type": "text",
+      "label": "Skills Eyebrow"
+    },
+    "skills.description": {
+      "type": "text",
+      "label": "Skills Description"
+    },
+    "certificates.visible": {
+      "type": "boolean",
+      "label": "Show Certificates Section",
+      "default": true
+    },
+    "certificates.eyebrow": {
+      "type": "text",
+      "label": "Certificates Eyebrow"
+    },
+    "certificates.description": {
+      "type": "text",
+      "label": "Certificates Description"
+    },
+    "contact.visible": {
+      "type": "boolean",
+      "label": "Show Contact Section",
+      "default": true
+    },
+    "contact.eyebrow": {
+      "type": "text",
+      "label": "Contact Eyebrow"
+    },
+    "contact.description": {
+      "type": "text",
+      "label": "Contact Description"
+    },
+    "contact.email": {
+      "type": "text",
+      "label": "Email Address"
+    },
+    "contact.phone": {
+      "type": "text",
+      "label": "Phone Number"
+    },
+    "contact.location": {
+      "type": "text",
+      "label": "Location"
+    },
+    "contact.github": {
+      "type": "url",
+      "label": "GitHub URL"
+    },
+    "contact.linkedin": {
+      "type": "url",
+      "label": "LinkedIn URL"
+    },
+    "contact.twitter": {
+      "type": "url",
+      "label": "Twitter / X URL"
+    },
+    "contact.website": {
+      "type": "url",
+      "label": "Website URL"
+    }
+  },
+  "sections": [
+    "hero",
+    "about",
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "certificates",
+    "contact"
+  ]
+}

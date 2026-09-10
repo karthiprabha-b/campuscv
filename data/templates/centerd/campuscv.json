@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "centerd",
+    "name": "Centered Editorial Portfolio",
+    "version": "1.0.0",
+    "entry": "src/index.jsx",
+    "category": "Designer / Developer",
+    "author": "CampusCV",
+    "description": "Minimalist editorial portfolio with fixed left navigation, large numbering watermarks, interactive case study modals, and smooth typography animations."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "primary",
+      "background",
+      "foreground",
+      "muted",
+      "border"
+    ]
+  },
+  "fields": {
+    "hero.name": { "type": "text", "label": "Full Name" },
+    "hero.role": { "type": "text", "label": "Primary Role / Title" },
+    "hero.avatar": { "type": "image", "label": "Hero Avatar Photo", "styleLocked": true },
+    "hero.profileImage": { "type": "image", "label": "Profile Image", "styleLocked": true },
+    "hero.ctaText": { "type": "text", "label": "CTA Button Text" },
+
+    "about.visible": { "type": "boolean", "label": "Show About Section", "default": true },
+    "about.eyebrow": { "type": "text", "label": "About Eyebrow" },
+    "about.title": { "type": "text", "label": "About Title" },
+    "about.subtitle": { "type": "text", "label": "About Subtitle" },
+    "about.heading": { "type": "text", "label": "Lead Statement" },
+    "about.bio": { "type": "textarea", "label": "About Bio" },
+
+    "personal.role": { "type": "text", "label": "Role" },
+    "personal.location": { "type": "text", "label": "Location" },
+    "personal.languages": { "type": "text", "label": "Languages" },
+    "personal.experience": { "type": "text", "label": "Experience" },
+    "personal.availability": { "type": "text", "label": "Status / Availability" },
+
+    "education.visible": { "type": "boolean", "label": "Show Education Section", "default": true },
+    "education.eyebrow": { "type": "text", "label": "Education Eyebrow" },
+    "education.title": { "type": "text", "label": "Education Title" },
+    "education.description": { "type": "textarea", "label": "Education Description" },
+
+    "experience.visible": { "type": "boolean", "label": "Show Experience Section", "default": true },
+    "experience.eyebrow": { "type": "text", "label": "Experience Eyebrow" },
+    "experience.title": { "type": "text", "label": "Experience Title" },
+    "experience.description": { "type": "textarea", "label": "Experience Description" },
+
+    "projects.visible": { "type": "boolean", "label": "Show Projects Section", "default": true },
+    "projects.eyebrow": { "type": "text", "label": "Projects Eyebrow" },
+    "projects.title": { "type": "text", "label": "Projects Title" },
+    "projects.description": { "type": "textarea", "label": "Projects Description" },
+
+    "skills.visible": { "type": "boolean", "label": "Show Skills Section", "default": true },
+    "skills.eyebrow": { "type": "text", "label": "Skills Eyebrow" },
+    "skills.title": { "type": "text", "label": "Skills Title" },
+    "skills.description": { "type": "textarea", "label": "Skills Description" },
+
+    "certificates.visible": { "type": "boolean", "label": "Show Certifications Section", "default": true },
+    "certificates.eyebrow": { "type": "text", "label": "Certifications Eyebrow" },
+    "certificates.title": { "type": "text", "label": "Certifications Title" },
+    "certificates.description": { "type": "textarea", "label": "Certifications Description" },
+
+    "contact.visible": { "type": "boolean", "label": "Show Contact Section", "default": true },
+    "contact.eyebrow": { "type": "text", "label": "Contact Eyebrow" },
+    "contact.title": { "type": "text", "label": "Contact Title" },
+    "contact.description": { "type": "textarea", "label": "Contact Description" },
+    "contact.email": { "type": "email", "label": "Email Address" },
+    "contact.phone": { "type": "text", "label": "Phone Number" },
+    "contact.location": { "type": "text", "label": "Contact Location" },
+    "contact.status": { "type": "text", "label": "Availability Status" }
+  },
+  "collections": {
+    "services.items": {
+      "type": "collection",
+      "label": "Services & Offerings",
+      "itemSchema": {
+        "number": { "type": "text", "label": "Number" },
+        "title": { "type": "text", "label": "Service Title" },
+        "description": { "type": "textarea", "label": "Service Description" }
+      }
+    },
+    "projects.items": {
+      "type": "collection",
+      "label": "Featured Projects",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "tagline": { "type": "text", "label": "Project Tagline" },
+        "category": { "type": "text", "label": "Category" },
+        "description": { "type": "textarea", "label": "Description" },
+        "image": { "type": "image", "label": "Project Image" },
+        "metrics": { "type": "text", "label": "Metrics / Outcome" }
+      }
+    },
+    "experience.items": {
+      "type": "collection",
+      "label": "Work Experience Timeline",
+      "itemSchema": {
+        "company": { "type": "text", "label": "Company Name" },
+        "role": { "type": "text", "label": "Role / Title" },
+        "period": { "type": "text", "label": "Time Period" },
+        "location": { "type": "text", "label": "Location" },
+        "description": { "type": "textarea", "label": "Role Description" }
+      }
+    },
+    "education.items": {
+      "type": "collection",
+      "label": "Education History",
+      "itemSchema": {
+        "institution": { "type": "text", "label": "Institution" },
+        "degree": { "type": "text", "label": "Degree / Program" },
+        "period": { "type": "text", "label": "Time Period" },
+        "location": { "type": "text", "label": "Location" },
+        "grade": { "type": "text", "label": "Grade / Honors" }
+      }
+    },
+    "skills.categories": {
+      "type": "collection",
+      "label": "Skill Domains",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Domain Title" },
+        "description": { "type": "textarea", "label": "Domain Description" }
+      }
+    },
+    "certifications.items": {
+      "type": "collection",
+      "label": "Certifications & Credentials",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Certificate Title" },
+        "issuer": { "type": "text", "label": "Issuer" },
+        "date": { "type": "text", "label": "Date Issued" },
+        "badge": { "type": "text", "label": "Badge Label" }
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --campuscv-accent: #0284c7;
+  --campuscv-background: #f8fafc;
+  --campuscv-foreground: #0f172a;
+  --campuscv-muted: #64748b;
+  --campuscv-border: #e2e8f0;
+  --campuscv-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --campuscv-base-font-size: 16px;
+  --font-serif: 'Newsreader', Georgia, Cambria, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: var(--campuscv-base-font-size, 16px);
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--campuscv-background, #f8fafc);
+  color: var(--campuscv-foreground, #0f172a);
+  font-family: var(--campuscv-font-family, 'Plus Jakarta Sans', system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--campuscv-accent, #0284c7);
+  color: #ffffff;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Medical Gradients */
+.medical-hero-gradient {
+  background: radial-gradient(1200px circle at 50% 0%, rgba(224, 242, 254, 0.7) 0%, rgba(240, 253, 250, 0.5) 40%, rgba(248, 250, 252, 1) 100%);
+}
+
+.medical-subtle-glow {
+  background: radial-gradient(800px circle at 80% 20%, rgba(224, 242, 254, 0.5), transparent 60%),
+              radial-gradient(600px circle at 10% 80%, rgba(204, 251, 241, 0.4), transparent 50%);
+}
+
+.medical-card-light {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.medical-card-light:hover {
+  transform: translateY(-3px);
+  border-color: rgba(2, 132, 199, 0.35);
+  box-shadow: 0 16px 32px -4px rgba(2, 132, 199, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+}
+
+/* Smooth custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

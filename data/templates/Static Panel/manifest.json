@@ -1,0 +1,69 @@
+{
+  "id": "static-panel",
+  "name": "Static Panel Portfolio",
+  "version": "1.0.0",
+  "category": "Developer",
+  "author": "CampusCV",
+  "description": "Modern two-column developer portfolio with a fixed left static sidebar, spacious scrollable canvas, interactive project & cert modals, and clean editorial typography.",
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png",
+  "entry": "src/index.jsx",
+  "config": "campuscv.json",
+  "bindings": "bindings.json",
+  "schema": "schema.json",
+  "sections": [
+    {
+      "id": "hero",
+      "name": "Profile Header",
+      "componentPath": "src/components/ProfileHeader.tsx",
+      "required": true
+    },
+    {
+      "id": "about",
+      "name": "About Me",
+      "componentPath": "src/components/AboutSection.tsx",
+      "required": true
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "componentPath": "src/components/EducationSection.tsx",
+      "required": false
+    },
+    {
+      "id": "experience",
+      "name": "Experience",
+      "componentPath": "src/components/ExperienceSection.tsx",
+      "required": false
+    },
+    {
+      "id": "projects",
+      "name": "Projects",
+      "componentPath": "src/components/ProjectsSection.tsx",
+      "required": true
+    },
+    {
+      "id": "skills",
+      "name": "Technical Skills",
+      "componentPath": "src/components/SkillsSection.tsx",
+      "required": true
+    },
+    {
+      "id": "certificates",
+      "name": "Certifications",
+      "componentPath": "src/components/CertificatesSection.tsx",
+      "required": false
+    },
+    {
+      "id": "contact",
+      "name": "Contact",
+      "componentPath": "src/components/ContactSection.tsx",
+      "required": true
+    }
+  ],
+  "themeConfig": {
+    "primaryColor": "#7F56D9",
+    "backgroundColor": "#FFFFFF",
+    "textColor": "#101828"
+  }
+}

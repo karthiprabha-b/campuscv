@@ -1,0 +1,16 @@
+{
+  "id": "cs-portfolio",
+  "name": "CS Portfolio",
+  "version": "1.0.0",
+  "author": "Alex Chen",
+  "description": "Senior Computer Science & AI Student Portfolio Light Theme Modular Template",
+  "category": "Developer",
+  "supportsDarkMode": false,
+  "entry": "src/index.jsx",
+  "sections": ["Hero", "About", "Specialties", "Skills", "Projects", "Experience", "Contact"],
+  "themeConfig": {
+    "primaryColor": "#2563eb",
+    "backgroundColor": "#f8fafc",
+    "textColor": "#0f172a"
+  }
+}

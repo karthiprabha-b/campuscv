@@ -1,0 +1,124 @@
+{
+  "bindings": [
+    {
+      "field": "name",
+      "targetFile": "src/components/Navbar.jsx",
+      "description": "Executive full name / branding title"
+    },
+    {
+      "field": "title",
+      "targetFile": "src/components/Navbar.jsx",
+      "description": "Professional practice title / role label"
+    },
+    {
+      "field": "hero.headline",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Primary hero headline"
+    },
+    {
+      "field": "hero.highlightText",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Gold highlighted tagline in hero headline"
+    },
+    {
+      "field": "hero.intro",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Hero introduction paragraph"
+    },
+    {
+      "field": "hero.summary",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Executive summary quote in Hero section"
+    },
+    {
+      "field": "hero.avatarUrl",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Executive portrait photograph URL"
+    },
+    {
+      "field": "hero.badgeYears",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Floating badge: Years of excellence"
+    },
+    {
+      "field": "hero.badgeSatisfaction",
+      "targetFile": "src/sections/Hero.jsx",
+      "description": "Floating badge: Client satisfaction score"
+    },
+    {
+      "field": "metrics",
+      "targetFile": "src/sections/Achievements.jsx",
+      "description": "Quantifiable key metrics and career statistics array"
+    },
+    {
+      "field": "about.story",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Professional story and vision in About section"
+    },
+    {
+      "field": "about.mission",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Core mission statement"
+    },
+    {
+      "field": "about.values",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Core operating values array"
+    },
+    {
+      "field": "about.location",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Primary practice location"
+    },
+    {
+      "field": "about.availability",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Current availability status"
+    },
+    {
+      "field": "about.languages",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Languages spoken array"
+    },
+    {
+      "field": "about.expertise",
+      "targetFile": "src/sections/About.jsx",
+      "description": "Industry specializations array"
+    },
+    {
+      "field": "skills",
+      "targetFile": "src/sections/Skills.jsx",
+      "description": "Categorized legal and strategic competencies array"
+    },
+    {
+      "field": "projects",
+      "targetFile": "src/sections/Projects.jsx",
+      "description": "Featured deals closed and case studies array"
+    },
+    {
+      "field": "services",
+      "targetFile": "src/sections/Services.jsx",
+      "description": "Services and advisory practice capabilities array"
+    },
+    {
+      "field": "experience",
+      "targetFile": "src/sections/Experience.jsx",
+      "description": "Career timeline and milestones array"
+    },
+    {
+      "field": "education",
+      "targetFile": "src/sections/Education.jsx",
+      "description": "Academic degrees and bar admissions array"
+    },
+    {
+      "field": "testimonials",
+      "targetFile": "src/sections/Testimonials.jsx",
+      "description": "Client endorsements and peer reviews array"
+    },
+    {
+      "field": "hero.socials",
+      "targetFile": "src/sections/Contact.jsx",
+      "description": "Social media links object"
+    }
+  ]
+}

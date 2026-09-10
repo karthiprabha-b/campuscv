@@ -1,0 +1,29 @@
+{
+  "name": "cs-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Modular CS & AI Student Portfolio React Template",
+  "main": "src/index.jsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.2"
+  },
+  "keywords": [
+    "portfolio",
+    "react",
+    "template",
+    "cs-portfolio"
+  ],
+  "author": "Alex Chen",
+  "license": "MIT"
+}

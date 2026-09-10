@@ -1,0 +1,23 @@
+{
+  "hero.title": "src/sections/Hero.jsx",
+  "hero.subtitle": "src/sections/Hero.jsx",
+  "hero.ctaText": "src/sections/Hero.jsx",
+  "personal.name": "src/sections/Hero.jsx",
+  "personal.role": "src/sections/Hero.jsx",
+  "personal.location": "src/sections/Hero.jsx",
+  "personal.availability": "src/sections/Hero.jsx",
+  "personal.profileImage": "src/sections/Hero.jsx",
+  "about.headline": "src/sections/About.jsx",
+  "about.bio": "src/sections/About.jsx",
+  "about.avatarUrl": "src/sections/About.jsx",
+  "projects": "src/sections/Projects.jsx",
+  "process": "src/sections/Process.jsx",
+  "experience": "src/sections/Experience.jsx",
+  "skills": "src/sections/Skills.jsx",
+  "tools": "src/sections/Skills.jsx",
+  "education": "src/sections/Education.jsx",
+  "certifications": "src/sections/Certifications.jsx",
+  "testimonial": "src/sections/Testimonial.jsx",
+  "contact": "src/sections/Contact.jsx",
+  "socialLinks": "src/sections/Contact.jsx"
+}

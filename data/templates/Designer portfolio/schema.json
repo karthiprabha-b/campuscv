@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DesignerPortfolioSchema",
+  "type": "object",
+  "properties": {
+    "personal": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "default": "Maya Kapoor" },
+        "role": { "type": "string", "default": "Senior Product Designer" },
+        "location": { "type": "string", "default": "Bengaluru, India" },
+        "email": { "type": "string", "default": "maya.kapoor@example.com" },
+        "availability": { "type": "string", "default": "Available for select freelance & full-time roles" },
+        "profileImage": { "type": "string", "format": "uri" }
+      }
+    },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "default": "Designing digital products people actually enjoy using." },
+        "subtitle": { "type": "string", "default": "Product designer focused on turning complex problems into simple, thoughtful digital experiences." },
+        "ctaText": { "type": "string", "default": "View Selected Work" }
+      }
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string", "default": "I design at the intersection of people, products and technology." },
+        "bio": { "type": "string" },
+        "avatarUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "category": { "type": "string" },
+          "year": { "type": "string" },
+          "description": { "type": "string" },
+          "image": { "type": "string", "format": "uri" },
+          "caseStudyUrl": { "type": "string" },
+          "technologies": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["title", "category", "description"]
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "startDate": { "type": "string" },
+          "endDate": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["role", "company"]
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "degree": { "type": "string" },
+          "institution": { "type": "string" },
+          "period": { "type": "string" },
+          "details": { "type": "string" }
+        }
+      }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "issuer": { "type": "string" },
+          "year": { "type": "string" }
+        }
+      }
+    },
+    "testimonial": {
+      "type": "object",
+      "properties": {
+        "quote": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientRole": { "type": "string" }
+      }
+    },
+    "socialLinks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "slash-model",
+  "name": "Slash Model",
+  "version": "1.0.0",
+  "author": "Tomasz Gajda",
+  "description": "High-contrast monochromatic developer portfolio featuring bold typography, diagonal slash hero, modular showcase, case study & credential modals.",
+  "category": "Developer",
+  "supportsDarkMode": true,
+  "entry": "src/template.jsx",
+  "sections": [
+    "Hero",
+    "SubHero",
+    "About",
+    "Skills",
+    "Projects",
+    "Experience",
+    "Education",
+    "Certificates",
+    "Contact"
+  ],
+  "themeConfig": {
+    "primaryColor": "#000000",
+    "backgroundColor": "#E5E5E5",
+    "textColor": "#000000"
+  },
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png"
+}

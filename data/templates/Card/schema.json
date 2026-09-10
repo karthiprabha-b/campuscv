@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CardTemplateData",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "title": { "type": "string" },
+    "bio": { "type": "string" },
+    "email": { "type": "string" },
+    "phone": { "type": "string" },
+    "location": { "type": "string" },
+    "avatar": { "type": "string" },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" }
+      }
+    },
+    "projects": { "type": "array" },
+    "experience": { "type": "array" },
+    "education": { "type": "array" },
+    "skills": { "type": "array" },
+    "certifications": { "type": "array" },
+    "contact": { "type": "object" }
+  }
+}

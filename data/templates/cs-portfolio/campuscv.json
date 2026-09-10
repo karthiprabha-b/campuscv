@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "cs-portfolio",
+    "name": "CS Portfolio",
+    "version": "1.0.0",
+    "entry": "src/index.jsx",
+    "category": "Developer",
+    "author": "CampusCV",
+    "description": "Senior Computer Science & AI Student Portfolio Light Theme Modular Template"
+  },
+  "capabilities": {
+    "editableFields": true,
+    "repeatableCollections": true,
+    "themeTokens": true,
+    "sectionOrdering": true,
+    "sectionVisibility": true,
+    "mediaReplacement": true
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "primaryColor",
+      "backgroundColor",
+      "textColor"
+    ]
+  },
+  "fields": {
+    "name": { "type": "text", "label": "Full Name" },
+    "hero.title": { "type": "text", "label": "Hero Title" },
+    "hero.subtitle": { "type": "text", "label": "Hero Subtitle" },
+    "hero.introductionText": { "type": "textarea", "label": "Introduction Text" },
+    "about.title": { "type": "text", "label": "About Heading" },
+    "about.bio": { "type": "textarea", "label": "Bio Paragraph" },
+    "about.avatarUrl": { "type": "image", "label": "Avatar Image", "replaceable": true },
+    "about.image": { "type": "image", "label": "About Image", "replaceable": true },
+    "profileImage": { "type": "image", "label": "Profile Image", "replaceable": true },
+    "specialtiesTitle": { "type": "text", "label": "Specialties Title" },
+    "specialtiesSubheading": { "type": "text", "label": "Specialties Subtitle" },
+    "contact.email": { "type": "email", "label": "Contact Email" },
+    "contact.location": { "type": "text", "label": "Location" },
+    "socialLinks.github": { "type": "url", "label": "GitHub URL" },
+    "socialLinks.linkedin": { "type": "url", "label": "LinkedIn URL" },
+    "collaborate.heading": { "type": "text", "label": "Collaboration Heading" },
+    "collaborate.text": { "type": "textarea", "label": "Collaboration Description" }
+  },
+  "collections": {
+    "projects": {
+      "type": "collection",
+      "label": "Projects",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "description": { "type": "textarea", "label": "Short Summary" },
+        "fullDesc": { "type": "textarea", "label": "Full Description" },
+        "image": { "type": "image", "label": "Project Image", "replaceable": true },
+        "category": { "type": "text", "label": "Category" },
+        "tags": { "type": "tags", "label": "Technologies" },
+        "github": { "type": "url", "label": "GitHub URL" },
+        "live": { "type": "url", "label": "Live Demo URL" }
+      }
+    },
+    "specialties": {
+      "type": "collection",
+      "label": "Specialties",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Specialty Title" },
+        "description": { "type": "textarea", "label": "Description" },
+        "num": { "type": "text", "label": "Badge Number" }
+      }
+    },
+    "skills": {
+      "type": "collection",
+      "label": "Skills",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Skill Name" }
+      }
+    },
+    "experience": {
+      "type": "collection",
+      "label": "Work Experience",
+      "itemSchema": {
+        "role": { "type": "text", "label": "Role / Position" },
+        "company": { "type": "text", "label": "Company" },
+        "duration": { "type": "text", "label": "Duration" },
+        "bullets": { "type": "list", "label": "Bullet Points" }
+      }
+    },
+    "education": {
+      "type": "collection",
+      "label": "Education",
+      "itemSchema": {
+        "degree": { "type": "text", "label": "Degree" },
+        "school": { "type": "text", "label": "University / School" },
+        "duration": { "type": "text", "label": "Duration" },
+        "gpa": { "type": "text", "label": "GPA" },
+        "status": { "type": "text", "label": "Status" }
+      }
+    }
+  },
+  "assets": [
+    {
+      "id": "avatar-image",
+      "type": "image",
+      "path": "about.avatarUrl",
+      "purpose": "Profile avatar photo",
+      "replaceable": true,
+      "required": false
+    },
+    {
+      "id": "about-image",
+      "type": "image",
+      "path": "about.image",
+      "purpose": "About photo",
+      "replaceable": true,
+      "required": false
+    },
+    {
+      "id": "project-images",
+      "type": "image",
+      "path": "projects[].image",
+      "purpose": "Project screenshot thumbnails",
+      "replaceable": true,
+      "required": false
+    }
+  ]
+}

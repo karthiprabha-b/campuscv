@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "doctor-portfolio",
+    "name": "Consultant Physician & Specialist Portfolio",
+    "version": "1.2.0",
+    "entry": "src/index.jsx",
+    "category": "Medical",
+    "author": "CampusCV",
+    "description": "Premium portfolio website template tailored for consultants, specialists, and professionals."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "background",
+      "foreground",
+      "muted",
+      "accent",
+      "teal",
+      "border"
+    ]
+  },
+  "fields": {
+    "hero.name": { "type": "text", "label": "Full Name" },
+    "hero.role": { "type": "text", "label": "Professional Role / Title" },
+    "hero.headline": { "type": "text", "label": "Headline / Tagline" },
+    "hero.description": { "type": "textarea", "label": "Bio / Overview" },
+    "hero.availability": { "type": "text", "label": "Availability Status" },
+    "hero.profileImage": { "type": "image", "label": "Hero Portrait Photo", "styleLocked": true },
+    "hero.primaryButton": {
+      "type": "button",
+      "fields": {
+        "label": { "type": "text", "label": "Button Label" },
+        "url": { "type": "url", "label": "Button Link URL" },
+        "openInNewTab": { "type": "boolean" }
+      }
+    },
+    "hero.secondaryButton": {
+      "type": "button",
+      "fields": {
+        "label": { "type": "text", "label": "Secondary Button Label" },
+        "url": { "type": "url", "label": "Secondary Button Link URL" },
+        "openInNewTab": { "type": "boolean" }
+      }
+    },
+
+    "about.visible": { "type": "boolean", "label": "Show About Section", "default": true },
+    "about.eyebrow": { "type": "text", "label": "About Section Eyebrow" },
+    "about.title": { "type": "text", "label": "About Section Title" },
+    "about.description": { "type": "textarea", "label": "About Narrative / Biography" },
+    "about.image": { "type": "image", "label": "About Photo", "styleLocked": true },
+
+    "projects.visible": { "type": "boolean", "label": "Show Projects Section", "default": true },
+    "projects.eyebrow": { "type": "text", "label": "Projects Section Eyebrow" },
+    "projects.title": { "type": "text", "label": "Projects Section Title" },
+    "projects.description": { "type": "textarea", "label": "Projects Section Description" },
+
+    "skills.visible": { "type": "boolean", "label": "Show Skills Section", "default": true },
+    "skills.eyebrow": { "type": "text", "label": "Skills Section Eyebrow" },
+    "skills.title": { "type": "text", "label": "Skills Section Title" },
+    "skills.description": { "type": "textarea", "label": "Skills Section Description" },
+
+    "experience.visible": { "type": "boolean", "label": "Show Experience Section", "default": true },
+    "experience.eyebrow": { "type": "text", "label": "Experience Section Eyebrow" },
+    "experience.title": { "type": "text", "label": "Experience Section Title" },
+    "experience.description": { "type": "textarea", "label": "Experience Section Description" },
+
+    "education.visible": { "type": "boolean", "label": "Show Education Section", "default": true },
+    "education.eyebrow": { "type": "text", "label": "Education Section Eyebrow" },
+    "education.title": { "type": "text", "label": "Education Section Title" },
+    "education.description": { "type": "textarea", "label": "Education Section Description" },
+
+    "certifications.visible": { "type": "boolean", "label": "Show Certifications Section", "default": true },
+    "certifications.eyebrow": { "type": "text", "label": "Certifications Section Eyebrow" },
+    "certifications.title": { "type": "text", "label": "Certifications Section Title" },
+    "certifications.description": { "type": "textarea", "label": "Certifications Section Description" },
+
+    "contact.visible": { "type": "boolean", "label": "Show Contact Section", "default": true },
+    "contact.eyebrow": { "type": "text", "label": "Contact Eyebrow" },
+    "contact.title": { "type": "text", "label": "Contact Section Title" },
+    "contact.description": { "type": "textarea", "label": "Contact Description" },
+    "contact.email": { "type": "email", "label": "Contact Email" },
+    "contact.phone": { "type": "text", "label": "Contact Phone" },
+    "contact.location": { "type": "text", "label": "Location / Address" }
+  },
+  "collections": {
+    "projects": {
+      "type": "collection",
+      "label": "Featured Projects & Case Studies",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "category": { "type": "text", "label": "Category" },
+        "year": { "type": "text", "label": "Year" },
+        "description": { "type": "textarea", "label": "Project Description" },
+        "image": { "type": "image", "label": "Project Cover Image" },
+        "link": { "type": "url", "label": "Project Link / URL" }
+      }
+    },
+    "skills": {
+      "type": "collection",
+      "label": "Skills & Competencies",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Skill Name" },
+        "category": { "type": "text", "label": "Category" },
+        "description": { "type": "textarea", "label": "Description" }
+      }
+    },
+    "experience": {
+      "type": "collection",
+      "label": "Career Experience & Appointments",
+      "itemSchema": {
+        "role": { "type": "text", "label": "Role / Position" },
+        "institution": { "type": "text", "label": "Organization / Hospital" },
+        "location": { "type": "text", "label": "Location" },
+        "period": { "type": "text", "label": "Time Period (e.g. 2020 – Present)" },
+        "startDate": { "type": "text", "label": "Start Date" },
+        "endDate": { "type": "text", "label": "End Date" },
+        "department": { "type": "text", "label": "Department" },
+        "description": { "type": "textarea", "label": "Role Overview" }
+      }
+    },
+    "education": {
+      "type": "collection",
+      "label": "Education & Degrees",
+      "itemSchema": {
+        "degree": { "type": "text", "label": "Degree Name" },
+        "field": { "type": "text", "label": "Field of Study" },
+        "fieldOfStudy": { "type": "text", "label": "Field of Study" },
+        "institution": { "type": "text", "label": "University / School" },
+        "year": { "type": "text", "label": "Year / Period" },
+        "period": { "type": "text", "label": "Date Range / Period" },
+        "startDate": { "type": "text", "label": "Start Year" },
+        "endDate": { "type": "text", "label": "Graduation Year" },
+        "honors": { "type": "text", "label": "Academic Honors" },
+        "description": { "type": "textarea", "label": "Details" }
+      }
+    },
+    "certifications": {
+      "type": "collection",
+      "label": "Certifications & Licensure",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Certification Title" },
+        "authority": { "type": "text", "label": "Board Authority / Issuer" },
+        "year": { "type": "text", "label": "Year" },
+        "credentialId": { "type": "text", "label": "Credential ID" },
+        "status": { "type": "text", "label": "Status" }
+      }
+    }
+  }
+}

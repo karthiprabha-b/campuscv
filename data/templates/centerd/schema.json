@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CenteredPortfolioData",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "avatar": { "type": "string" },
+    "bio": { "type": ["string", "array"] },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "primaryColor": { "type": "string" },
+        "accentColor": { "type": "string" }
+      }
+    },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "avatar": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "services": { "type": "array" }
+      }
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "eyebrow": { "type": "string" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "heading": { "type": "string" },
+        "bio": { "type": ["string", "array"] },
+        "pillars": { "type": "array" },
+        "stats": { "type": "array" }
+      }
+    },
+    "education": {
+      "type": ["array", "object"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "degree": { "type": "string" },
+          "institution": { "type": "string" },
+          "period": { "type": "string" },
+          "location": { "type": "string" },
+          "grade": { "type": "string" },
+          "details": { "type": "array" },
+          "coursework": { "type": "array" }
+        }
+      }
+    },
+    "experience": {
+      "type": ["array", "object"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "period": { "type": "string" },
+          "location": { "type": "string" },
+          "type": { "type": "string" },
+          "description": { "type": "string" },
+          "achievements": { "type": "array" },
+          "skills": { "type": "array" }
+        }
+      }
+    },
+    "projects": {
+      "type": ["array", "object"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "tagline": { "type": "string" },
+          "description": { "type": "string" },
+          "image": { "type": "string" },
+          "tags": { "type": "array" },
+          "metrics": { "type": "string" },
+          "liveUrl": { "type": "string" },
+          "githubUrl": { "type": "string" },
+          "featured": { "type": "boolean" }
+        }
+      }
+    },
+    "skills": {
+      "type": ["array", "object"],
+      "properties": {
+        "categories": { "type": "array" },
+        "tools": { "type": "array" }
+      }
+    },
+    "certifications": {
+      "type": ["array", "object"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "issuer": { "type": "string" },
+          "issueDate": { "type": "string" },
+          "credentialId": { "type": "string" },
+          "verifyUrl": { "type": "string" },
+          "badge": { "type": "string" },
+          "skillsCovered": { "type": "array" }
+        }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "eyebrow": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "hours": { "type": "string" },
+        "availabilityStatus": { "type": "string" }
+      }
+    }
+  }
+}

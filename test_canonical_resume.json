@@ -1,0 +1,220 @@
+{
+  "id": "port-canonical-test-001",
+  "name": "Alexander Christopher Montgomery",
+  "fullName": "Alexander Christopher Montgomery",
+  "headline": "Lead Full-Stack Distributed Systems Architect & Machine Learning Engineer",
+  "bio": "Senior software architect with over 8 years of production experience designing ultra-low latency distributed stream processing platforms, high-throughput microservices, and multimodal generative AI applications.",
+  "summary": "Senior software architect with over 8 years of production experience designing ultra-low latency distributed stream processing platforms, high-throughput microservices, and multimodal generative AI applications.",
+  "profileImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+  "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+  "location": "San Francisco, California, United States",
+  "email": "alex.montgomery@alum.stanford.edu",
+  "phone": "+1 (415) 890-2341",
+  "socials": {
+    "linkedin": "https://linkedin.com/in/alex-c-montgomery",
+    "github": "https://github.com/alex-montgomery-dev",
+    "portfolio": "https://alexmontgomery.dev",
+    "twitter": "https://twitter.com/alexcmontgomery"
+  },
+  "socialLinks": {
+    "linkedin": "https://linkedin.com/in/alex-c-montgomery",
+    "github": "https://github.com/alex-montgomery-dev",
+    "portfolio": "https://alexmontgomery.dev"
+  },
+  "experience": [
+    {
+      "id": "exp-1",
+      "company": "Stripe Global Infrastructure",
+      "role": "Principal Systems Engineer",
+      "startDate": "2022",
+      "endDate": "Present",
+      "period": "2022 – Present",
+      "duration": "2022 – Present",
+      "isCurrent": true,
+      "location": "San Francisco, CA",
+      "description": "Spearheaded core real-time ledger consistency protocol processing $45B+ monthly transactional throughput with zero data anomalies across 14 geographic data centers.",
+      "technologies": ["Go", "Kubernetes", "Kafka", "gRPC", "RocksDB", "Rust"]
+    },
+    {
+      "id": "exp-2",
+      "company": "Datadog Cloud Observability",
+      "role": "Senior Distributed Systems Engineer",
+      "startDate": "2019",
+      "endDate": "2022",
+      "period": "2019 – 2022",
+      "duration": "2019 – 2022",
+      "isCurrent": false,
+      "location": "New York, NY",
+      "description": "Architected petabyte-scale APM trace indexing pipeline reducing query latencies by 64% while ingesting 12 million events per second.",
+      "technologies": ["C++", "Java", "Apache Cassandra", "ClickHouse", "Docker"]
+    },
+    {
+      "id": "exp-3",
+      "company": "Palantir Technologies",
+      "role": "Software Engineer II",
+      "startDate": "2017",
+      "endDate": "2019",
+      "period": "2017 – 2019",
+      "duration": "2017 – 2019",
+      "isCurrent": false,
+      "location": "Palo Alto, CA",
+      "description": "Built secure cross-organizational data federation layers and dynamic geospatial access control algorithms for enterprise clients.",
+      "technologies": ["TypeScript", "React", "Python", "PostgreSQL", "Elasticsearch"]
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "institution": "Stanford University",
+      "school": "Stanford University",
+      "university": "Stanford University",
+      "degree": "Master of Science in Computer Science",
+      "field": "Artificial Intelligence & Distributed Systems",
+      "startDate": "2015",
+      "endDate": "2017",
+      "year": "2017",
+      "period": "2015 – 2017",
+      "grade": "GPA 3.96 / 4.0",
+      "score": "3.96"
+    },
+    {
+      "id": "edu-2",
+      "institution": "University of California, Berkeley",
+      "school": "University of California, Berkeley",
+      "university": "University of California, Berkeley",
+      "degree": "Bachelor of Science in Electrical Engineering & Computer Science",
+      "field": "Computer Science & Mathematics",
+      "startDate": "2011",
+      "endDate": "2015",
+      "year": "2015",
+      "period": "2011 – 2015",
+      "grade": "High Honors, GPA 3.92 / 4.0",
+      "score": "3.92"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "AuraFlow - Distributed Real-Time ML Inference Engine",
+      "name": "AuraFlow - Distributed Real-Time ML Inference Engine",
+      "description": "Sub-millisecond dynamic batching engine for LLM and Vision transformer serving with CUDA kernel acceleration.",
+      "desc": "Sub-millisecond dynamic batching engine for LLM and Vision transformer serving with CUDA kernel acceleration.",
+      "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+      "technologies": ["Rust", "CUDA", "PyTorch", "gRPC", "Triton"],
+      "tags": ["Rust", "CUDA", "PyTorch", "gRPC"],
+      "liveUrl": "https://auraflow.dev",
+      "githubUrl": "https://github.com/alex-montgomery-dev/auraflow-core",
+      "projectUrl": "https://auraflow.dev"
+    },
+    {
+      "id": "proj-2",
+      "title": "ChronoKV - Multi-Raft Consistent Key-Value Storage",
+      "name": "ChronoKV - Multi-Raft Consistent Key-Value Storage",
+      "description": "Horizontally partitionable LSM-tree storage engine implementing strict linearizable Raft consensus with automated rebalancing.",
+      "desc": "Horizontally partitionable LSM-tree storage engine implementing strict linearizable Raft consensus with automated rebalancing.",
+      "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+      "technologies": ["Go", "Raft", "LevelDB", "Prometheus"],
+      "tags": ["Go", "Raft", "LevelDB", "Prometheus"],
+      "liveUrl": "https://chronokv.io",
+      "githubUrl": "https://github.com/alex-montgomery-dev/chronokv",
+      "projectUrl": "https://chronokv.io"
+    },
+    {
+      "id": "proj-3",
+      "title": "NexusGraph - Interactive High-Volume Knowledge Graph Visualizer",
+      "name": "NexusGraph - Interactive High-Volume Knowledge Graph Visualizer",
+      "description": "WebGL accelerated 3D graph rendering engine capable of smoothly visualizing 500,000+ interconnected entities at 60 FPS in browser.",
+      "desc": "WebGL accelerated 3D graph rendering engine capable of smoothly visualizing 500,000+ interconnected entities at 60 FPS in browser.",
+      "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+      "technologies": ["TypeScript", "Three.js", "WebGPU", "React", "D3.js"],
+      "tags": ["TypeScript", "Three.js", "WebGPU", "React"],
+      "liveUrl": "https://nexusgraph.ai",
+      "githubUrl": "https://github.com/alex-montgomery-dev/nexusgraph-web",
+      "projectUrl": "https://nexusgraph.ai"
+    },
+    {
+      "id": "proj-4",
+      "title": "SentinelMesh - Zero-Trust Service Mesh Controller",
+      "name": "SentinelMesh - Zero-Trust Service Mesh Controller",
+      "description": "eBPF-driven lightweight sidecar proxy controller enforcing mutual mTLS and fine-grained cryptographic identity isolation.",
+      "desc": "eBPF-driven lightweight sidecar proxy controller enforcing mutual mTLS and fine-grained cryptographic identity isolation.",
+      "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
+      "technologies": ["C", "eBPF", "Envoy", "Kubernetes", "SPIFFE"],
+      "tags": ["C", "eBPF", "Envoy", "Kubernetes"],
+      "liveUrl": "https://sentinelmesh.dev",
+      "githubUrl": "https://github.com/alex-montgomery-dev/sentinel-mesh",
+      "projectUrl": "https://sentinelmesh.dev"
+    }
+  ],
+  "skills": [
+    { "name": "Distributed Systems Architecture", "category": "Core Architecture" },
+    { "name": "Real-Time Stream Processing", "category": "Core Architecture" },
+    { "name": "Go (Golang)", "category": "Languages" },
+    { "name": "Rust", "category": "Languages" },
+    { "name": "TypeScript / JavaScript", "category": "Languages" },
+    { "name": "C++ & CUDA", "category": "Languages" },
+    { "name": "Kubernetes & Cloud Native", "category": "Cloud & Infrastructure" },
+    { "name": "Apache Kafka & Event Sourcing", "category": "Data & Streaming" },
+    { "name": "ClickHouse & OLAP Databases", "category": "Data & Streaming" },
+    { "name": "PostgreSQL & Redis", "category": "Data & Streaming" },
+    { "name": "React & Next.js Ecosystem", "category": "Frontend" },
+    { "name": "Three.js & WebGL 3D", "category": "Frontend" },
+    { "name": "Large Language Model Serving", "category": "AI / ML" },
+    { "name": "PyTorch & Deep Learning", "category": "AI / ML" }
+  ],
+  "certifications": [
+    {
+      "id": "cert-1",
+      "name": "AWS Certified Solutions Architect - Professional",
+      "title": "AWS Certified Solutions Architect - Professional",
+      "issuer": "Amazon Web Services",
+      "date": "2023",
+      "year": "2023",
+      "url": "https://aws.amazon.com/verification/AWS-SAP-8921",
+      "credentialUrl": "https://aws.amazon.com/verification/AWS-SAP-8921"
+    },
+    {
+      "id": "cert-2",
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "title": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation (CNCF)",
+      "date": "2022",
+      "year": "2022",
+      "url": "https://www.cncf.io/certification/cka/verify/CKA-7741",
+      "credentialUrl": "https://www.cncf.io/certification/cka/verify/CKA-7741"
+    },
+    {
+      "id": "cert-3",
+      "name": "Google Cloud Professional Data Engineer",
+      "title": "Google Cloud Professional Data Engineer",
+      "issuer": "Google Cloud Platform",
+      "date": "2021",
+      "year": "2021",
+      "url": "https://cloud.google.com/certification/verify/GCP-PDE-3301",
+      "credentialUrl": "https://cloud.google.com/certification/verify/GCP-PDE-3301"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ach-1",
+      "title": "ACM ICPC World Finals Top 10 Finisher",
+      "description": "Ranked 8th internationally in competitive algorithmic problem solving out of 3,200+ universities worldwide.",
+      "year": "2016"
+    },
+    {
+      "id": "ach-2",
+      "title": "Patent Holder: Multi-Tiered Transaction Verification Engine",
+      "description": "US Patent #11,405,291 granted for zero-knowledge transaction state replication protocols.",
+      "year": "2021"
+    }
+  ],
+  "languages": [
+    { "language": "English", "proficiency": "Native / Bilingual" },
+    { "language": "German", "proficiency": "Professional Working (C1)" }
+  ],
+  "theme": {
+    "primaryColor": "#6366F1",
+    "backgroundColor": "#09090b",
+    "textColor": "#fafafa"
+  }
+}

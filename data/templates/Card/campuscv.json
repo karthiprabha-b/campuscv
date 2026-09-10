@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "card",
+    "name": "Card Deck Portfolio",
+    "version": "1.0.0",
+    "entry": "src/index.jsx",
+    "category": "Developer",
+    "author": "CampusCV",
+    "description": "Futuristic full-screen card deck portfolio with smooth momentum snap-scrolling, curved rectangular glass cards, floating quick-navigator dock, interactive project & resume modals, and cyber glow accents."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "primary",
+      "background",
+      "foreground",
+      "muted",
+      "border"
+    ]
+  },
+  "fields": {
+    "name": { "type": "text", "label": "Full Name" },
+    "hero.name": { "type": "text", "label": "Full Name" },
+    "hero.role": { "type": "text", "label": "Primary Role / Title" },
+    "hero.headline": { "type": "text", "label": "Headline / Subtitle" },
+    "hero.title": { "type": "text", "label": "Hero Title" },
+    "hero.bio": { "type": "textarea", "label": "Bio & Elevator Pitch" },
+    "hero.description": { "type": "textarea", "label": "Bio Description" },
+    "hero.avatar": { "type": "image", "label": "Avatar Photo" },
+    "hero.profileImage": { "type": "image", "label": "Profile Image" },
+    "hero.ctaText": { "type": "text", "label": "CTA Button Text" },
+    "hero.location": { "type": "text", "label": "Location" },
+
+    "about.visible": { "type": "boolean", "label": "Show About Section", "default": true },
+    "about.title": { "type": "text", "label": "About Title" },
+    "about.story": { "type": "textarea", "label": "Engineering Journey" },
+    "about.description": { "type": "textarea", "label": "About Description" },
+    "about.location": { "type": "text", "label": "Location" },
+
+    "education.visible": { "type": "boolean", "label": "Show Education Section", "default": true },
+    "education.title": { "type": "text", "label": "Education Title" },
+
+    "experience.visible": { "type": "boolean", "label": "Show Experience Section", "default": true },
+    "experience.title": { "type": "text", "label": "Experience Title" },
+
+    "projects.visible": { "type": "boolean", "label": "Show Projects Section", "default": true },
+    "projects.title": { "type": "text", "label": "Projects Title" },
+
+    "skills.visible": { "type": "boolean", "label": "Show Skills Section", "default": true },
+    "skills.title": { "type": "text", "label": "Skills Title" },
+
+    "certifications.visible": { "type": "boolean", "label": "Show Certifications Section", "default": true },
+    "certifications.title": { "type": "text", "label": "Certifications Title" },
+
+    "contact.visible": { "type": "boolean", "label": "Show Contact Section", "default": true },
+    "contact.title": { "type": "text", "label": "Contact Title" },
+    "contact.headline": { "type": "text", "label": "Contact Headline" },
+    "contact.subheadline": { "type": "textarea", "label": "Contact Subheadline" },
+    "contact.description": { "type": "textarea", "label": "Contact Pitch" },
+    "contact.email": { "type": "email", "label": "Email Address" },
+    "contact.location": { "type": "text", "label": "Location" },
+    "contact.phone": { "type": "text", "label": "Phone Number" }
+  },
+  "collections": {
+    "projects.items": {
+      "type": "collection",
+      "label": "Featured Projects",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "tagline": { "type": "text", "label": "Tagline" },
+        "category": { "type": "text", "label": "Category" },
+        "description": { "type": "textarea", "label": "Description" },
+        "image": { "type": "image", "label": "Project Image" },
+        "liveUrl": { "type": "text", "label": "Live Demo URL" },
+        "githubUrl": { "type": "text", "label": "Source Code URL" }
+      }
+    },
+    "experience.items": {
+      "type": "collection",
+      "label": "Work Experience",
+      "itemSchema": {
+        "company": { "type": "text", "label": "Company Name" },
+        "role": { "type": "text", "label": "Role / Title" },
+        "period": { "type": "text", "label": "Time Period" },
+        "location": { "type": "text", "label": "Location" },
+        "description": { "type": "textarea", "label": "Role Description" }
+      }
+    },
+    "education.items": {
+      "type": "collection",
+      "label": "Education History",
+      "itemSchema": {
+        "institution": { "type": "text", "label": "Institution" },
+        "degree": { "type": "text", "label": "Degree / Program" },
+        "period": { "type": "text", "label": "Time Period" },
+        "location": { "type": "text", "label": "Location" },
+        "grade": { "type": "text", "label": "Grade / GPA" }
+      }
+    },
+    "skills.categories": {
+      "type": "collection",
+      "label": "Skill Domains",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Domain Title" },
+        "skills": { "type": "array", "label": "Skills List" }
+      }
+    },
+    "skills.items": {
+      "type": "collection",
+      "label": "Skills & Technologies",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Skill Name" },
+        "experience": { "type": "text", "label": "Experience" },
+        "level": { "type": "number", "label": "Proficiency Level" }
+      }
+    },
+    "certifications.items": {
+      "type": "collection",
+      "label": "Certifications & Credentials",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Certificate Title" },
+        "issuer": { "type": "text", "label": "Issuer" },
+        "issueDate": { "type": "text", "label": "Issue Date" },
+        "credentialId": { "type": "text", "label": "Credential ID" },
+        "credentialUrl": { "type": "text", "label": "Verification URL" }
+      }
+    }
+  }
+}

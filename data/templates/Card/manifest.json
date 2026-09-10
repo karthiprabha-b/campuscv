@@ -1,0 +1,27 @@
+{
+  "id": "card",
+  "name": "Card Deck Portfolio",
+  "version": "1.0.0",
+  "author": "CampusCV",
+  "description": "Futuristic full-screen card deck portfolio with smooth momentum snap-scrolling, curved rectangular glass cards, floating quick-navigator dock, interactive project & resume modals, and cyber glow accents.",
+  "category": "Developer",
+  "supportsDarkMode": true,
+  "entry": "src/index.jsx",
+  "sections": [
+    "Hero",
+    "About",
+    "Education",
+    "Experience",
+    "Projects",
+    "Skills",
+    "Certifications",
+    "Contact"
+  ],
+  "themeConfig": {
+    "primaryColor": "#8b5cf6",
+    "backgroundColor": "#060608",
+    "textColor": "#ededed"
+  },
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png"
+}

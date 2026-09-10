@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ExecutiveLawyerPortfolioSchema",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "default": "Alexander Vance" },
+    "title": { "type": "string", "default": "Executive Legal Counsel & Corporate Strategist" },
+    "roleLabel": { "type": "string", "default": "Legal & Corporate Advisory" },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "smallLabel": { "type": "string", "default": "WELCOME TO MY EXECUTIVE PORTFOLIO" },
+        "headline": { "type": "string", "default": "Strategic Legal Counsel." },
+        "highlightText": { "type": "string", "default": "Committed to Excellence." },
+        "intro": { "type": "string", "default": "Providing high-stakes corporate counsel, regulatory compliance strategies, and bespoke legal advisory for fortune leaders, startups, and high-net-worth clients." },
+        "summary": { "type": "string", "default": "Over 8+ years of expertise in corporate jurisprudence, cross-border M&A negotiations, commercial litigation defense, and intellectual property protection." },
+        "name": { "type": "string", "default": "Alexander Vance" },
+        "title": { "type": "string", "default": "Senior Legal Counsel & Partner" },
+        "avatarUrl": { "type": "string", "default": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1000" },
+        "badgeYears": { "type": "string", "default": "8+" },
+        "badgeLabel": { "type": "string", "default": "Years Legal Excellence" },
+        "badgeSatisfaction": { "type": "string", "default": "99.4%" },
+        "socials": {
+          "type": "object",
+          "properties": {
+            "linkedin": { "type": "string", "default": "https://linkedin.com" },
+            "github": { "type": "string", "default": "https://github.com" },
+            "twitter": { "type": "string", "default": "https://twitter.com" },
+            "dribbble": { "type": "string", "default": "https://dribbble.com" }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "number": { "type": "number" },
+          "suffix": { "type": "string" },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "iconName": { "type": "string" }
+        }
+      }
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "story": { "type": "string", "default": "With a distinguished career rooted in top-tier appellate litigation and corporate strategy, I advise boardrooms on high-velocity transactions, corporate governance, and complex dispute resolution. My practice bridges rigorous statutory legal mastery with modern tech-forward business agility." },
+        "mission": { "type": "string", "default": "To deliver uncompromising, result-driven legal leadership that safeguards capital, minimizes operational risk, and accelerates enterprise growth." },
+        "values": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "educationShort": { "type": "string", "default": "LL.M. Harvard Law School | J.D. Columbia University" },
+        "location": { "type": "string", "default": "New York & London" },
+        "availability": { "type": "string", "default": "Available for Board Advisory & Retainers" },
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "expertise": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string" },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "level": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "longDescription": { "type": "string" },
+          "imageUrl": { "type": "string" },
+          "techStack": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "liveUrl": { "type": "string" },
+          "githubUrl": { "type": "string" },
+          "featured": { "type": "boolean" },
+          "impactMetrics": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "detailedPoints": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "iconName": { "type": "string" }
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "type": { "type": "string" },
+          "duration": { "type": "string" },
+          "location": { "type": "string" },
+          "achievements": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "technologies": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "institution": { "type": "string" },
+          "degree": { "type": "string" },
+          "duration": { "type": "string" },
+          "location": { "type": "string" },
+          "description": { "type": "string" },
+          "honors": { "type": "string" }
+        }
+      }
+    },
+    "testimonials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "role": { "type": "string" },
+          "organization": { "type": "string" },
+          "photoUrl": { "type": "string" },
+          "review": { "type": "string" },
+          "rating": { "type": "number" },
+          "type": { "type": "string" }
+        }
+      }
+    }
+  }
+}

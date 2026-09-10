@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SlashModelPortfolioSchema",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "headline": { "type": "string" },
+    "bio": { "type": "string" },
+    "profileImage": { "type": "string" },
+    "avatarUrl": { "type": "string" },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "greeting": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "image": { "type": "string" },
+        "quote": { "type": "string" }
+      }
+    },
+    "subHero": {
+      "type": "object",
+      "properties": {
+        "watermark": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "linkText": { "type": "string" },
+        "linkHref": { "type": "string" }
+      }
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "leadText": { "type": "string" },
+        "pillars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "icon": { "type": "string" }
+            },
+            "required": ["title", "description"]
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "level": { "type": "string" },
+          "icon": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "categoryTag": { "type": "string" },
+          "shortDesc": { "type": "string" },
+          "description": { "type": "string" },
+          "image": { "type": "string" },
+          "highlights": { "type": "array", "items": { "type": "string" } },
+          "techStack": { "type": "array", "items": { "type": "string" } },
+          "demoUrl": { "type": "string" },
+          "codeUrl": { "type": "string" }
+        },
+        "required": ["title"]
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "period": { "type": "string" },
+          "location": { "type": "string" },
+          "description": { "type": "string" },
+          "bullets": { "type": "array", "items": { "type": "string" } },
+          "technologies": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["role", "company"]
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "degree": { "type": "string" },
+          "institution": { "type": "string" },
+          "period": { "type": "string" },
+          "description": { "type": "string" },
+          "honors": { "type": "string" }
+        },
+        "required": ["degree", "institution"]
+      }
+    },
+    "certificates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "issuer": { "type": "string" },
+          "issuedDate": { "type": "string" },
+          "credentialId": { "type": "string" },
+          "description": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["title", "issuer"]
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "location": { "type": "string" },
+        "heading": { "type": "string" },
+        "text": { "type": "string" }
+      }
+    }
+  }
+}

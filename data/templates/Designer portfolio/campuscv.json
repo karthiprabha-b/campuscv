@@ -1,0 +1,185 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "product-designer-portfolio",
+    "name": "Product Designer Portfolio",
+    "version": "1.0.0",
+    "entry": "index.html",
+    "category": "Designer",
+    "author": "CampusCV",
+    "description": "Editorial Swiss-inspired UI/UX & Product Designer portfolio template."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "background",
+      "foreground",
+      "muted",
+      "accent",
+      "border"
+    ]
+  },
+  "fields": {
+    "hero.name": { "type": "text", "label": "Full Name" },
+    "hero.role": { "type": "text", "label": "Professional Role" },
+    "hero.headline": { "type": "text", "label": "Hero Headline" },
+    "hero.description": { "type": "textarea", "label": "Hero Description" },
+    "hero.location": { "type": "text", "label": "Location" },
+    "hero.availability": { "type": "text", "label": "Availability Status" },
+    "hero.profileImage": { "type": "image", "label": "Profile Image", "styleLocked": true },
+    "hero.primaryButton": {
+      "type": "button",
+      "fields": {
+        "label": { "type": "text" },
+        "url": { "type": "url" },
+        "openInNewTab": { "type": "boolean" }
+      }
+    },
+    "hero.secondaryButton": {
+      "type": "button",
+      "fields": {
+        "label": { "type": "text" },
+        "url": { "type": "url" },
+        "openInNewTab": { "type": "boolean" }
+      }
+    },
+
+    "about.visible": { "type": "boolean", "label": "Show About Section", "default": true },
+    "about.eyebrow": { "type": "text", "label": "About Eyebrow" },
+    "about.title": { "type": "text", "label": "About Title / Headline" },
+    "about.description": { "type": "textarea", "label": "About Narrative / Bio" },
+    "about.image": { "type": "image", "label": "About Image", "styleLocked": true },
+
+    "projects.visible": { "type": "boolean", "label": "Show Projects Section", "default": true },
+    "projects.eyebrow": { "type": "text", "label": "Projects Eyebrow" },
+    "projects.title": { "type": "text", "label": "Projects Section Title" },
+    "projects.description": { "type": "textarea", "label": "Projects Section Description" },
+
+    "process.visible": { "type": "boolean", "label": "Show Process Section", "default": true },
+    "process.eyebrow": { "type": "text", "label": "Process Eyebrow" },
+    "process.title": { "type": "text", "label": "Process Section Title" },
+
+    "experience.visible": { "type": "boolean", "label": "Show Experience Section", "default": true },
+    "experience.eyebrow": { "type": "text", "label": "Experience Eyebrow" },
+    "experience.title": { "type": "text", "label": "Experience Section Title" },
+    "experience.description": { "type": "textarea", "label": "Experience Section Description" },
+
+    "skills.visible": { "type": "boolean", "label": "Show Skills Section", "default": true },
+    "skills.eyebrow": { "type": "text", "label": "Skills Eyebrow" },
+    "skills.title": { "type": "text", "label": "Skills Section Title" },
+    "skills.description": { "type": "textarea", "label": "Skills Section Description" },
+
+    "education.visible": { "type": "boolean", "label": "Show Education Section", "default": true },
+    "education.eyebrow": { "type": "text", "label": "Education Eyebrow" },
+    "education.title": { "type": "text", "label": "Education Section Title" },
+
+    "certifications.visible": { "type": "boolean", "label": "Show Certifications Section", "default": true },
+    "certifications.eyebrow": { "type": "text", "label": "Certifications Eyebrow" },
+    "certifications.title": { "type": "text", "label": "Certifications Section Title" },
+
+    "testimonial.visible": { "type": "boolean", "label": "Show Testimonial Section", "default": true },
+    "testimonial.eyebrow": { "type": "text", "label": "Testimonial Eyebrow" },
+    "testimonial.quote": { "type": "textarea", "label": "Testimonial Quote" },
+    "testimonial.name": { "type": "text", "label": "Client Name" },
+    "testimonial.role": { "type": "text", "label": "Client Role / Company" },
+
+    "contact.visible": { "type": "boolean", "label": "Show Contact Section", "default": true },
+    "contact.eyebrow": { "type": "text", "label": "Contact Eyebrow" },
+    "contact.title": { "type": "text", "label": "Contact Title" },
+    "contact.description": { "type": "textarea", "label": "Contact Description" },
+    "contact.email": { "type": "email", "label": "Contact Email" },
+
+    "footer.copyright": { "type": "text", "label": "Copyright Text" },
+    "footer.role": { "type": "text", "label": "Footer Role Label" },
+    "footer.location": { "type": "text", "label": "Footer Location" }
+  },
+  "collections": {
+    "projects.items": {
+      "type": "collection",
+      "label": "Featured Projects",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "subtitle": { "type": "text", "label": "Project Subtitle" },
+        "category": { "type": "text", "label": "Category" },
+        "year": { "type": "year", "label": "Year" },
+        "description": { "type": "textarea", "label": "Description" },
+        "image": { "type": "image", "label": "Project Image" },
+        "link": { "type": "url", "label": "Project URL" }
+      }
+    },
+    "experience.items": {
+      "type": "collection",
+      "label": "Work Experience Timeline",
+      "itemSchema": {
+        "company": { "type": "text", "label": "Company Name" },
+        "role": { "type": "text", "label": "Role / Title" },
+        "period": { "type": "text", "label": "Time Period" },
+        "description": { "type": "textarea", "label": "Role Description" }
+      }
+    },
+    "education.items": {
+      "type": "collection",
+      "label": "Education History",
+      "itemSchema": {
+        "institution": { "type": "text", "label": "School / Institution" },
+        "degree": { "type": "text", "label": "Degree / Program" },
+        "period": { "type": "text", "label": "Time Period" },
+        "description": { "type": "textarea", "label": "Details" }
+      }
+    },
+    "skills.items": {
+      "type": "collection",
+      "label": "Skills & Disciplines",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Skill Name" }
+      }
+    },
+    "tools.items": {
+      "type": "collection",
+      "label": "Tools & Software",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Tool Name" }
+      }
+    },
+    "certifications.items": {
+      "type": "collection",
+      "label": "Certifications & Recognition",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Certification Title" },
+        "issuer": { "type": "text", "label": "Issuing Organization" },
+        "year": { "type": "year", "label": "Year Received" }
+      }
+    },
+    "process.items": {
+      "type": "collection",
+      "label": "Design Process Stages",
+      "itemSchema": {
+        "number": { "type": "text", "label": "Stage Number" },
+        "title": { "type": "text", "label": "Stage Title" },
+        "description": { "type": "textarea", "label": "Stage Description" }
+      }
+    },
+    "stats.items": {
+      "type": "collection",
+      "label": "Key Statistics",
+      "itemSchema": {
+        "value": { "type": "text", "label": "Stat Value" },
+        "label": { "type": "text", "label": "Stat Label" }
+      }
+    },
+    "socialLinks.items": {
+      "type": "collection",
+      "label": "Social & Portfolio Links",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Platform Name" },
+        "url": { "type": "url", "label": "Profile URL" }
+      }
+    }
+  }
+}

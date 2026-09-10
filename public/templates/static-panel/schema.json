@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StaticPanelPortfolioSchema",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "headline": { "type": "string" },
+    "profileImage": { "type": "string" },
+    "coverImage": { "type": "string" },
+    "about": {
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string" },
+        "bio": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "location": { "type": "string" }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "degree": { "type": "string" },
+          "school": { "type": "string" },
+          "fieldOfStudy": { "type": "string" },
+          "period": { "type": "string" },
+          "gpa": { "type": "string" },
+          "honors": { "type": "array", "items": { "type": "string" } },
+          "coursework": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "location": { "type": "string" },
+          "period": { "type": "string" },
+          "highlights": { "type": "array", "items": { "type": "string" } },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "projectLink": { "type": "string" }
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "categoryLabel": { "type": "string" },
+          "shortDesc": { "type": "string" },
+          "fullDesc": { "type": "string" },
+          "highlights": { "type": "array", "items": { "type": "string" } },
+          "techStack": { "type": "array", "items": { "type": "string" } },
+          "image": { "type": "string" },
+          "githubUrl": { "type": "string" },
+          "liveUrl": { "type": "string" }
+        }
+      }
+    },
+    "skills": {
+      "type": "object"
+    },
+    "certificates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "issuer": { "type": "string" },
+          "issueDate": { "type": "string" },
+          "expiryDate": { "type": "string" },
+          "credentialId": { "type": "string" },
+          "verifyUrl": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" }
+      }
+    },
+    "socialLinks": {
+      "type": "object",
+      "properties": {
+        "github": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "twitter": { "type": "string" }
+      }
+    }
+  }
+}

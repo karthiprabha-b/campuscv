@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "slash-model",
+    "name": "Slash Model",
+    "version": "1.0.0",
+    "entry": "src/template.jsx",
+    "category": "Developer",
+    "author": "CampusCV",
+    "description": "High-contrast monochromatic developer portfolio with diagonal slash hero geometry, interactive case study modal, and verified credential dialogs."
+  },
+  "capabilities": {
+    "editableFields": true,
+    "repeatableCollections": true,
+    "themeTokens": true,
+    "sectionOrdering": true,
+    "sectionVisibility": true,
+    "mediaReplacement": true
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "primaryColor",
+      "backgroundColor",
+      "textColor"
+    ]
+  },
+  "fields": {
+    "name": { "type": "text", "label": "Full Name" },
+    "hero.greeting": { "type": "text", "label": "Hero Greeting" },
+    "hero.name": { "type": "text", "label": "Hero Name" },
+    "hero.title": { "type": "text", "label": "Hero Title / Role" },
+    "hero.quote": { "type": "textarea", "label": "Hero Quote Badge" },
+    "hero.image": { "type": "image", "label": "Hero Portrait Photo", "replaceable": true },
+    "profileImage": { "type": "image", "label": "Profile Image", "replaceable": true },
+    "subHero.watermark": { "type": "text", "label": "SubHero Watermark" },
+    "subHero.title": { "type": "text", "label": "SubHero Title" },
+    "subHero.text": { "type": "textarea", "label": "SubHero Description" },
+    "about.title": { "type": "text", "label": "About Title" },
+    "about.leadText": { "type": "textarea", "label": "About Lead Summary" },
+    "skills.title": { "type": "text", "label": "Skills Title" },
+    "contact.email": { "type": "email", "label": "Email Address" },
+    "contact.location": { "type": "text", "label": "Location" },
+    "contact.heading": { "type": "text", "label": "Contact Heading" },
+    "contact.text": { "type": "textarea", "label": "Contact Pitch" },
+    "socialLinks.github": { "type": "url", "label": "GitHub Profile URL" },
+    "socialLinks.linkedin": { "type": "url", "label": "LinkedIn Profile URL" }
+  },
+  "collections": {
+    "pillars": {
+      "type": "collection",
+      "label": "About Pillars",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Pillar Title" },
+        "description": { "type": "textarea", "label": "Pillar Description" },
+        "icon": { "type": "text", "label": "Icon Key (design, code, wrench)" }
+      }
+    },
+    "skills": {
+      "type": "collection",
+      "label": "Skills",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Skill Name" },
+        "level": { "type": "text", "label": "Proficiency Level" },
+        "icon": { "type": "text", "label": "Icon Identifier" }
+      }
+    },
+    "projects": {
+      "type": "collection",
+      "label": "Projects / Case Studies",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "categoryTag": { "type": "text", "label": "Category Tag" },
+        "shortDesc": { "type": "textarea", "label": "Short Summary" },
+        "description": { "type": "textarea", "label": "Full Case Study Description" },
+        "image": { "type": "image", "label": "Project Screenshot", "replaceable": true },
+        "techStack": { "type": "tags", "label": "Technologies" },
+        "demoUrl": { "type": "url", "label": "Live Demo URL" },
+        "codeUrl": { "type": "url", "label": "Source Code URL" }
+      }
+    },
+    "experience": {
+      "type": "collection",
+      "label": "Work Experience",
+      "itemSchema": {
+        "role": { "type": "text", "label": "Role / Title" },
+        "company": { "type": "text", "label": "Company Name" },
+        "period": { "type": "text", "label": "Date Range" },
+        "location": { "type": "text", "label": "Location" },
+        "description": { "type": "textarea", "label": "Summary" },
+        "bullets": { "type": "list", "label": "Key Accomplishments" },
+        "technologies": { "type": "tags", "label": "Technologies Used" }
+      }
+    },
+    "education": {
+      "type": "collection",
+      "label": "Education",
+      "itemSchema": {
+        "degree": { "type": "text", "label": "Degree / Major" },
+        "institution": { "type": "text", "label": "University / Institution" },
+        "period": { "type": "text", "label": "Graduation / Period" },
+        "description": { "type": "textarea", "label": "Coursework & Description" },
+        "honors": { "type": "text", "label": "Honors / GPA" }
+      }
+    },
+    "certificates": {
+      "type": "collection",
+      "label": "Certifications",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Certificate Name" },
+        "issuer": { "type": "text", "label": "Issuing Organization" },
+        "issuedDate": { "type": "text", "label": "Issue Date" },
+        "credentialId": { "type": "text", "label": "Credential ID" },
+        "description": { "type": "textarea", "label": "Credential Details" },
+        "skills": { "type": "tags", "label": "Verified Skills" }
+      }
+    }
+  },
+  "assets": [
+    {
+      "id": "hero-portrait",
+      "type": "image",
+      "path": "hero.image",
+      "purpose": "Hero portrait photo",
+      "replaceable": true,
+      "required": false
+    },
+    {
+      "id": "project-screenshots",
+      "type": "image",
+      "path": "projects[].image",
+      "purpose": "Project showcase screenshots",
+      "replaceable": true,
+      "required": false
+    }
+  ]
+}

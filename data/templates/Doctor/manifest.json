@@ -1,0 +1,14 @@
+{
+  "id": "doctor-portfolio",
+  "name": "Consultant Physician & Medical Portfolio",
+  "version": "1.2.0",
+  "category": "Medical",
+  "author": "CampusCV",
+  "description": "Premium, trustworthy medical portfolio template for doctors, consultant physicians, and healthcare specialists.",
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png",
+  "entry": "src/index.jsx",
+  "config": "campuscv.json",
+  "bindings": "bindings.json",
+  "schema": "schema.json"
+}
