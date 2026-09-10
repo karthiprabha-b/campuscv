@@ -145,6 +145,17 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
     data?.tagline ||
     DEFAULT_PROFILE.title;
 
+  // Dynamic stats & metrics
+  const rawStats = Array.isArray(data?.stats) && data.stats.length > 0
+    ? data.stats
+    : (Array.isArray(data?.metrics) && data.metrics.length > 0
+      ? data.metrics
+      : (Array.isArray(data?.hero?.stats) && data.hero.stats.length > 0 ? data.hero.stats : []));
+
+  const stat1 = rawStats[0] || { value: `${data?.yearsOfExperience || (Array.isArray(data?.experience) ? Math.max(1, data.experience.length) : 2)}+`, label: 'Years Exp' };
+  const stat2 = rawStats[1] || { value: `${Array.isArray(data?.projects) ? data.projects.length : 5}+`, label: 'Projects Shipped' };
+  const stat3 = rawStats[2] || { value: `${Array.isArray(data?.skills) ? data.skills.length : 15}+`, label: 'Skills & Tech' };
+
   const socials = profile?.socials || data?.socialLinks || DEFAULT_PROFILE.socials;
   const github = socials?.github || data?.github || "https://github.com";
   const linkedin = socials?.linkedin || data?.linkedin || "https://linkedin.com";
@@ -159,30 +170,29 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
     >
       {/* Background Decorative Glows */}
       <div 
-        className={`absolute -top-32 -right-32 w-96 h-96 rounded-full bg-gradient-to-br ${accentClass.glow} pointer-events-none`} 
-        style={{ transform: 'translate3d(0,0,0)', contain: 'paint' }}
-      />
-      <div 
-        className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-cyan-600/10 blur-[100px] pointer-events-none" 
+        className={`absolute top-0 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br ${accentClass.glow} pointer-events-none`}
         style={{ transform: 'translate3d(0,0,0)', contain: 'paint' }}
       />
 
-      {/* Card Header Tag */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-white/10">
-          <Terminal className="w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
-          <span 
-            data-node-id="text:hero:root:span:badge_status"
-            data-node-type="text"
-            data-cv="hero.availability"
-            className="text-xs font-mono text-zinc-300 cursor-text"
-          >
-            portfolio.init(2025)
-          </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none" />
+      {/* Header Bar: Status & Social Quick Links */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300 shadow-sm">
+            <Terminal className="w-3.5 h-3.5 text-zinc-400" />
+            <span 
+              data-node-id="text:hero:root:span:status"
+              data-node-type="text"
+              data-cv="hero.statusBadge"
+              className="cursor-text"
+            >
+              &gt;_ portfolio.init(2025)
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Social Link Badges */}
+        <div className="flex items-center gap-2">
           {github && (
             <a
               href={github}
@@ -297,7 +307,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="profile.yearsOfExperience"
                 className="text-xl sm:text-2xl font-bold text-white font-mono cursor-text"
               >
-                {yearsOfExperience}+
+                {stat1.value || `${stat1.number || 2}+`}
               </div>
               <div 
                 data-node-id="text:hero:root:div:years_lbl"
@@ -305,7 +315,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="hero.stats[0].label"
                 className="text-[11px] text-zinc-400 font-medium cursor-text"
               >
-                Years Exp
+                {stat1.label || 'Years Exp'}
               </div>
             </div>
             <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
@@ -315,7 +325,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="profile.projectsCompleted"
                 className="text-xl sm:text-2xl font-bold text-white font-mono cursor-text"
               >
-                {projectsCompleted}+
+                {stat2.value || `${stat2.number || 5}+`}
               </div>
               <div 
                 data-node-id="text:hero:root:div:projects_lbl"
@@ -323,7 +333,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="hero.stats[1].label"
                 className="text-[11px] text-zinc-400 font-medium cursor-text"
               >
-                Projects Shipped
+                {stat2.label || 'Projects Shipped'}
               </div>
             </div>
             <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
@@ -333,7 +343,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="hero.stats[2].value"
                 className="text-xl sm:text-2xl font-bold text-emerald-400 font-mono cursor-text"
               >
-                99.8%
+                {stat3.value || `${stat3.number || 99.8}%`}
               </div>
               <div 
                 data-node-id="text:hero:root:div:csat_lbl"
@@ -341,7 +351,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 data-cv="hero.stats[2].label"
                 className="text-[11px] text-zinc-400 font-medium cursor-text"
               >
-                Client CSAT
+                {stat3.label || 'Client CSAT'}
               </div>
             </div>
           </div>

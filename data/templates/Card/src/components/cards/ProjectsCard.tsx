@@ -258,10 +258,10 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
                     )}
                   </h3>
                   <p 
-                    data-node-id={`text:portfolio:items:${idx}:desc`}
+                    data-node-id={`text:projects:items:${idx}:desc`}
                     data-node-type="text"
                     data-cv={`projects.items[${idx}].description`}
-                    className="text-xs text-zinc-400 line-clamp-1 mt-0.5 cursor-text"
+                    className="text-xs text-zinc-300 line-clamp-2 mt-1 cursor-text leading-relaxed"
                   >
                     {projDesc}
                   </p>

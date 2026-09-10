@@ -111,7 +111,8 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
           const issueDate = cert.issueDate || (cert as any).date || (cert as any).year || '2023';
           const issuer = cert.issuer || (cert as any).organization || 'Accredited Issuer';
           const certTitle = cert.title || cert.name || 'Certification';
-          const credentialId = cert.credentialId || (cert as any).id || `CERT-${idx + 1000}`;
+          const certDesc = cert.description || cert.summary || cert.details || cert.desc || '';
+          const credentialId = cert.credentialId || (cert as any).id || (idx === 0 ? '' : `CERT-${idx + 1000}`);
 
           return (
             <div
@@ -129,7 +130,7 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
                       <ShieldCheck className="w-3.5 h-3.5" />
                     </div>
                     <span 
-                      data-node-id={`text:certificates:items:${idx}:issuer`}
+                      data-node-id={`text:certifications:items:${idx}:issuer`}
                       data-node-type="text"
                       data-cv={`certifications.items[${idx}].issuer`}
                       className="text-xs font-semibold text-zinc-300"
@@ -139,7 +140,7 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
                   </div>
 
                   <div 
-                    data-node-id={`text:certificates:items:${idx}:date`}
+                    data-node-id={`text:certifications:items:${idx}:date`}
                     data-node-type="text"
                     data-cv={`certifications.items[${idx}].issueDate`}
                     className="flex items-center gap-1 text-[10px] text-zinc-400 font-mono"
@@ -151,7 +152,7 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
 
                 {/* Title */}
                 <h3 
-                  data-node-id={`text:certificates:items:${idx}:title`}
+                  data-node-id={`text:certifications:items:${idx}:title`}
                   data-node-type="text"
                   data-cv={`certifications.items[${idx}].title`}
                   className="text-sm sm:text-base font-bold text-white group-hover:text-white transition-colors mb-1"
@@ -159,12 +160,24 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
                   {certTitle}
                 </h3>
 
+                {/* Description */}
+                {certDesc && (
+                  <p 
+                    data-node-id={`text:certifications:items:${idx}:desc`}
+                    data-node-type="text"
+                    data-cv={`certifications.items[${idx}].description`}
+                    className="text-xs text-zinc-300 leading-relaxed mb-2"
+                  >
+                    {certDesc}
+                  </p>
+                )}
+
                 {/* Credential ID */}
                 {credentialId && (
                   <div className="text-[10px] font-mono text-zinc-400 mb-2.5">
                     Credential ID:{' '}
                     <span 
-                      data-node-id={`text:certificates:items:${idx}:id`}
+                      data-node-id={`text:certifications:items:${idx}:id`}
                       data-node-type="text"
                       data-cv={`certifications.items[${idx}].credentialId`}
                       className="text-zinc-200"

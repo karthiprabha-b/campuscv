@@ -87,14 +87,17 @@ export const AboutCard: React.FC<AboutCardProps> = React.memo(({
   // Primary Domain: concise role (never an entire 150-character resume summary)
   let rawDomain =
     contentOverrides['text:about:root:span:domain']?.value ||
+    data?.domain ||
     data?.role ||
     data?.basics?.label ||
     data?.hero?.subtitle ||
+    data?.headline ||
     profile?.role ||
-    "Software Developer & AI Engineer";
+    profile?.headline ||
+    "Professional";
 
   if (typeof rawDomain === 'string' && rawDomain.length > 50) {
-    rawDomain = rawDomain.split(/[,•|&]/)[0].trim() || "Software Developer";
+    rawDomain = rawDomain.split(/[,•|&]/)[0].trim() || "Professional";
   }
   const primaryDomain = rawDomain;
 
@@ -118,47 +121,51 @@ export const AboutCard: React.FC<AboutCardProps> = React.memo(({
     validCoreStack ||
     (rawSkillsList.length > 0
       ? rawSkillsList.map(extractSkillName).filter(Boolean).slice(0, 4).join(' · ')
-      : 'Python · JavaScript · React · Next.js')
+      : 'Engineering · Strategy · Problem Solving')
   );
 
   let rawStatus =
     contentOverrides['text:about:root:span:status']?.value ||
+    data?.availability ||
+    data?.personal?.availability ||
     profile?.statusText ||
     profile?.availability ||
-    data?.availability ||
     "Available for Opportunities";
   if (typeof rawStatus === 'string' && rawStatus.length > 45) {
     rawStatus = "Available for Opportunities";
   }
   const statusText = rawStatus;
 
-  // Core values or highlights - only use if structured distinct array
-  const rawCoreValues = profile?.coreValues || data?.coreValues;
+  // Core values or highlights - dynamically bound from AI engine principles & coreValues
+  const rawCoreValues = data?.principles || data?.coreValues || data?.about?.principles || data?.about?.coreValues || profile?.coreValues || profile?.principles;
   let coreValues = DEFAULT_ABOUT.coreValues;
-  if (Array.isArray(rawCoreValues) && rawCoreValues.length >= 2) {
+  if (Array.isArray(rawCoreValues) && rawCoreValues.length > 0) {
     const valid = rawCoreValues.filter((v: any) => {
-      const s = typeof v === 'string' ? v : (v?.title || v?.name || '');
-      return s && s.length < 40 && !s.toUpperCase().includes('B.TECH');
+      const s = typeof v === 'string' ? v : (v?.title || v?.name || v?.label || '');
+      return s && s.length < 50;
     });
-    if (valid.length >= 2) {
+    if (valid.length > 0) {
       coreValues = valid.map((v: any, idx: number) => {
         if (typeof v === 'string') {
           return { title: `Principle 0${idx + 1}`, desc: v };
         }
-        return { title: v.title || v.name || `Principle 0${idx + 1}`, desc: v.desc || v.description || v.text || '' };
+        return { 
+          title: v.title || v.name || v.label || `Principle 0${idx + 1}`, 
+          desc: v.desc || v.description || v.text || v.value || '' 
+        };
       });
     }
   }
 
-  const rawHobbies = profile?.hobbies || data?.interests || data?.hobbies;
+  const rawHobbies = data?.interests || data?.hobbies || data?.about?.hobbies || profile?.hobbies;
   let hobbies = DEFAULT_ABOUT.hobbies;
-  if (Array.isArray(rawHobbies) && rawHobbies.length >= 2) {
+  if (Array.isArray(rawHobbies) && rawHobbies.length > 0) {
     const validH = rawHobbies.filter((h: any) => {
       const s = typeof h === 'string' ? h : (h?.name || h?.title || '');
-      return s && s.length < 35 && !s.toUpperCase().includes('B.TECH');
+      return s && s.length < 40;
     });
-    if (validH.length >= 2) {
-      hobbies = validH;
+    if (validH.length > 0) {
+      hobbies = validH.map((h: any) => typeof h === 'string' ? { name: h } : { name: h.name || h.title || String(h) });
     }
   }
 

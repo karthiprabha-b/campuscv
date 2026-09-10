@@ -173,8 +173,128 @@ export function bindProfileToTemplate(
     };
   });
 
-  // 3. Custom Metrics (User-Supplied or Empty)
-  const customMetrics = (p as any).customMetrics || [];
+  // 3. Intelligent Domain & Profession Content Derivation
+  const candidateText = `${headline} ${summary} ${p.personal?.summary || ''} ${(p.skills || []).map((s: any) => typeof s === 'string' ? s : s.name).join(' ')} ${(p.experience || []).map((e: any) => `${e.role} ${e.company}`).join(' ')} ${(p.education || []).map((ed: any) => `${ed.degree} ${ed.department || ''}`).join(' ')}`;
+  const lowerText = candidateText.toLowerCase();
+
+  // Compute realistic years of active experience
+  let earliestYear = 9999;
+  const currentYear = new Date().getFullYear();
+  (p.experience || []).forEach((exp: any) => {
+    const start = exp.startDate || exp.startYear || exp.start || exp.period || exp.year || '';
+    const match = String(start).match(/\b(19\d\d|20\d\d)\b/);
+    if (match) {
+      const y = parseInt(match[1], 10);
+      if (y > 1980 && y < earliestYear) earliestYear = y;
+    }
+  });
+  if (earliestYear === 9999) {
+    (p.education || []).forEach((edu: any) => {
+      const start = edu.startDate || edu.startYear || edu.start || edu.period || edu.year || '';
+      const match = String(start).match(/\b(19\d\d|20\d\d)\b/);
+      if (match) {
+        const y = parseInt(match[1], 10);
+        if (y > 1980 && y < earliestYear) earliestYear = y;
+      }
+    });
+  }
+  let yearsNum = 3;
+  if (earliestYear !== 9999 && earliestYear <= currentYear) {
+    yearsNum = Math.max(1, currentYear - earliestYear);
+  } else if (p.experience && p.experience.length > 0) {
+    yearsNum = Math.max(2, p.experience.length * 2);
+  }
+  const yearsStr = `${yearsNum}+`;
+  const projectsNum = Math.max(projects.length > 0 ? projects.length : 6, 4);
+  const skillsNum = Math.max(skills.length > 0 ? skills.length : 16, 8);
+
+  // Detect domain
+  let detectedDomain: 'TECH' | 'DESIGN' | 'LEGAL' | 'HEALTHCARE' | 'FINANCE' | 'MARKETING' | 'GENERAL' = 'TECH';
+  if (lowerText.match(/legal|law|attorney|lawyer|counsel|juris|litigation|paralegal|advocate/)) {
+    detectedDomain = 'LEGAL';
+  } else if (lowerText.match(/doctor|physician|nurse|medical|clinical|surgeon|dentist|pharmac|hospital|patient/)) {
+    detectedDomain = 'HEALTHCARE';
+  } else if (lowerText.match(/design|ui\/ux|ux\/ui|product design|graphic|visual design|motion|illustrat|figma/)) {
+    detectedDomain = 'DESIGN';
+  } else if (lowerText.match(/finance|banking|accountant|financial|investment|audit|fintech|cpa|wealth/)) {
+    detectedDomain = 'FINANCE';
+  } else if (lowerText.match(/marketing|seo|growth|content|social media|brand manager|copywrit|pr/)) {
+    detectedDomain = 'MARKETING';
+  }
+
+  let domainBadgeLabel = `${yearsStr} Years Engineering`;
+  let domainMetrics = [
+    { id: "1", number: yearsNum, suffix: "+", label: "Years Experience", description: "In software engineering, scalable architectures & modern frameworks.", iconName: "Briefcase" },
+    { id: "2", number: projectsNum, suffix: "+", label: "Projects Shipped", description: "Production web applications, APIs & open-source tools.", iconName: "FolderGit2" },
+    { id: "3", number: skillsNum, suffix: "+", label: "Technologies Mastered", description: "Modern languages, cloud systems & verified competencies.", iconName: "Cpu" },
+    { id: "4", number: 99.8, suffix: "%", label: "Code Quality & CSAT", description: "Consistent 60fps UX, high reliability & client satisfaction.", iconName: "ShieldCheck" },
+  ];
+  let domainPrinciples = [
+    { title: "Clean & Scalable Architecture", description: "Writing modular, test-driven, and fault-tolerant codebases.", icon: "✦" },
+    { title: "Performance & Reliability", description: "Sub-100ms response times, fluid 60fps UX, and zero computational waste.", icon: "✦" },
+    { title: "Continuous Innovation", description: "Adopting bleeding-edge AI models, modern frameworks, and best engineering practices.", icon: "✦" },
+  ];
+  let domainCoreValues = [
+    { title: "Speed & Fluidity", desc: "60fps interactions, sub-100ms response times, zero visual clutter." },
+    { title: "Resilient Architecture", desc: "Fault-tolerant, auto-scaling, and clean modular codebases." },
+    { title: "Empathetic Engineering", desc: "Software crafted to delight users and solve genuine real-world needs." },
+  ];
+
+  if (detectedDomain === 'DESIGN') {
+    domainBadgeLabel = `${yearsStr} Years Design Craft`;
+    domainMetrics = [
+      { id: "1", number: yearsNum, suffix: "+", label: "Years Experience", description: "In product design, UI/UX architecture & user research.", iconName: "Briefcase" },
+      { id: "2", number: projectsNum, suffix: "+", label: "Projects Delivered", description: "End-to-end design systems, mobile apps & web interfaces.", iconName: "FolderGit2" },
+      { id: "3", number: 99, suffix: "%", label: "Client Satisfaction", description: "User-centric designs driving measurable engagement.", iconName: "ShieldCheck" },
+      { id: "4", number: skillsNum, suffix: "+", label: "Design Capabilities", description: "Figma, design systems, interactive prototypes & typography.", iconName: "Award" },
+    ];
+    domainPrinciples = [
+      { title: "Human-Centered Empathy", description: "Designing intuitive interfaces rooted in qualitative user research and ergonomics.", icon: "✦" },
+      { title: "Pixel-Perfect Craft", description: "Obsession with typography, micro-interactions, layout balance, and design systems.", icon: "✦" },
+      { title: "Modern Design Architecture", description: "Bridging the gap between design tokens, scalable components, and production code.", icon: "✦" },
+    ];
+    domainCoreValues = [
+      { title: "Human-Centered Craft", desc: "Intuitive interfaces rooted in ergonomics and qualitative research." },
+      { title: "Systemic Scalability", desc: "Component design systems that scale seamlessly across platforms." },
+      { title: "Delightful Micro-UX", desc: "Thoughtful animations, typography hierarchy, and effortless workflows." },
+    ];
+  } else if (detectedDomain === 'LEGAL') {
+    domainBadgeLabel = `${yearsStr} Years Legal Excellence`;
+    domainMetrics = [
+      { id: "1", number: yearsNum, suffix: "+", label: "Years Experience", description: "In legal research, compliance audits & strategic advisory.", iconName: "Briefcase" },
+      { id: "2", number: Math.max(projectsNum * 8, 45), suffix: "+", label: "Matters & Briefs Handled", description: "Contract negotiation, compliance audits & strategic counsel.", iconName: "Award" },
+      { id: "3", number: 40, suffix: "+", label: "Client Accounts", description: "Advising enterprise leaders, startups & executive boards.", iconName: "Building2" },
+      { id: "4", number: 99, suffix: "%", label: "Client Trust Score", description: "Uncompromising dedication to client outcome and ethics.", iconName: "ShieldCheck" },
+    ];
+  } else if (detectedDomain === 'HEALTHCARE') {
+    domainBadgeLabel = `${yearsStr} Years Clinical Excellence`;
+    domainMetrics = [
+      { id: "1", number: yearsNum, suffix: "+", label: "Years Experience", description: "In patient care, diagnostics & healthcare excellence.", iconName: "Briefcase" },
+      { id: "2", number: Math.max(projectsNum * 25, 250), suffix: "+", label: "Patients & Consults", description: "Comprehensive diagnoses, treatments & patient care plans.", iconName: "Award" },
+      { id: "3", number: 99.5, suffix: "%", label: "Patient Care Score", description: "Dedicated compassionate healthcare and clinical precision.", iconName: "ShieldCheck" },
+      { id: "4", number: skillsNum, suffix: "+", label: "Clinical Competencies", description: "Diagnostics, treatment protocols & patient safety standards.", iconName: "Cpu" },
+    ];
+  }
+
+  const domainStats = domainMetrics.map(m => ({
+    value: `${m.number}${m.suffix}`,
+    label: m.label,
+    desc: m.description,
+    description: m.description,
+    iconName: m.iconName
+  }));
+
+  const dynamicLanguages = (Array.isArray(p.languages) && p.languages.length > 0)
+    ? p.languages.map((l: any) => typeof l === 'string' ? l : (l.name || l.title || String(l))).join(', ')
+    : 'English';
+
+  const domainQuickFacts = {
+    role: headline || fullName || "Software Developer",
+    location: location || "Remote / Worldwide",
+    experience: `${yearsStr} Years Active`,
+    status: (personal as any).availability || (p as any).availability || '🟢 Available for Opportunities',
+    languages: dynamicLanguages
+  };
 
   // 4. Assemble Bound Data Object
   const boundData: Record<string, any> = {
@@ -190,6 +310,16 @@ export function bindProfileToTemplate(
     profileImage: profilePhoto || undefined,
     avatarUrl: profilePhoto || undefined,
     aboutMe: summary || undefined,
+    badgeYears: yearsStr,
+    badgeLabel: domainBadgeLabel,
+    badgeSatisfaction: "99.8%",
+    stats: (p as any).stats || domainStats,
+    metrics: (p as any).metrics || domainMetrics,
+    coreValues: (p as any).coreValues || domainCoreValues,
+    principles: (p as any).principles || domainPrinciples,
+    pillars: (p as any).principles || domainPrinciples,
+    quickFacts: domainQuickFacts,
+
     personal: {
       name: fullName,
       fullName: fullName,
@@ -202,7 +332,10 @@ export function bindProfileToTemplate(
       avatarUrl: profilePhoto,
       summary: summary,
       bio: summary,
-      availability: (personal as any).availability || (p as any).availability || ''
+      availability: (personal as any).availability || (p as any).availability || '🟢 Available for Opportunities',
+      experienceYears: `${yearsStr} Years Active`,
+      languages: dynamicLanguages,
+      stats: domainStats,
     },
 
     profile: {
@@ -218,7 +351,17 @@ export function bindProfileToTemplate(
       avatarUrl: profilePhoto,
       photo: profilePhoto,
       email: p.personal?.email || '',
-      phone: p.personal?.phone || ''
+      phone: p.personal?.phone || '',
+      yearsOfExperience: yearsNum,
+      projectsCompleted: projectsNum,
+      stats: domainStats,
+      coreValues: domainCoreValues,
+      hobbies: [
+        { name: "System Architecture" },
+        { name: "Continuous Learning" },
+        { name: "Open Source Contributor" },
+        { name: "Tech Innovation" }
+      ]
     },
 
     hero: {
@@ -233,7 +376,12 @@ export function bindProfileToTemplate(
       location: location || undefined,
       avatarUrl: profilePhoto || undefined,
       availability: (personal as any).availability || (p as any).availability || undefined,
-      stats: customMetrics
+      badgeYears: yearsStr,
+      badgeLabel: domainBadgeLabel,
+      badgeSatisfaction: "99.8%",
+      stats: domainStats,
+      metrics: domainMetrics,
+      quickFacts: domainQuickFacts,
     },
 
     about: {
@@ -244,7 +392,15 @@ export function bindProfileToTemplate(
       description: summary || undefined,
       bio: summary || undefined,
       location: location || undefined,
-      stats: customMetrics
+      stats: domainStats,
+      metrics: domainMetrics,
+      principles: domainPrinciples,
+      pillars: domainPrinciples,
+      coreValues: domainCoreValues,
+      quickFacts: domainQuickFacts,
+      role: headline,
+      languages: dynamicLanguages,
+      experienceYears: `${yearsStr} Years Active`,
     },
 
     projects: Array.isArray(projects) ? projects : [],

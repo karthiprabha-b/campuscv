@@ -80,10 +80,10 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
     data?.experienceTitle ||
     'Work Experience';
 
-  const [expandedId, setExpandedId] = useState<string>(experienceList[0]?.id || '0');
+  const [expandedId, setExpandedId] = useState<string>('ALL');
 
   const toggleExpand = (id: string) => {
-    setExpandedId(prev => (prev === id ? '' : id));
+    setExpandedId(prev => (prev === id ? '' : (prev === 'ALL' ? '' : id)));
   };
 
   return (
@@ -127,14 +127,15 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
       <div className="space-y-3 my-auto" data-cv-section="experience" data-cv-collection="experience.items">
         {experienceList.map((exp: any, idx: number) => {
           const expId = exp.id || String(idx);
-          const isExpanded = expandedId === expId;
-          const highlights = Array.isArray(exp.highlights) ? exp.highlights : [];
+          const isExpanded = expandedId === 'ALL' || expandedId === expId;
+          const highlights = Array.isArray(exp.highlights) ? exp.highlights : (Array.isArray(exp.achievements) ? exp.achievements : []);
           const technologies = Array.isArray(exp.technologies) 
             ? exp.technologies 
             : (Array.isArray(exp.stack) ? exp.stack : (Array.isArray(exp.skills) ? exp.skills : []));
-          const roleName = exp.role || exp.title || 'Software Engineer';
-          const companyName = exp.company || 'Tech Company';
-          const periodText = exp.period || exp.year || exp.date || 'Present';
+          const roleName = exp.role || exp.title || exp.position || 'Software Engineer';
+          const companyName = exp.company || exp.organization || exp.subtitle || 'Tech Company';
+          const periodText = exp.period || (exp.startDate && exp.endDate ? `${exp.startDate} – ${exp.endDate}` : (exp.year || exp.date || 'Present'));
+          const descriptionText = exp.description || exp.summary || exp.details || exp.desc || '';
 
           return (
             <div
@@ -217,14 +218,14 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
               {/* Collapsible Content */}
               {isExpanded && (
                 <div className="px-4 sm:px-5 pb-5 pt-1 border-t border-white/10 space-y-3">
-                  {exp.description && (
+                  {descriptionText && (
                     <p 
                       data-node-id={`text:experience:items:${idx}:desc`}
                       data-node-type="text"
                       data-cv={`experience.items[${idx}].description`}
                       className="text-xs sm:text-sm text-zinc-300 leading-relaxed"
                     >
-                      {exp.description}
+                      {descriptionText}
                     </p>
                   )}
 

@@ -114,9 +114,11 @@ export const EducationCard: React.FC<EducationCardProps> = React.memo(({
         {educationList.map((edu: any, idx: number) => {
           const honors = Array.isArray(edu.honors) ? edu.honors : (edu.honors ? [String(edu.honors)] : []);
           const courses = Array.isArray(edu.courses) ? edu.courses : (edu.courses ? [String(edu.courses)] : []);
-          const degreeName = edu.degree || edu.title || edu.qualification || (idx === 0 ? 'Master of Science' : 'Bachelor of Science');
+          const degreeName = edu.degree || edu.qualification || edu.title || (idx === 0 ? 'Master of Science' : 'Bachelor of Science');
+          const fieldOfStudy = edu.fieldOfStudy || edu.field || edu.department || edu.major || edu.specialization || edu.area || '';
           const institutionName = edu.institution || edu.school || edu.university || 'University';
-          const periodText = edu.period || edu.year || edu.date || '2019 - 2023';
+          const periodText = edu.period || (edu.startDate && edu.endDate ? `${edu.startDate} – ${edu.endDate}` : (edu.year || edu.date || ''));
+          const description = edu.description || edu.details || edu.summary || edu.desc || edu.notes || '';
 
           return (
             <div
@@ -126,72 +128,103 @@ export const EducationCard: React.FC<EducationCardProps> = React.memo(({
               data-cv-index={idx}
               className="group relative p-5 rounded-3xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between"
             >
-              {/* Top Indicator */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <span 
-                  data-node-id={`text:education:items:${idx}:badge`}
-                  data-node-type="text"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold ${accentClass.badge}`}
-                >
-                  {degreeName}
-                </span>
+              <div>
+                {/* Top Indicator */}
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <span 
+                    data-node-id={`text:education:items:${idx}:badge`}
+                    data-node-type="text"
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold ${accentClass.badge}`}
+                  >
+                    {degreeName}
+                  </span>
 
-                <div 
-                  data-node-id={`text:education:items:${idx}:period`}
-                  data-node-type="text"
-                  data-cv={`education.items[${idx}].period`}
-                  className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono"
-                >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{periodText}</span>
-                </div>
-              </div>
-
-              {/* Institution & Degree */}
-              <div className="space-y-1 mb-3">
-                <h3 
-                  data-node-id={`text:education:items:${idx}:institution`}
-                  data-node-type="text"
-                  data-cv={`education.items[${idx}].institution`}
-                  className="text-lg sm:text-xl font-bold text-white group-hover:text-white transition-colors"
-                >
-                  {institutionName}
-                </h3>
-                <p 
-                  data-node-id={`text:education:items:${idx}:degree`}
-                  data-node-type="text"
-                  data-cv={`education.items[${idx}].degree`}
-                  className={`text-xs sm:text-sm font-medium ${accentClass.text}`}
-                >
-                  {edu.degree} {edu.field ? <>· <span className="text-zinc-300 font-normal">{edu.field}</span></> : null}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-zinc-400 pt-0.5">
-                  {edu.location && (
-                    <>
-                      <MapPin className="w-3.5 h-3.5 text-zinc-500" />
-                      <span 
-                        data-node-id={`text:education:items:${idx}:location`}
-                        data-node-type="text"
-                        data-cv={`education.items[${idx}].location`}
-                      >
-                        {edu.location}
-                      </span>
-                    </>
-                  )}
-                  {edu.grade && (
-                    <>
-                      <span className="text-zinc-600">•</span>
-                      <span 
-                        data-node-id={`text:education:items:${idx}:grade`}
-                        data-node-type="text"
-                        data-cv={`education.items[${idx}].grade`}
-                        className="text-emerald-400 font-mono font-semibold"
-                      >
-                        {edu.grade}
-                      </span>
-                    </>
+                  {periodText && (
+                    <div 
+                      data-node-id={`text:education:items:${idx}:period`}
+                      data-node-type="text"
+                      data-cv={`education.items[${idx}].period`}
+                      className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>{periodText}</span>
+                    </div>
                   )}
                 </div>
+
+                {/* Institution & Degree / Field */}
+                <div className="space-y-1 mb-2">
+                  <h3 
+                    data-node-id={`text:education:items:${idx}:institution`}
+                    data-node-type="text"
+                    data-cv={`education.items[${idx}].institution`}
+                    className="text-lg sm:text-xl font-bold text-white group-hover:text-white transition-colors"
+                  >
+                    {institutionName}
+                  </h3>
+                  
+                  {fieldOfStudy ? (
+                    <p 
+                      data-node-id={`text:education:items:${idx}:field`}
+                      data-node-type="text"
+                      data-cv={`education.items[${idx}].field`}
+                      className={`text-xs sm:text-sm font-semibold ${accentClass.text}`}
+                    >
+                      {fieldOfStudy}
+                    </p>
+                  ) : (
+                    degreeName && (
+                      <p 
+                        data-node-id={`text:education:items:${idx}:degree`}
+                        data-node-type="text"
+                        data-cv={`education.items[${idx}].degree`}
+                        className="text-xs sm:text-sm font-medium text-zinc-300"
+                      >
+                        {degreeName}
+                      </p>
+                    )
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 pt-0.5">
+                    {edu.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-zinc-500" />
+                        <span 
+                          data-node-id={`text:education:items:${idx}:location`}
+                          data-node-type="text"
+                          data-cv={`education.items[${idx}].location`}
+                        >
+                          {edu.location}
+                        </span>
+                      </span>
+                    )}
+                    {edu.grade && (
+                      <span className="flex items-center gap-1">
+                        <span className="text-zinc-600">•</span>
+                        <span 
+                          data-node-id={`text:education:items:${idx}:grade`}
+                          data-node-type="text"
+                          data-cv={`education.items[${idx}].grade`}
+                          className="text-emerald-400 font-mono font-semibold"
+                        >
+                          GPA / Score: {edu.grade}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Detailed Description */}
+                {description && (
+                  <p 
+                    data-node-id={`text:education:items:${idx}:desc`}
+                    data-node-type="text"
+                    data-cv={`education.items[${idx}].description`}
+                    className="text-xs sm:text-sm text-zinc-300 leading-relaxed mt-2 mb-3 line-clamp-3 group-hover:line-clamp-none transition-all"
+                  >
+                    {description}
+                  </p>
+                )}
               </div>
 
               {/* Honors */}
