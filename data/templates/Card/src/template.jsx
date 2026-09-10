@@ -190,6 +190,42 @@ function CardDeckInner({ data }) {
     }
   };
 
+  // Listen to navigation events from editor Layers panel or hash changes
+  useEffect(() => {
+    const handleNavEvent = (e) => {
+      const secId = e?.detail?.sectionId || e?.detail?.id;
+      if (secId) {
+        const idx = activeSections.findIndex(s => s.renderKey === secId || s.id === secId || s.id === `card-${secId}`);
+        if (idx !== -1) {
+          goToCard(idx);
+        }
+      }
+    };
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        const idx = activeSections.findIndex(s => s.renderKey === hash || s.id === hash || s.id === `card-${hash}`);
+        if (idx !== -1) {
+          goToCard(idx);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('campuscv:navigate-section', handleNavEvent);
+      window.addEventListener('hashchange', handleHashChange);
+      window.__CAMPUSCV_CARD_NAVIGATE__ = (secKey) => {
+        const idx = activeSections.findIndex(s => s.renderKey === secKey || s.id === secKey || s.id === `card-${secKey}`);
+        if (idx !== -1) goToCard(idx);
+      };
+      return () => {
+        window.removeEventListener('campuscv:navigate-section', handleNavEvent);
+        window.removeEventListener('hashchange', handleHashChange);
+      };
+    }
+  }, [activeSections, goToCard]);
+
   // Card Content Renderer
   const renderCardContent = (renderKey) => {
     switch (renderKey) {
@@ -244,28 +280,25 @@ function CardDeckInner({ data }) {
         }} 
       />
 
-      {/* Main Slide Deck Stage */}
+      {/* Main Slide Deck Stage - All sections remain in DOM for permanent Layers stability */}
       <main className="relative z-10 w-full max-w-5xl px-3 sm:px-6 md:px-8 py-6 flex items-center justify-center">
         {activeSections.map((section, idx) => {
           const isActive = idx === activeIndex;
           const isPrev = idx < activeIndex;
-          const isNext = idx > activeIndex;
-
-          // If far from active, hide to maximize rendering performance
-          if (Math.abs(idx - activeIndex) > 1) return null;
 
           return (
             <div
               key={section.id}
               id={section.id}
               data-section={section.renderKey}
-              className={`w-full transition-all duration-400 ease-out ${
+              data-cv-section={section.renderKey}
+              className={`w-full transition-all duration-300 ease-out ${
                 isActive
                   ? 'relative z-20 opacity-100 scale-100 translate-y-0 pointer-events-auto block'
-                  : 'absolute z-10 opacity-0 pointer-events-none' + (isPrev ? ' -translate-y-8 scale-95' : ' translate-y-8 scale-95')
+                  : 'absolute z-10 opacity-0 pointer-events-none' + (isPrev ? ' -translate-y-6 scale-95' : ' translate-y-6 scale-95')
               }`}
               style={{
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease',
                 willChange: 'transform, opacity'
               }}
             >
