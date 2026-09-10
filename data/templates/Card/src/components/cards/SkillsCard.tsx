@@ -88,7 +88,17 @@ const getTierBadge = (level: number) => {
   return { label: 'Core', color: 'bg-amber-500/15 text-amber-300 border-amber-500/30' };
 };
 
-export const SkillsCard: React.FC<SkillsCardProps> = React.memo(({ data }) => {
+interface SkillsCardProps {
+  data?: any;
+  cardNumber?: number;
+  totalCards?: number;
+}
+
+export const SkillsCard: React.FC<SkillsCardProps> = React.memo(({
+  data,
+  cardNumber = 6,
+  totalCards = 8
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const { accentClass } = useTheme();
@@ -111,21 +121,97 @@ export const SkillsCard: React.FC<SkillsCardProps> = React.memo(({ data }) => {
       if (typeof rawSkills[0] === 'object' && Array.isArray((rawSkills[0] as any).skills)) {
         return rawSkills;
       }
-      // If flat array of strings or objects, group them into a single category
+
+      // Check if items have category field
+      const byCategory: Record<string, any[]> = {};
+      const unclassified: any[] = [];
+
+      rawSkills.forEach((s: any, idx: number) => {
+        const name = typeof s === 'string' ? s.trim() : (s.name || s.title || String(s)).trim();
+        if (!name) return;
+        const category = typeof s === 'object' && s.category ? s.category : null;
+        const skillObj = {
+          name,
+          level: typeof s === 'object' && typeof s.level === 'number' ? s.level : (95 - (idx % 5) * 4),
+          experience: typeof s === 'object' && s.experience ? s.experience : '3+ yrs',
+          isPrimary: typeof s === 'object' && !!s.isPrimary || idx < 5,
+        };
+        if (category) {
+          if (!byCategory[category]) byCategory[category] = [];
+          byCategory[category].push(skillObj);
+        } else {
+          unclassified.push(skillObj);
+        }
+      });
+
+      if (Object.keys(byCategory).length > 0) {
+        const catList = Object.entries(byCategory).map(([catTitle, skills]) => ({
+          title: catTitle,
+          icon: 'Code2',
+          skills
+        }));
+        if (unclassified.length > 0) {
+          catList.push({ title: 'Other Skills', icon: 'Cpu', skills: unclassified });
+        }
+        return catList;
+      }
+
+      // If flat list with > 12 skills, cluster into clean tabs
+      if (rawSkills.length > 12) {
+        const clusters: Record<string, any[]> = {
+          'Languages & Core': [],
+          'Frontend & Web': [],
+          'Backend & Data': [],
+          'Cloud & DevOps': [],
+          'Tools & AI': []
+        };
+
+        rawSkills.forEach((s: any, idx: number) => {
+          const name = typeof s === 'string' ? s.trim() : (s.name || s.title || String(s)).trim();
+          if (!name) return;
+          const lower = name.toLowerCase();
+          const skillObj = {
+            name,
+            level: typeof s === 'object' && typeof s.level === 'number' ? s.level : (95 - (idx % 5) * 4),
+            experience: typeof s === 'object' && s.experience ? s.experience : '3+ yrs',
+            isPrimary: idx < 6,
+          };
+
+          if (lower.match(/python|javascript|typescript|java|c\+\+|c#|golang|go|rust|ruby|php|kotlin|swift|scala|r|dart/)) {
+            clusters['Languages & Core'].push(skillObj);
+          } else if (lower.match(/react|next|vue|angular|svelte|html|css|tailwind|redux|ui|ux|styled|sass|bootstrap/)) {
+            clusters['Frontend & Web'].push(skillObj);
+          } else if (lower.match(/node|express|nest|django|flask|spring|sql|postgres|mysql|mongo|graphql|rest|prisma|redis|kafka|backend|database/)) {
+            clusters['Backend & Data'].push(skillObj);
+          } else if (lower.match(/aws|azure|gcp|docker|kubernetes|ci\/cd|linux|git|terraform|nginx|cloud|devops/)) {
+            clusters['Cloud & DevOps'].push(skillObj);
+          } else {
+            clusters['Tools & AI'].push(skillObj);
+          }
+        });
+
+        const activeClusters = Object.entries(clusters)
+          .filter(([_, list]) => list.length > 0)
+          .map(([clusterTitle, skills]) => ({
+            title: clusterTitle,
+            icon: clusterTitle.includes('Frontend') ? 'Layout' : (clusterTitle.includes('Backend') ? 'Server' : (clusterTitle.includes('Cloud') ? 'Cloud' : 'Cpu')),
+            skills
+          }));
+
+        if (activeClusters.length > 1) {
+          return activeClusters;
+        }
+      }
+
       return [{
         title: "Technical Stack",
         icon: "Cpu",
-        skills: rawSkills.map((s: any, idx: number) => {
-          if (typeof s === 'string') {
-            return { name: s, level: 90 - (idx % 4) * 5, experience: "4+ yrs", isPrimary: idx < 4 };
-          }
-          return {
-            name: s.name || s.title || String(s),
-            level: typeof s.level === 'number' ? s.level : (typeof s.proficiency === 'number' ? s.proficiency : 90),
-            experience: s.experience || s.years || "4+ yrs",
-            isPrimary: !!s.isPrimary || idx < 4
-          };
-        })
+        skills: unclassified.length > 0 ? unclassified : rawSkills.map((s: any, idx: number) => ({
+          name: typeof s === 'string' ? s : (s.name || s.title || String(s)),
+          level: 90 - (idx % 4) * 5,
+          experience: "3+ yrs",
+          isPrimary: idx < 4
+        }))
       }];
     }
 
@@ -156,7 +242,7 @@ export const SkillsCard: React.FC<SkillsCardProps> = React.memo(({ data }) => {
             <Cpu className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 06 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
               data-node-id="text:skills:root:div:title"
               data-node-type="text"

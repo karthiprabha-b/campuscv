@@ -47,9 +47,15 @@ const DEFAULT_CERTIFICATIONS = [
 
 interface CertificationsCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
 }
 
-export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(({ data }) => {
+export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(({
+  data,
+  cardNumber = 7,
+  totalCards = 8
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const rawCerts = data?.certifications || data?.certificates;
@@ -82,9 +88,9 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
             <Award className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 07 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
-              data-node-id="text:certificates:root:div:title"
+              data-node-id="text:certifications:root:div:title"
               data-node-type="text"
               data-cv="certifications.title"
               className="text-xl sm:text-2xl font-bold text-white tracking-tight"

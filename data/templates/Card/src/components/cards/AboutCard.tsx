@@ -32,9 +32,15 @@ const DEFAULT_ABOUT = {
 
 interface AboutCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
 }
 
-export const AboutCard: React.FC<AboutCardProps> = React.memo(({ data }) => {
+export const AboutCard: React.FC<AboutCardProps> = React.memo(({
+  data,
+  cardNumber = 2,
+  totalCards = 8
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const profile = data?.profile || data?.about || data || {};
@@ -176,7 +182,7 @@ export const AboutCard: React.FC<AboutCardProps> = React.memo(({ data }) => {
             <User className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 02 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
               data-node-id="text:about:root:div:title"
               data-node-type="text"

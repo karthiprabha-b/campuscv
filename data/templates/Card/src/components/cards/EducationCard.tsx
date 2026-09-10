@@ -52,9 +52,15 @@ const DEFAULT_EDUCATION = [
 
 interface EducationCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
 }
 
-export const EducationCard: React.FC<EducationCardProps> = React.memo(({ data }) => {
+export const EducationCard: React.FC<EducationCardProps> = React.memo(({
+  data,
+  cardNumber = 3,
+  totalCards = 8
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const rawEdu = data?.education || data?.academics;
@@ -86,7 +92,7 @@ export const EducationCard: React.FC<EducationCardProps> = React.memo(({ data })
             <GraduationCap className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 03 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
               data-node-id="text:education:root:div:title"
               data-node-type="text"
@@ -108,7 +114,7 @@ export const EducationCard: React.FC<EducationCardProps> = React.memo(({ data })
         {educationList.map((edu: any, idx: number) => {
           const honors = Array.isArray(edu.honors) ? edu.honors : (edu.honors ? [String(edu.honors)] : []);
           const courses = Array.isArray(edu.courses) ? edu.courses : (edu.courses ? [String(edu.courses)] : []);
-          const degreeName = edu.degree ? (edu.degree.includes('Master') ? 'Master of Science' : (edu.degree.includes('Bachelor') ? 'Bachelor of Science' : edu.degree)) : (idx === 0 ? 'Master of Science' : 'Bachelor of Science');
+          const degreeName = edu.degree || edu.title || edu.qualification || (idx === 0 ? 'Master of Science' : 'Bachelor of Science');
           const institutionName = edu.institution || edu.school || edu.university || 'University';
           const periodText = edu.period || edu.year || edu.date || '2019 - 2023';
 

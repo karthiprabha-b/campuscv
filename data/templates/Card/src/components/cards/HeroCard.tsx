@@ -42,12 +42,16 @@ const DEFAULT_PROFILE = {
 
 interface HeroCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
   onScrollToNext?: () => void;
   onScrollToProjects?: () => void;
 }
 
 export const HeroCard: React.FC<HeroCardProps> = React.memo(({
   data,
+  cardNumber = 1,
+  totalCards = 8,
   onScrollToNext,
   onScrollToProjects
 }) => {

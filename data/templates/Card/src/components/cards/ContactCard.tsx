@@ -41,10 +41,17 @@ const DEFAULT_CONTACT = {
 
 interface ContactCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
   onScrollToTop?: () => void;
 }
 
-export const ContactCard: React.FC<ContactCardProps> = React.memo(({ data, onScrollToTop }) => {
+export const ContactCard: React.FC<ContactCardProps> = React.memo(({
+  data,
+  cardNumber = 8,
+  totalCards = 8,
+  onScrollToTop
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const profile = data?.profile || data || {};
@@ -156,7 +163,7 @@ export const ContactCard: React.FC<ContactCardProps> = React.memo(({ data, onScr
             <Mail className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 08 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
               data-node-id="text:contact:root:div:title"
               data-node-type="text"

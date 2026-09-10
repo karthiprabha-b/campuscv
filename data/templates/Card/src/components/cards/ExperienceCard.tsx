@@ -60,9 +60,15 @@ const DEFAULT_EXPERIENCE = [
 
 interface ExperienceCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
 }
 
-export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({ data }) => {
+export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
+  data,
+  cardNumber = 4,
+  totalCards = 8
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const rawExp = data?.experience || data?.timeline;
@@ -100,7 +106,7 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({ data 
             <Briefcase className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 04 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
               data-node-id="text:experience:root:div:title"
               data-node-type="text"

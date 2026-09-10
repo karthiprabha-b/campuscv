@@ -303,31 +303,33 @@ function CardDeckInner({ data }) {
   }, [activeSections, goToCard]);
 
   // Card Content Renderer
-  const renderCardContent = (renderKey) => {
+  const renderCardContent = (renderKey, cardIndex, totalCount) => {
     switch (renderKey) {
       case 'hero':
         const projectsIdx = activeSections.findIndex(s => s.renderKey === 'projects');
         return (
           <HeroCard
             data={data}
+            cardNumber={cardIndex}
+            totalCards={totalCount}
             onScrollToNext={nextCard}
             onScrollToProjects={() => goToCard(projectsIdx !== -1 ? projectsIdx : 1)}
           />
         );
       case 'about':
-        return <AboutCard data={data} />;
+        return <AboutCard data={data} cardNumber={cardIndex} totalCards={totalCount} />;
       case 'education':
-        return <EducationCard data={data} />;
+        return <EducationCard data={data} cardNumber={cardIndex} totalCards={totalCount} />;
       case 'experience':
-        return <ExperienceCard data={data} />;
+        return <ExperienceCard data={data} cardNumber={cardIndex} totalCards={totalCount} />;
       case 'projects':
-        return <ProjectsCard data={data} onSelectProject={(proj) => setSelectedProject(proj)} />;
+        return <ProjectsCard data={data} cardNumber={cardIndex} totalCards={totalCount} onSelectProject={(proj) => setSelectedProject(proj)} />;
       case 'skills':
-        return <SkillsCard data={data} />;
+        return <SkillsCard data={data} cardNumber={cardIndex} totalCards={totalCount} />;
       case 'certifications':
-        return <CertificationsCard data={data} />;
+        return <CertificationsCard data={data} cardNumber={cardIndex} totalCards={totalCount} />;
       case 'contact':
-        return <ContactCard data={data} onScrollToTop={() => goToCard(0)} />;
+        return <ContactCard data={data} cardNumber={cardIndex} totalCards={totalCount} onScrollToTop={() => goToCard(0)} />;
       default:
         return null;
     }
@@ -380,7 +382,7 @@ function CardDeckInner({ data }) {
             >
               {/* Curved Rectangular Card Shell */}
               <div className="relative w-full rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950/95 border border-white/20 shadow-2xl shadow-black/80 ring-1 ring-white/10 overflow-hidden">
-                {renderCardContent(section.renderKey)}
+                {renderCardContent(section.renderKey, idx + 1, activeSections.length)}
               </div>
             </div>
           );

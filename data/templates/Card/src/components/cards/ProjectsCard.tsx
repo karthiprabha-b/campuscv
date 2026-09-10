@@ -75,10 +75,17 @@ const DEFAULT_PROJECTS = [
 
 interface ProjectsCardProps {
   data?: any;
+  cardNumber?: number;
+  totalCards?: number;
   onSelectProject: (project: any) => void;
 }
 
-export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({ data, onSelectProject }) => {
+export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
+  data,
+  cardNumber = 5,
+  totalCards = 8,
+  onSelectProject
+}) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
   const rawProjects = data?.projects || data?.portfolioProjects;
@@ -137,9 +144,9 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({ data, onS
             <FolderGit2 className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 05 / 08</div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Card 0{cardNumber} / 0{totalCards}</div>
             <h2 
-              data-node-id="text:portfolio:root:div:title"
+              data-node-id="text:projects:root:div:title"
               data-node-type="text"
               data-cv="projects.title"
               className="text-xl sm:text-2xl font-bold text-white tracking-tight"
