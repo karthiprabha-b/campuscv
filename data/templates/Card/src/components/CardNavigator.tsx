@@ -62,7 +62,7 @@ export const CardNavigator: React.FC<CardNavigatorProps> = React.memo(({
       {/* Desktop Floating Right Rail */}
       <aside className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center gap-3 select-none pointer-events-auto">
         {/* Step Counter Badge */}
-        <div className="px-2.5 py-1 rounded-full bg-black/70 border border-white/10 backdrop-blur-xl text-[11px] font-mono font-medium text-zinc-300 shadow-xl">
+        <div className="px-2.5 py-1 rounded-full bg-zinc-900/95 border border-white/10 text-[11px] font-mono font-medium text-zinc-300 shadow-xl">
           <span className={accentClass.text}>0{activeIndex + 1}</span>
           <span className="text-zinc-600"> / 0{totalSections}</span>
         </div>
@@ -72,13 +72,13 @@ export const CardNavigator: React.FC<CardNavigatorProps> = React.memo(({
           onClick={handlePrev}
           disabled={activeIndex === 0}
           aria-label="Previous card"
-          className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.15] border border-white/10 text-zinc-300 disabled:opacity-25 disabled:hover:bg-white/[0.06] transition-all backdrop-blur-md hover:scale-105 active:scale-95"
+          className="p-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-zinc-300 disabled:opacity-25 disabled:hover:bg-zinc-900/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
         >
           <ChevronUp className="w-4 h-4" />
         </button>
 
         {/* Nav Items Dock */}
-        <div className="flex flex-col gap-2 p-2 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-2xl shadow-2xl shadow-black/80">
+        <div className="flex flex-col gap-2 p-2 rounded-3xl bg-zinc-950/95 border border-white/10 shadow-2xl shadow-black/80">
           {sections.map((sec, idx) => {
             const Icon = sec.icon;
             const isActive = activeIndex === idx;
@@ -87,14 +87,9 @@ export const CardNavigator: React.FC<CardNavigatorProps> = React.memo(({
               <button
                 key={sec.id}
                 onClick={() => onNavigate(idx)}
-                className="group relative flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-200"
+                className="group relative flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-200 cursor-pointer"
                 aria-label={`Scroll to ${sec.name}`}
               >
-                {/* Active Backdrop Glow */}
-                {isActive && (
-                  <div className={`absolute inset-0 rounded-2xl ${accentClass.bg} opacity-25 blur-[6px]`} />
-                )}
-
                 {/* Active Pill Indicator */}
                 <div
                   className={`relative flex items-center justify-center w-full h-full rounded-2xl transition-all duration-150 ${
@@ -107,7 +102,7 @@ export const CardNavigator: React.FC<CardNavigatorProps> = React.memo(({
                 </div>
 
                 {/* Hover Tooltip Pill */}
-                <div className="absolute right-14 pointer-events-none opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap px-3 py-1 rounded-xl bg-zinc-900/95 border border-white/15 text-xs font-medium text-white shadow-xl backdrop-blur-md z-50">
+                <div className="absolute right-14 pointer-events-none opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap px-3 py-1 rounded-xl bg-zinc-900 border border-white/15 text-xs font-medium text-white shadow-xl z-50">
                   <span>{sec.name}</span>
                 </div>
               </button>
@@ -120,14 +115,14 @@ export const CardNavigator: React.FC<CardNavigatorProps> = React.memo(({
           onClick={handleNext}
           disabled={activeIndex === totalSections - 1}
           aria-label="Next card"
-          className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.15] border border-white/10 text-zinc-300 disabled:opacity-25 disabled:hover:bg-white/[0.06] transition-all backdrop-blur-md hover:scale-105 active:scale-95"
+          className="p-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-zinc-300 disabled:opacity-25 disabled:hover:bg-zinc-900/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
         >
           <ChevronDown className="w-4 h-4" />
         </button>
       </aside>
 
       {/* Mobile / Tablet Bottom Quick-Nav Bar */}
-      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 lg:hidden flex items-center gap-1.5 p-2 rounded-2xl bg-zinc-950/95 border border-white/15 backdrop-blur-2xl shadow-2xl max-w-[95vw] overflow-x-auto no-scrollbar pointer-events-auto">
+      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 lg:hidden flex items-center gap-1.5 p-2 rounded-2xl bg-zinc-950/95 border border-white/15 shadow-2xl max-w-[95vw] overflow-x-auto no-scrollbar pointer-events-auto">
         {sections.map((sec, idx) => {
           const Icon = sec.icon;
           const isActive = activeIndex === idx;

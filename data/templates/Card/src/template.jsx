@@ -235,17 +235,14 @@ function CardDeckInner({ data }) {
         sections={activeSections}
       />
 
-      {/* Ambient Atmospheric Background Glows */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" style={{ contain: 'strict' }}>
-        <div 
-          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br ${accentClass.glow} rounded-full blur-[100px] opacity-35 transition-all duration-700`}
-          style={{ transform: 'translate3d(-50%, -50%, 0)', contain: 'paint' }}
-        />
-        <div 
-          className="absolute bottom-10 right-1/4 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[80px]"
-          style={{ transform: 'translate3d(0, 0, 0)', contain: 'paint' }}
-        />
-      </div>
+      {/* Ambient Atmospheric Background */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0" 
+        style={{ 
+          background: 'radial-gradient(circle at 50% 25%, rgba(139, 92, 246, 0.12) 0%, rgba(6, 182, 212, 0.05) 45%, transparent 70%)',
+          contain: 'strict'
+        }} 
+      />
 
       {/* Main Slide Deck Stage */}
       <main className="relative z-10 w-full max-w-5xl px-3 sm:px-6 md:px-8 py-6 flex items-center justify-center">

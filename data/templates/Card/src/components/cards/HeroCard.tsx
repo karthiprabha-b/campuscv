@@ -165,7 +165,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
 
       {/* Card Header Tag */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-white/10">
           <Terminal className="w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
           <span 
             data-node-id="text:hero:root:span:badge_status"
@@ -175,7 +175,7 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
           >
             portfolio.init(2025)
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping pointer-events-none" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none" />
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -388,9 +388,9 @@ export const HeroCard: React.FC<HeroCardProps> = React.memo(({
                 />
                 <div className="absolute inset-0 ring-1 ring-inset ring-white/10 pointer-events-none rounded-2xl sm:rounded-3xl" />
                 <div 
-                  className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-emerald-400 pointer-events-none select-none"
+                  className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-950/90 border border-white/20 text-[10px] font-mono text-emerald-400 pointer-events-none select-none"
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span>Available</span>
                 </div>
               </div>
