@@ -180,7 +180,7 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({ data, onS
       </div>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto max-h-[60vh] overflow-y-auto no-scrollbar pr-1" data-cv-section="projects" data-cv-collection="projects.items">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto" data-cv-section="projects" data-cv-collection="projects.items">
         {filteredProjects.slice(0, 4).map((proj: any, idx: number) => {
           const tags = Array.isArray(proj.tags) ? proj.tags : (Array.isArray((proj as any).technologies) ? (proj as any).technologies : []);
           const image = proj.image || (proj as any).thumbnail || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80";

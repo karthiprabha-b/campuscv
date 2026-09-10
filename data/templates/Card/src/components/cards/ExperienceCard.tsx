@@ -118,7 +118,7 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({ data 
       </div>
 
       {/* Experience Timeline */}
-      <div className="space-y-3 my-auto max-h-[60vh] overflow-y-auto no-scrollbar pr-1" data-cv-section="experience" data-cv-collection="experience.items">
+      <div className="space-y-3 my-auto" data-cv-section="experience" data-cv-collection="experience.items">
         {experienceList.map((exp: any, idx: number) => {
           const expId = exp.id || String(idx);
           const isExpanded = expandedId === expId;

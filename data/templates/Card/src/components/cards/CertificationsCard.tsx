@@ -98,7 +98,7 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
           Verified Credentials
         </div>
       </div>      {/* Certifications Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto max-h-[60vh] overflow-y-auto no-scrollbar pr-1" data-cv-section="certifications" data-cv-collection="certifications.items">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto" data-cv-section="certifications" data-cv-collection="certifications.items">
         {certificationsList.map((cert: any, idx: number) => {
           const skills = Array.isArray(cert.skills) ? cert.skills : [];
           const certUrl = cert.credentialUrl || (cert as any).url || (cert as any).link || '#';

@@ -211,7 +211,7 @@ export const SkillsCard: React.FC<SkillsCardProps> = React.memo(({ data }) => {
       )}
 
       {/* Modern Bento Tech Chips Grid */}
-      <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/10 space-y-3.5 my-auto max-h-[55vh] overflow-y-auto no-scrollbar" data-cv-section="skills" data-cv-collection="skills.items">
+      <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/10 space-y-3.5 my-auto" data-cv-section="skills" data-cv-collection="skills.items">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <IconComponent className={`w-4 h-4 ${accentClass.text}`} />

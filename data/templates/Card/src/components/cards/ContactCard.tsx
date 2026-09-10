@@ -175,7 +175,7 @@ export const ContactCard: React.FC<ContactCardProps> = React.memo(({ data, onScr
       </div>
 
       {/* Main Content Layout */}
-      <div className="space-y-6 my-auto max-h-[68vh] overflow-y-auto no-scrollbar pr-1" data-cv-section="contact">
+      <div className="space-y-6 my-auto" data-cv-section="contact">
         {/* Headline & Availability Banner */}
         <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5 max-w-xl">
