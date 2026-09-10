@@ -92,10 +92,24 @@ export const AboutCard: React.FC<AboutCardProps> = React.memo(({ data }) => {
   }
   const primaryDomain = rawDomain;
 
+  const extractSkillName = (s: any): string => {
+    if (!s) return '';
+    if (typeof s === 'string') return s.trim();
+    if (typeof s === 'object') {
+      return s.name || s.title || s.skill || s.label || s.value || '';
+    }
+    return String(s);
+  };
+
+  const rawSkillsList = Array.isArray(data?.skills) && data.skills.length > 0
+    ? data.skills
+    : (Array.isArray(data?.techStack) ? data.techStack : (Array.isArray(profile?.skills) ? profile.skills : []));
+
   const coreStackString = (
-    Array.isArray(data?.skills) && data.skills.length > 0
-      ? data.skills.slice(0, 3).map((s: any) => typeof s === 'string' ? s : (s?.name || s?.title || String(s))).join(' · ')
-      : (Array.isArray(data?.techStack) ? data.techStack.slice(0, 3).join(' · ') : 'Python · JavaScript · TypeScript')
+    contentOverrides['text:about:root:span:core_stack']?.value ||
+    (rawSkillsList.length > 0
+      ? rawSkillsList.map(extractSkillName).filter(Boolean).slice(0, 4).join(' · ')
+      : 'Python · JavaScript · React · Next.js')
   );
 
   let rawStatus =
