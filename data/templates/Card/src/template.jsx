@@ -138,7 +138,7 @@ function CardDeckInner({ data }) {
         });
       },
       {
-        threshold: 0.35,
+        threshold: 0.2,
       }
     );
 
@@ -248,7 +248,7 @@ function CardDeckInner({ data }) {
               id={section.id}
               data-section={section.renderKey}
               ref={(el) => { cardRefs.current[idx] = el; }}
-              className="min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8"
+              className="w-full py-6 sm:py-10 md:py-14 flex items-center justify-center p-3 sm:p-6 md:p-8"
             >
               {/* Curved Rectangular Card Shell */}
               <div
