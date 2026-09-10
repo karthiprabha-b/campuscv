@@ -36,6 +36,17 @@ const ALL_SECTION_DEFS = [
   { id: 'card-contact', renderKey: 'contact', name: 'Get in Touch', short: 'Contact', icon: Mail },
 ];
 
+const normalizeKey = (k) => {
+  let s = String(k || '').toLowerCase().replace(/^(card-|section:)/, '').trim();
+  if (s === 'home' || s === 'intro') return 'hero';
+  if (s === 'certificates' || s === 'awards') return 'certifications';
+  if (s === 'timeline' || s === 'work') return 'experience';
+  if (s === 'academics') return 'education';
+  if (s === 'portfolio') return 'projects';
+  if (s === 'tech' || s === 'technologies' || s === 'tools') return 'skills';
+  return s;
+};
+
 function CardDeckInner({ data }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -55,15 +66,26 @@ function CardDeckInner({ data }) {
 
   // Check section visibility from CampusCV data
   const isSectionVisible = useCallback((sectionName) => {
-    const key = String(sectionName || '').toLowerCase().trim();
+    const key = normalizeKey(sectionName);
 
-    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
+    if (
+      data?.deletedNodes?.[`section:${key}:root:section:0`] === true ||
+      data?.deletedNodes?.[key] === true ||
+      data?.deletedNodes?.[`card-${key}`] === true
+    ) {
       return false;
     }
-    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
+    if (
+      data?.hiddenNodes?.[`section:${key}:root:section:0`] === true ||
+      data?.hiddenNodes?.[key] === true ||
+      data?.hiddenNodes?.[`card-${key}`] === true
+    ) {
       return false;
     }
-    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
+    if (
+      Array.isArray(data?.hiddenFields) &&
+      (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key) || data.hiddenFields.includes(`card-${key}`))
+    ) {
       return false;
     }
 
@@ -82,12 +104,57 @@ function CardDeckInner({ data }) {
     return true;
   }, [data]);
 
-  // Dynamically filter active sections
+  // Dynamically filter and order active sections according to user layer reordering
   const activeSections = useMemo(() => {
-    return ALL_SECTION_DEFS.filter(sec => isSectionVisible(sec.renderKey));
-  }, [isSectionVisible]);
+    const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+      ? data.sectionOrder
+      : ((Array.isArray(data?.sectionsOrder) && data.sectionsOrder.length > 0)
+        ? data.sectionsOrder
+        : ((Array.isArray(data?.sections) && data.sections.length > 0)
+          ? data.sections
+          : null));
+
+    const defsMap = new Map();
+    ALL_SECTION_DEFS.forEach(sec => {
+      defsMap.set(sec.renderKey, sec);
+    });
+
+    const ordered = [];
+    const addedKeys = new Set();
+
+    if (rawOrder && rawOrder.length > 0) {
+      rawOrder.forEach((rawKey) => {
+        const norm = normalizeKey(rawKey);
+        if (defsMap.has(norm) && !addedKeys.has(norm)) {
+          if (isSectionVisible(norm)) {
+            ordered.push(defsMap.get(norm));
+          }
+          addedKeys.add(norm);
+        }
+      });
+    }
+
+    // Append any remaining visible sections not in rawOrder
+    ALL_SECTION_DEFS.forEach((sec) => {
+      if (!addedKeys.has(sec.renderKey)) {
+        if (isSectionVisible(sec.renderKey)) {
+          ordered.push(sec);
+        }
+        addedKeys.add(sec.renderKey);
+      }
+    });
+
+    return ordered.length > 0 ? ordered : ALL_SECTION_DEFS;
+  }, [data?.sectionOrder, data?.sectionsOrder, data?.sections, isSectionVisible]);
 
   const totalCards = activeSections.length;
+
+  // Auto-clamp activeIndex if sections count changed
+  useEffect(() => {
+    if (activeIndex >= totalCards && totalCards > 0) {
+      setActiveIndex(totalCards - 1);
+    }
+  }, [totalCards, activeIndex]);
 
   // High-performance smooth card transition
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -193,9 +260,12 @@ function CardDeckInner({ data }) {
   // Listen to navigation events from editor Layers panel or hash changes
   useEffect(() => {
     const handleNavEvent = (e) => {
-      const secId = e?.detail?.sectionId || e?.detail?.id;
+      const secId = e?.detail?.sectionId || e?.detail?.id || e?.detail?.section;
       if (secId) {
-        const idx = activeSections.findIndex(s => s.renderKey === secId || s.id === secId || s.id === `card-${secId}`);
+        const clean = normalizeKey(secId);
+        const idx = activeSections.findIndex(
+          s => s.renderKey === clean || s.renderKey === secId || s.id === secId || s.id === `card-${clean}` || s.id === `card-${secId}`
+        );
         if (idx !== -1) {
           goToCard(idx);
         }
@@ -205,7 +275,10 @@ function CardDeckInner({ data }) {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (hash) {
-        const idx = activeSections.findIndex(s => s.renderKey === hash || s.id === hash || s.id === `card-${hash}`);
+        const clean = normalizeKey(hash);
+        const idx = activeSections.findIndex(
+          s => s.renderKey === clean || s.renderKey === hash || s.id === hash || s.id === `card-${clean}` || s.id === `card-${hash}`
+        );
         if (idx !== -1) {
           goToCard(idx);
         }
@@ -216,7 +289,10 @@ function CardDeckInner({ data }) {
       window.addEventListener('campuscv:navigate-section', handleNavEvent);
       window.addEventListener('hashchange', handleHashChange);
       window.__CAMPUSCV_CARD_NAVIGATE__ = (secKey) => {
-        const idx = activeSections.findIndex(s => s.renderKey === secKey || s.id === secKey || s.id === `card-${secKey}`);
+        const clean = normalizeKey(secKey);
+        const idx = activeSections.findIndex(
+          s => s.renderKey === clean || s.renderKey === secKey || s.id === secKey || s.id === `card-${clean}` || s.id === `card-${secKey}`
+        );
         if (idx !== -1) goToCard(idx);
       };
       return () => {

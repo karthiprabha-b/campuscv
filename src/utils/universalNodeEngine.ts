@@ -1017,6 +1017,12 @@ export function applyPortfolioOverrides(
 export function reorderDOMSections(rootEl: HTMLElement, sectionOrder: string[] = []): void {
   if (!rootEl || !Array.isArray(sectionOrder) || sectionOrder.length < 2) return;
 
+  // If the root element or its children is a dynamic React-rendered template (like Card deck or centerd)
+  // that manages its own section ordering via React state and props, avoid mutating raw DOM nodes.
+  if (rootEl.querySelector('[data-campuscv-template="card"], [data-campuscv-template="centerd"], .card-deck-template-root')) {
+    return;
+  }
+
   // Collect all section candidate DOM elements
   const allSectionEls = Array.from(
     rootEl.querySelectorAll('section, [data-cv-section], [data-section], [data-section-id], #hero, #home, #intro, #about, #projects, #experience, #education, #skills, #certifications, #achievements, #interests, #publications, #awards, #contact, #footer, #process, #testimonial, .custom-added-section')
