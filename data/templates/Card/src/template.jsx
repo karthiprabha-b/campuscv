@@ -89,65 +89,59 @@ function CardDeckInner({ data }) {
 
   const totalCards = activeSections.length;
 
-  // Smooth scroll to card by index
-  const scrollToCard = useCallback((index) => {
-    if (index >= 0 && index < totalCards) {
-      const targetEl = cardRefs.current[index];
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      setActiveIndex(index);
-    }
-  }, [totalCards]);
+  // High-performance smooth card transition
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const lastScrollTimeRef = useRef(0);
 
-  const scrollToCardById = useCallback((cardId) => {
-    const idx = activeSections.findIndex(s => s.id === cardId);
-    if (idx !== -1) {
-      scrollToCard(idx);
-    } else {
-      const el = typeof document !== 'undefined' ? document.getElementById(cardId) : null;
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [activeSections, scrollToCard]);
+  const goToCard = useCallback((targetIndex) => {
+    if (targetIndex < 0 || targetIndex >= totalCards || targetIndex === activeIndex) return;
+    setIsTransitioning(true);
+    setActiveIndex(targetIndex);
+    const timer = setTimeout(() => setIsTransitioning(false), 450);
+    return () => clearTimeout(timer);
+  }, [totalCards, activeIndex]);
 
   const nextCard = useCallback(() => {
     if (activeIndex < totalCards - 1) {
-      scrollToCard(activeIndex + 1);
+      goToCard(activeIndex + 1);
     }
-  }, [activeIndex, totalCards, scrollToCard]);
+  }, [activeIndex, totalCards, goToCard]);
 
   const prevCard = useCallback(() => {
     if (activeIndex > 0) {
-      scrollToCard(activeIndex - 1);
+      goToCard(activeIndex - 1);
     }
-  }, [activeIndex, scrollToCard]);
+  }, [activeIndex, goToCard]);
 
-  // High-performance IntersectionObserver with passive observation
+  // Debounced wheel listener for smooth single-card progression
   useEffect(() => {
-    if (totalCards === 0 || typeof IntersectionObserver === 'undefined') return;
+    const handleWheel = (e) => {
+      // Don't intercept if a modal or input is open
+      if (selectedProject !== null || isResumeOpen) return;
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = cardRefs.current.indexOf(entry.target);
-            if (index !== -1) {
-              setActiveIndex(index);
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.2,
+      const now = Date.now();
+      if (now - lastScrollTimeRef.current < 450) return; // 450ms cooldown for smooth 1-card glide
+
+      if (e.deltaY > 25) {
+        if (activeIndex < totalCards - 1) {
+          lastScrollTimeRef.current = now;
+          nextCard();
+        }
+      } else if (e.deltaY < -25) {
+        if (activeIndex > 0) {
+          lastScrollTimeRef.current = now;
+          prevCard();
+        }
       }
-    );
+    };
 
-    cardRefs.current.forEach((el) => {
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [totalCards]);
+    const container = containerRef.current || (typeof window !== 'undefined' ? window : null);
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: true });
+      return () => container.removeEventListener('wheel', handleWheel);
+    }
+  }, [activeIndex, totalCards, nextCard, prevCard, selectedProject, isResumeOpen]);
 
   // Keyboard navigation for power users
   useEffect(() => {
@@ -169,10 +163,10 @@ function CardDeckInner({ data }) {
         prevCard();
       } else if (e.key === 'Home') {
         e.preventDefault();
-        scrollToCard(0);
+        goToCard(0);
       } else if (e.key === 'End') {
         e.preventDefault();
-        scrollToCard(totalCards - 1);
+        goToCard(totalCards - 1);
       }
     };
 
@@ -180,7 +174,21 @@ function CardDeckInner({ data }) {
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [nextCard, prevCard, scrollToCard, totalCards, selectedProject, isResumeOpen]);
+  }, [nextCard, prevCard, goToCard, totalCards, selectedProject, isResumeOpen]);
+
+  // Touch Swipe Navigation
+  const touchStartY = useRef(0);
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) nextCard();
+      else prevCard();
+    }
+  };
 
   // Card Content Renderer
   const renderCardContent = (renderKey) => {
@@ -191,7 +199,7 @@ function CardDeckInner({ data }) {
           <HeroCard
             data={data}
             onScrollToNext={nextCard}
-            onScrollToProjects={() => scrollToCard(projectsIdx !== -1 ? projectsIdx : 1)}
+            onScrollToProjects={() => goToCard(projectsIdx !== -1 ? projectsIdx : 1)}
           />
         );
       case 'about':
@@ -207,60 +215,68 @@ function CardDeckInner({ data }) {
       case 'certifications':
         return <CertificationsCard data={data} />;
       case 'contact':
-        return <ContactCard data={data} onScrollToTop={() => scrollToCard(0)} />;
+        return <ContactCard data={data} onScrollToTop={() => goToCard(0)} />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-black text-white selection:bg-violet-500/30 selection:text-violet-200">
+    <div 
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="relative min-h-screen w-full bg-black text-white selection:bg-violet-500/30 selection:text-violet-200 overflow-hidden flex flex-col justify-center items-center"
+    >
       {/* Floating Side & Mobile Card Navigator */}
       <CardNavigator
         activeIndex={activeIndex}
-        onNavigate={scrollToCard}
+        onNavigate={goToCard}
         sections={activeSections}
       />
 
       {/* Ambient Atmospheric Background Glows */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" style={{ contain: 'strict' }}>
         <div 
-          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br ${accentClass.glow} rounded-full blur-[120px] opacity-35 transition-all duration-700`}
+          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br ${accentClass.glow} rounded-full blur-[100px] opacity-35 transition-all duration-700`}
           style={{ transform: 'translate3d(-50%, -50%, 0)', contain: 'paint' }}
         />
         <div 
-          className="absolute bottom-10 right-1/4 w-[450px] h-[450px] bg-cyan-600/10 rounded-full blur-[100px]"
+          className="absolute bottom-10 right-1/4 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[80px]"
           style={{ transform: 'translate3d(0, 0, 0)', contain: 'paint' }}
         />
       </div>
 
-      {/* Main Flow Container */}
-      <main
-        ref={containerRef}
-        className="relative z-10 w-full pt-0 pb-16 lg:pb-0"
-      >
+      {/* Main Slide Deck Stage */}
+      <main className="relative z-10 w-full max-w-5xl px-3 sm:px-6 md:px-8 py-6 flex items-center justify-center">
         {activeSections.map((section, idx) => {
-          const isCurrent = idx === activeIndex;
+          const isActive = idx === activeIndex;
+          const isPrev = idx < activeIndex;
+          const isNext = idx > activeIndex;
+
+          // If far from active, hide to maximize rendering performance
+          if (Math.abs(idx - activeIndex) > 1) return null;
 
           return (
-            <section
+            <div
               key={section.id}
               id={section.id}
               data-section={section.renderKey}
-              ref={(el) => { cardRefs.current[idx] = el; }}
-              className="w-full py-6 sm:py-10 md:py-14 flex items-center justify-center p-3 sm:p-6 md:p-8"
+              className={`w-full transition-all duration-400 ease-out ${
+                isActive
+                  ? 'relative z-20 opacity-100 scale-100 translate-y-0 pointer-events-auto block'
+                  : 'absolute z-10 opacity-0 pointer-events-none' + (isPrev ? ' -translate-y-8 scale-95' : ' translate-y-8 scale-95')
+              }`}
+              style={{
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                willChange: 'transform, opacity'
+              }}
             >
               {/* Curved Rectangular Card Shell */}
-              <div
-                className={`relative w-full max-w-5xl rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950/95 border transition-all duration-200 ${
-                  isCurrent
-                    ? 'border-white/25 shadow-2xl shadow-black/80 ring-1 ring-white/10'
-                    : 'border-white/10 shadow-lg'
-                } overflow-hidden`}
-              >
+              <div className="relative w-full rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950/95 border border-white/20 shadow-2xl shadow-black/80 ring-1 ring-white/10 overflow-hidden">
                 {renderCardContent(section.renderKey)}
               </div>
-            </section>
+            </div>
           );
         })}
       </main>

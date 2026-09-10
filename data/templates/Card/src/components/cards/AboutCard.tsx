@@ -105,8 +105,11 @@ export const AboutCard: React.FC<AboutCardProps> = React.memo(({ data }) => {
     ? data.skills
     : (Array.isArray(data?.techStack) ? data.techStack : (Array.isArray(profile?.skills) ? profile.skills : []));
 
+  const rawCoreStackOverride = contentOverrides['text:about:root:span:core_stack']?.value;
+  const validCoreStack = typeof rawCoreStackOverride === 'string' && !rawCoreStackOverride.includes('[object Object]') ? rawCoreStackOverride : null;
+
   const coreStackString = (
-    contentOverrides['text:about:root:span:core_stack']?.value ||
+    validCoreStack ||
     (rawSkillsList.length > 0
       ? rawSkillsList.map(extractSkillName).filter(Boolean).slice(0, 4).join(' · ')
       : 'Python · JavaScript · React · Next.js')
