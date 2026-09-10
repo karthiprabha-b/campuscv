@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:clean": "rmdir /s /q .next 2>nul & next dev",
     "clean": "rmdir /s /q .next 2>nul",
+    "package-templates": "tsx scripts/package_all_templates_zip.ts",
     "build": "next build",
     "start": "next start"
   },
