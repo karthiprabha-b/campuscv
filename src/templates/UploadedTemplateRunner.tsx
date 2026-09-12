@@ -1720,6 +1720,24 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
     const rootEl = getOverrideRoot();
     if (!rootEl) return;
 
+    // React-based templates manage their own JSX layout, sticky headers, and events natively.
+    // HTML-template sticky header rewrites, scroll proxies, and script runners must be bypassed for React templates.
+    const isReactComponent = Boolean(
+      rendered ||
+      sectionFiles['src/template.tsx'] ||
+      sectionFiles['src/template.jsx'] ||
+      sectionFiles['template.tsx'] ||
+      sectionFiles['template.jsx'] ||
+      sectionFiles['src/App.tsx'] ||
+      sectionFiles['src/App.jsx'] ||
+      sectionFiles['App.tsx'] ||
+      sectionFiles['App.jsx']
+    );
+
+    if (isReactComponent) {
+      return;
+    }
+
     const doc = rootEl.ownerDocument || document;
 
     let manifestObj: any = null;

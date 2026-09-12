@@ -351,21 +351,21 @@ export const experiences: ExperienceItem[] = [
 
 export const testimonials: TestimonialItem[] = [
   {
-    quote: "Anushka is a standout developer who brings both exceptional coding skills and creative flair to every project. Her visual sense combined with code quality is rare.",
+    quote: "A standout software engineer who brings both exceptional coding craftsmanship and architectural precision to every project. Strong attention to detail and code quality.",
     author: "Sarah Jenkins",
-    role: "Senior Product Manager at Pixel Solutions",
+    role: "Senior Engineering Manager",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80",
   },
   {
-    quote: "Anushka worked on our startup landing pages and completely blew our expectations out of the water. High-speed delivery, clean communications, and excellent animations.",
+    quote: "Delivered our modern web application features with high speed, clean code structure, and excellent UI responsiveness. Highly recommended.",
     author: "David Kovacs",
-    role: "Co-Founder, TravelEase",
+    role: "Technical Co-Founder",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80",
   },
   {
-    quote: "Under my mentorship, Anushka demonstrated immense talent in problem-solving and software engineering architecture. She absorbs complex concepts with ease.",
+    quote: "Demonstrates immense talent in problem-solving and full-stack development. Absorbs complex requirements and delivers polished solutions quickly.",
     author: "Dr. Alan Mercer",
-    role: "Professor, Creative Tech University",
+    role: "Technical Advisor & Mentor",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80",
   },
 ];
