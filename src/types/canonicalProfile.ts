@@ -386,13 +386,54 @@ export function normalizeToCanonicalProfile(raw: any, fallbackId?: string, fallb
     });
 
   // 6. Skills Normalization
-  const rawSkills = Array.isArray(raw.skills)
-    ? raw.skills
-    : (Array.isArray(raw.skillsList)
-      ? raw.skillsList
-      : (Array.isArray(raw.techStack) ? raw.techStack : []));
+  const rawSkillsCandidates = [
+    raw.canonicalProfile?.skills,
+    raw.canonical_profile?.skills,
+    raw.skills,
+    raw.skillsList,
+    raw.technicalSkills,
+    raw.techStack,
+    raw.profile?.skills,
+    raw.personalInfo?.skills
+  ];
 
-  profile.skills = rawSkills
+  let rawSkills: any[] = [];
+  for (const c of rawSkillsCandidates) {
+    if (Array.isArray(c) && c.length > 0) {
+      rawSkills = c;
+      break;
+    }
+  }
+
+  const flattenedSkills: any[] = [];
+  rawSkills.forEach((sk: any) => {
+    if (typeof sk === 'string' && sk.trim()) {
+      flattenedSkills.push({ name: sk.trim(), category: 'Technical Skills' });
+    } else if (sk && typeof sk === 'object') {
+      const categoryName = sk.category || sk.name || sk.title || 'Technical Skills';
+      if (Array.isArray(sk.items)) {
+        sk.items.forEach((it: any) => {
+          if (typeof it === 'string' && it.trim()) {
+            flattenedSkills.push({ name: it.trim(), category: categoryName });
+          } else if (it && typeof it === 'object') {
+            flattenedSkills.push({ ...it, category: it.category || categoryName });
+          }
+        });
+      } else if (Array.isArray(sk.skills)) {
+        sk.skills.forEach((it: any) => {
+          if (typeof it === 'string' && it.trim()) {
+            flattenedSkills.push({ name: it.trim(), category: categoryName });
+          } else if (it && typeof it === 'object') {
+            flattenedSkills.push({ ...it, category: it.category || categoryName });
+          }
+        });
+      } else {
+        flattenedSkills.push(sk);
+      }
+    }
+  });
+
+  profile.skills = flattenedSkills
     .map((sk: any, idx: number): SkillEntry | null => {
       if (typeof sk === 'string') {
         const trimmed = sk.trim();
@@ -404,10 +445,11 @@ export function normalizeToCanonicalProfile(raw: any, fallbackId?: string, fallb
         };
       }
       if (sk && typeof sk === 'object') {
-        const name = (sk.name || sk.skill || sk.title || sk.label || 'New Skill').trim();
+        const name = (sk.name || sk.skill || sk.title || sk.label || '').trim();
+        if (!name) return null;
         return {
           id: sk.id || `skill-${Date.now()}-${idx + 1}`,
-          name: name || 'New Skill',
+          name,
           category: (sk.category || 'Technical Skills').trim(),
           proficiency: (sk.proficiency || sk.level || 'Advanced').trim()
         };
@@ -419,9 +461,13 @@ export function normalizeToCanonicalProfile(raw: any, fallbackId?: string, fallb
   // 7. Certifications Normalization
   const rawCerts = Array.isArray(raw.certifications)
     ? raw.certifications
-    : (Array.isArray(raw.certificates)
-      ? raw.certificates
-      : (Array.isArray(raw.awards) ? raw.awards : []));
+    : (Array.isArray(raw.canonicalProfile?.certifications)
+      ? raw.canonicalProfile.certifications
+      : (Array.isArray(raw.canonical_profile?.certifications)
+        ? raw.canonical_profile.certifications
+        : (Array.isArray(raw.certificates)
+          ? raw.certificates
+          : (Array.isArray(raw.awards) ? raw.awards : []))));
 
   profile.certifications = rawCerts
     .filter((cert: any) => cert && typeof cert === 'object')
