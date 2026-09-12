@@ -124,10 +124,10 @@ export const navLinks: NavLink[] = [
 
 export const heroData: HeroData = {
   greeting: "HEY, I'M",
-  name: "ANUSHKAA MUTHUKUMARAN",
-  title: "UI/UX Designer &",
-  highlightedTitle: "Frontend Developer",
-  description: "I design digital experiences that are beautiful, functional, and user-centered. Currently pursuing a Computer Science degree and building next-generation web apps.",
+  name: "PORTFOLIO",
+  title: "SOFTWARE DEVELOPER",
+  highlightedTitle: "",
+  description: "Builder-focused Software Developer with hands-on technical skills.",
   primaryCtaText: "VIEW MY WORK",
   primaryCtaHref: "#projects",
   secondaryCtaText: "GET IN TOUCH",
@@ -137,14 +137,14 @@ export const heroData: HeroData = {
 export const aboutData: AboutData = {
   title: "ABOUT ME",
   subtitle: "Creative professional with a passion for designing and building modern web experiences.",
-  description: "I'm Anushka, a CS student passionate about creating clean, bold, and dynamic web interfaces. I balance code efficiency with artistic visuals to construct websites that engage users immediately and leave a lasting impression.",
-  objective: "To secure a challenging software engineering or UI/UX role in a forward-thinking team where I can apply my web development expertise, user-centered design systems, and rapid prototyping skills to build products that scale.",
+  description: "Passionate developer focused on building clean, high-performance, and impactful digital solutions.",
+  objective: "To apply technical expertise and design excellence in crafting scalable, modern software products.",
   stats: [
-    { value: 2, suffix: "+", label: "Years Learning", icon: "BookOpen" },
-    { value: 25, suffix: "+", label: "Projects Completed", icon: "Briefcase" },
-    { value: 12, suffix: "", label: "Certifications", icon: "Award" },
-    { value: 98, suffix: "%", label: "Client Satisfaction", icon: "Heart" },
-  ],
+    { value: 1, suffix: "+", label: "Years Experience", icon: "Briefcase" },
+    { value: 6, suffix: "+", label: "Projects Shipped", icon: "BookOpen" },
+    { value: 60, suffix: "+", label: "Contributions", icon: "Award" },
+    { value: 99.8, suffix: "%", label: "Satisfaction", icon: "Heart" },
+  ]
 };
 
 export const services: Service[] = [

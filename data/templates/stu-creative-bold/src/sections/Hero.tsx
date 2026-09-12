@@ -11,7 +11,26 @@ interface HeroProps {
 
 export default function Hero(props: HeroProps = {}) {
   const incoming = props.hero || props.data?.hero || props.data || {};
-  const rawName = incoming.name || props.data?.name || props.data?.fullName || "Portfolio";
+  const rawIncomingName = incoming.name;
+  const isPlaceholderName = rawIncomingName && (rawIncomingName.includes('ANUSHKA') || rawIncomingName.includes('Anushka') || rawIncomingName === 'Portfolio' || rawIncomingName === 'PORTFOLIO');
+  const rawName = (!isPlaceholderName && rawIncomingName) || props.data?.name || props.data?.fullName || props.data?.profile?.fullName || props.data?.profile?.name || props.data?.personalInfo?.name || props.data?.personal?.name || props.data?.basics?.name || "Portfolio";
+
+  const rawIncomingTitle = incoming.title;
+  const isPlaceholderTitle = rawIncomingTitle && (rawIncomingTitle.includes('UI/UX Designer &') || rawIncomingTitle.includes('UI/UX Designer'));
+  const rawTitle =
+    (!isPlaceholderTitle && rawIncomingTitle) ||
+    props.data?.headline ||
+    props.data?.title ||
+    props.data?.role ||
+    props.data?.designation ||
+    props.data?.profile?.headline ||
+    props.data?.personalInfo?.headline ||
+    props.data?.personal?.headline ||
+    props.data?.basics?.label ||
+    props.data?.tagline ||
+    "SOFTWARE DEVELOPER";
+
+  const cleanTitle = String(rawTitle).replace(/\s*&\s*$/, '').trim();
 
   const secondaryText =
     incoming.secondaryCtaText ||
@@ -32,7 +51,7 @@ export default function Hero(props: HeroProps = {}) {
   const hero: HeroData & { avatarUrl?: string } = {
     greeting: incoming.greeting || props.data?.greeting || "HEY, I'M",
     name: rawName,
-    title: incoming.title || props.data?.title || "SOFTWARE DEVELOPER",
+    title: cleanTitle,
     highlightedTitle: incoming.highlightedTitle || props.data?.highlightedTitle || "",
     description: incoming.description || incoming.intro || incoming.introductionText || props.data?.profile?.summary || props.data?.bio || props.data?.summary || "Builder-focused Developer with hands-on technical skills.",
     primaryCtaText: incoming.primaryCtaText || props.data?.primaryCtaText || "VIEW MY WORK",

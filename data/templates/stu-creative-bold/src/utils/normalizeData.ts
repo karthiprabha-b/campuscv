@@ -60,10 +60,12 @@ export interface NormalizedPortfolioData {
 function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: number }>): SkillCategory[] {
   if (!flatSkills || flatSkills.length === 0) return [];
 
-  const frontendKeywords = ['react', 'vue', 'angular', 'next', 'svelte', 'html', 'css', 'tailwind', 'sass', 'scss', 'javascript', 'typescript', 'ui', 'ux', 'frontend', 'web', 'responsive', 'bootstrap', 'figma', 'design'];
-  const backendKeywords = ['node', 'express', 'nest', 'python', 'django', 'flask', 'java', 'spring', 'go', 'golang', 'rust', 'c#', 'c++', '.net', 'php', 'laravel', 'sql', 'mysql', 'postgres', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'backend', 'server', 'database'];
-  const toolsKeywords = ['git', 'github', 'gitlab', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'linux', 'webpack', 'vite', 'npm', 'yarn', 'pnpm', 'jira', 'agile', 'scrum', 'testing', 'jest', 'cypress', 'postman'];
+  const aiKeywords = ['ai', 'artificial intelligence', 'ml', 'machine learning', 'data science', 'deep learning', 'nlp', 'computer vision', 'neural', 'pandas', 'numpy', 'scikit', 'tensorflow', 'pytorch', 'keras', 'opencv', 'generative', 'llm', 'rag', 'analytics', 'statistics', 'matplotlib', 'seaborn', 'scipy', 'jupyter', 'hugging face', 'langchain'];
+  const frontendKeywords = ['react', 'vue', 'angular', 'next', 'svelte', 'html', 'css', 'tailwind', 'sass', 'scss', 'javascript', 'typescript', 'js', 'ts', 'ui', 'ux', 'frontend', 'web', 'responsive', 'bootstrap', 'figma', 'design', 'canvas', 'svg', 'three.js', 'framer', 'client'];
+  const backendKeywords = ['node', 'express', 'nest', 'python', 'django', 'flask', 'fastapi', 'java', 'spring', 'go', 'golang', 'rust', 'c#', 'c++', 'c', '.net', 'php', 'laravel', 'sql', 'mysql', 'postgres', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'backend', 'server', 'database', 'prisma', 'mongoose', 'nosql', 'dynamodb'];
+  const toolsKeywords = ['git', 'github', 'gitlab', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'linux', 'webpack', 'vite', 'npm', 'yarn', 'pnpm', 'jira', 'agile', 'scrum', 'testing', 'jest', 'cypress', 'postman', 'nginx', 'bash', 'terminal', 'devops'];
 
+  const aiGroup: Array<{ name: string; percentage: number }> = [];
   const frontendGroup: Array<{ name: string; percentage: number }> = [];
   const backendGroup: Array<{ name: string; percentage: number }> = [];
   const toolsGroup: Array<{ name: string; percentage: number }> = [];
@@ -71,7 +73,9 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
 
   flatSkills.forEach(skill => {
     const lower = skill.name.toLowerCase();
-    if (frontendKeywords.some(kw => lower.includes(kw))) {
+    if (aiKeywords.some(kw => lower.includes(kw))) {
+      aiGroup.push(skill);
+    } else if (frontendKeywords.some(kw => lower.includes(kw))) {
       frontendGroup.push(skill);
     } else if (backendKeywords.some(kw => lower.includes(kw))) {
       backendGroup.push(skill);
@@ -84,6 +88,9 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
 
   const categories: SkillCategory[] = [];
 
+  if (aiGroup.length > 0) {
+    categories.push({ category: 'AI, Data Science & Machine Learning', items: aiGroup });
+  }
   if (frontendGroup.length > 0) {
     categories.push({ category: 'Frontend & UI Engineering', items: frontendGroup });
   }
@@ -96,32 +103,34 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
 
   if (otherGroup.length > 0) {
     if (categories.length === 0) {
-      categories.push({ category: 'Technical Skills & Competencies', items: otherGroup });
+      categories.push({ category: 'Core Skills & Competencies', items: otherGroup });
+    } else if (categories.length < 4) {
+      categories.push({ category: 'Technologies & Tools', items: otherGroup });
     } else {
-      // Append others to the smallest category or create a Core Skills category
-      if (categories.length < 3) {
-        categories.push({ category: 'Core Technologies & Tools', items: otherGroup });
-      } else {
-        categories[0].items.push(...otherGroup);
+      // Append others to the smallest category
+      let minCat = categories[0];
+      for (const c of categories) {
+        if (c.items.length < minCat.items.length) minCat = c;
       }
+      minCat.items.push(...otherGroup);
     }
   }
 
-  // If after keyword categorization we still only have 1 category with > 6 skills, split evenly into 2 or 3 visually appealing cards
+  // If only 1 category with > 6 skills, split evenly into 2 or 3 visually appealing cards
   if (categories.length === 1 && categories[0].items.length > 6) {
     const all = categories[0].items;
     if (all.length <= 10) {
       const mid = Math.ceil(all.length / 2);
       return [
-        { category: 'Frontend & Web Technologies', items: all.slice(0, mid) },
-        { category: 'Backend & Tools', items: all.slice(mid) }
+        { category: 'Core Technologies & Frameworks', items: all.slice(0, mid) },
+        { category: 'Development & Tools', items: all.slice(mid) }
       ];
     } else {
       const chunk = Math.ceil(all.length / 3);
       return [
         { category: 'Frontend & Web Development', items: all.slice(0, chunk) },
         { category: 'Backend, Database & APIs', items: all.slice(chunk, chunk * 2) },
-        { category: 'Tools, Platforms & Libraries', items: all.slice(chunk * 2) }
+        { category: 'Tools & Technologies', items: all.slice(chunk * 2) }
       ];
     }
   }

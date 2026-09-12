@@ -10,7 +10,15 @@ interface SkillsProps {
 }
 
 export default function Skills(props: SkillsProps = {}) {
-  const rawSkills = props.skills || props.data?.skills || props.data?.skillCategories || props.data?.skillsList || props.data?.techStack || [];
+  const rawSkills =
+    props.skills ||
+    props.data?.skills ||
+    props.data?.skillCategories ||
+    props.data?.skillsList ||
+    props.data?.techStack ||
+    props.data?.profile?.skills ||
+    props.data?.personalInfo?.skills ||
+    [];
 
   // Normalize categories locally if passed directly unnormalized
   let categories: SkillCategory[] = [];
@@ -45,7 +53,7 @@ export default function Skills(props: SkillsProps = {}) {
       }).filter((c: any) => c.items.length > 0);
     } else {
       // Flat list
-      const items = rawSkills.map((sk: any) => {
+      const items: Array<{ name: string; percentage: number }> = rawSkills.map((sk: any) => {
         if (typeof sk === 'string') return { name: sk.trim(), percentage: 85 };
         return {
           name: (sk?.name || sk?.title || sk?.skill || String(sk)).trim(),
@@ -53,27 +61,70 @@ export default function Skills(props: SkillsProps = {}) {
         };
       }).filter((it: any) => it.name.length > 0);
 
-      if (items.length <= 8) {
-        categories = [{ category: 'Technical Competencies', items }];
-      } else if (items.length <= 14) {
-        const mid = Math.ceil(items.length / 2);
-        categories = [
-          { category: 'Core Technologies & Frameworks', items: items.slice(0, mid) },
-          { category: 'Tools, Platforms & Libraries', items: items.slice(mid) }
-        ];
-      } else {
-        const chunk = Math.ceil(items.length / 3);
-        categories = [
-          { category: 'Frontend & Web Development', items: items.slice(0, chunk) },
-          { category: 'Backend & Systems', items: items.slice(chunk, chunk * 2) },
-          { category: 'Tools, DevOps & Cloud', items: items.slice(chunk * 2) }
-        ];
+      const aiKeywords = ['ai', 'artificial intelligence', 'ml', 'machine learning', 'data science', 'deep learning', 'nlp', 'computer vision', 'neural', 'pandas', 'numpy', 'scikit', 'tensorflow', 'pytorch', 'keras', 'opencv', 'generative', 'llm', 'rag', 'analytics', 'statistics', 'matplotlib', 'seaborn', 'scipy', 'jupyter', 'hugging face', 'langchain'];
+      const frontendKeywords = ['react', 'vue', 'angular', 'next', 'svelte', 'html', 'css', 'tailwind', 'sass', 'scss', 'javascript', 'typescript', 'js', 'ts', 'ui', 'ux', 'frontend', 'web', 'responsive', 'bootstrap', 'figma', 'design', 'canvas', 'svg', 'three.js', 'framer', 'client'];
+      const backendKeywords = ['node', 'express', 'nest', 'python', 'django', 'flask', 'fastapi', 'java', 'spring', 'go', 'golang', 'rust', 'c#', 'c++', 'c', '.net', 'php', 'laravel', 'sql', 'mysql', 'postgres', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'backend', 'server', 'database', 'prisma', 'mongoose', 'nosql', 'dynamodb'];
+      const toolsKeywords = ['git', 'github', 'gitlab', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'linux', 'webpack', 'vite', 'npm', 'yarn', 'pnpm', 'jira', 'agile', 'scrum', 'testing', 'jest', 'cypress', 'postman', 'nginx', 'bash', 'terminal', 'devops'];
+
+      const aiGroup: Array<{ name: string; percentage: number }> = [];
+      const frontendGroup: Array<{ name: string; percentage: number }> = [];
+      const backendGroup: Array<{ name: string; percentage: number }> = [];
+      const toolsGroup: Array<{ name: string; percentage: number }> = [];
+      const otherGroup: Array<{ name: string; percentage: number }> = [];
+
+      items.forEach(skill => {
+        const lower = skill.name.toLowerCase();
+        if (aiKeywords.some(kw => lower.includes(kw))) {
+          aiGroup.push(skill);
+        } else if (frontendKeywords.some(kw => lower.includes(kw))) {
+          frontendGroup.push(skill);
+        } else if (backendKeywords.some(kw => lower.includes(kw))) {
+          backendGroup.push(skill);
+        } else if (toolsKeywords.some(kw => lower.includes(kw))) {
+          toolsGroup.push(skill);
+        } else {
+          otherGroup.push(skill);
+        }
+      });
+
+      if (aiGroup.length > 0) {
+        categories.push({ category: 'AI, Data Science & Machine Learning', items: aiGroup });
+      }
+      if (frontendGroup.length > 0) {
+        categories.push({ category: 'Frontend & UI Engineering', items: frontendGroup });
+      }
+      if (backendGroup.length > 0) {
+        categories.push({ category: 'Backend, Database & APIs', items: backendGroup });
+      }
+      if (toolsGroup.length > 0) {
+        categories.push({ category: 'Tools, DevOps & Cloud', items: toolsGroup });
+      }
+
+      if (otherGroup.length > 0) {
+        if (categories.length === 0) {
+          categories.push({ category: 'Core Skills & Competencies', items: otherGroup });
+        } else if (categories.length < 4) {
+          categories.push({ category: 'Technologies & Tools', items: otherGroup });
+        } else {
+          let minCat = categories[0];
+          for (const c of categories) {
+            if (c.items.length < minCat.items.length) minCat = c;
+          }
+          minCat.items.push(...otherGroup);
+        }
       }
     }
   }
 
   const totalSkillCount = categories.reduce((sum, cat) => sum + (cat.items?.length || 0), 0);
-  const gridColsClass = categories.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : (categories.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3');
+  const gridColsClass =
+    categories.length === 1
+      ? 'grid-cols-1 max-w-2xl mx-auto'
+      : categories.length === 2
+      ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto'
+      : categories.length === 4
+      ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
 
   return (
     <section

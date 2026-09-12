@@ -13,11 +13,45 @@ interface ContactProps {
 }
 
 export default function Contact(props: ContactProps = {}) {
+  const rawContact = props.contact || props.data?.contact || {};
   const contact: ContactData = {
-    email: props.email || props.contact?.email || props.data?.contact?.email || props.data?.email || fallbackContactData.email,
-    phone: props.phone || props.contact?.phone || props.data?.contact?.phone || props.data?.phone || fallbackContactData.phone,
-    location: props.location || props.contact?.location || props.data?.contact?.location || props.data?.location || fallbackContactData.location,
-    socials: props.contact?.socials || props.data?.contact?.socials || props.data?.socials || fallbackContactData.socials
+    email:
+      props.email ||
+      rawContact.email ||
+      props.data?.email ||
+      props.data?.profile?.email ||
+      props.data?.personalInfo?.email ||
+      props.data?.personal?.email ||
+      props.data?.basics?.email ||
+      "",
+    phone:
+      props.phone ||
+      rawContact.phone ||
+      props.data?.phone ||
+      props.data?.profile?.phone ||
+      props.data?.personalInfo?.phone ||
+      props.data?.personal?.phone ||
+      props.data?.basics?.phone ||
+      "",
+    location:
+      props.location ||
+      rawContact.location ||
+      props.data?.location ||
+      props.data?.profile?.location ||
+      props.data?.personalInfo?.location ||
+      props.data?.personal?.location ||
+      props.data?.basics?.location?.city ||
+      props.data?.basics?.location?.address ||
+      props.data?.basics?.location ||
+      props.data?.city ||
+      props.data?.address ||
+      "",
+    socials:
+      rawContact.socials ||
+      props.data?.socials ||
+      props.data?.socialLinks ||
+      props.data?.profile?.socials ||
+      {}
   };
 
   return (

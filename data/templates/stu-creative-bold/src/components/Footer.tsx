@@ -13,13 +13,29 @@ interface FooterProps {
 
 export default function Footer(props: FooterProps = {}) {
   const contact = props.contact || props.data?.contact || {};
-  const email = contact.email || props.data?.email || props.data?.profile?.email || "";
-  const phone = contact.phone || props.data?.phone || props.data?.profile?.phone || "";
-  const location = contact.location || props.data?.location || props.data?.profile?.location || "";
+  const email = contact.email || props.data?.email || props.data?.profile?.email || props.data?.personalInfo?.email || props.data?.personal?.email || props.data?.basics?.email || "";
+  const phone = contact.phone || props.data?.phone || props.data?.profile?.phone || props.data?.personalInfo?.phone || props.data?.personal?.phone || props.data?.basics?.phone || "";
+  const location =
+    contact.location ||
+    props.data?.location ||
+    props.data?.profile?.location ||
+    props.data?.personalInfo?.location ||
+    props.data?.personal?.location ||
+    props.data?.basics?.location?.city ||
+    props.data?.basics?.location?.address ||
+    props.data?.basics?.location ||
+    props.data?.city ||
+    props.data?.address ||
+    "";
   const socials = contact.socials || props.data?.socials || props.data?.socialLinks || {};
 
-  const name = props.data?.hero?.name || props.name || props.data?.name || props.data?.fullName || "Portfolio";
-  const brandName = name.toUpperCase();
+  const rawHeroName = props.data?.hero?.name;
+  const isPlaceholderName = rawHeroName && (rawHeroName.includes('ANUSHKA') || rawHeroName.includes('Anushka') || rawHeroName === 'Portfolio' || rawHeroName === 'PORTFOLIO');
+  const resolvedName = (!isPlaceholderName && rawHeroName) || props.name || props.data?.name || props.data?.fullName || props.data?.profile?.fullName || props.data?.profile?.name || props.data?.personalInfo?.name || props.data?.personal?.name || props.data?.basics?.name || "Portfolio";
+  const brandName = resolvedName.toUpperCase();
+
+  const rawTitle = props.data?.hero?.title || props.data?.title || props.data?.headline || props.data?.role || props.data?.profile?.headline || props.data?.personalInfo?.headline || props.data?.basics?.label || "Software Developer";
+  const cleanTitle = rawTitle.replace(/\s*&\s*$/, '').trim();
 
   const defaultLinks: NavLink[] = [
     { label: "Home", href: "#home" },
@@ -57,7 +73,7 @@ export default function Footer(props: FooterProps = {}) {
             {brandName}
           </h3>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-sm">
-            {props.data?.title || props.data?.hero?.title || "Software Developer"} crafting robust, high-performance digital applications.
+            {cleanTitle} — crafting robust, high-performance digital applications.
           </p>
           <div className="flex items-center space-x-3 pt-2">
             {socials.linkedin && (
@@ -149,7 +165,7 @@ export default function Footer(props: FooterProps = {}) {
       </div>
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400">
-        <p>© {new Date().getFullYear()} {name}. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {resolvedName}. All rights reserved.</p>
         <button
           onClick={handleScrollToTop}
           className="mt-4 sm:mt-0 flex items-center space-x-1.5 text-gray-300 hover:text-[#FFC107] transition-colors duration-200 cursor-pointer"

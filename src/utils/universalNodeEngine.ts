@@ -892,20 +892,26 @@ export function applyPortfolioOverrides(
     const parts = normalizedPath.split('.');
     if (parts[0] === 'hero' || parts[0] === 'profile' || parts[0] === 'personal' || parts[0] === 'personalInfo' || parts[0] === 'basics') {
       if (['name', 'fullName', 'brand'].includes(parts[1])) {
-        return portfolioData.hero?.name || portfolioData.profile?.fullName || portfolioData.profile?.name || portfolioData.personal?.fullName || portfolioData.personal?.name || portfolioData.name || portfolioData.fullName || portfolioData.basics?.name || undefined;
+        const rawHeroName = portfolioData.hero?.name;
+        const isPlName = rawHeroName && (rawHeroName.includes('ANUSHKA') || rawHeroName.includes('Anushka') || rawHeroName === 'Portfolio' || rawHeroName === 'PORTFOLIO');
+        return (!isPlName && rawHeroName) || portfolioData.name || portfolioData.fullName || portfolioData.profile?.fullName || portfolioData.profile?.name || portfolioData.personal?.fullName || portfolioData.personal?.name || portfolioData.basics?.name || undefined;
       }
       if (['role', 'headline', 'title', 'tagline'].includes(parts[1])) {
-        return portfolioData.hero?.title || portfolioData.hero?.role || portfolioData.hero?.headline || portfolioData.profile?.headline || portfolioData.headline || portfolioData.role || portfolioData.personal?.headline || undefined;
+        const rawHeroTitle = portfolioData.hero?.title;
+        const isPlTitle = rawHeroTitle && (rawHeroTitle.includes('UI/UX Designer &') || rawHeroTitle.includes('UI/UX Designer'));
+        return (!isPlTitle && rawHeroTitle) || portfolioData.headline || portfolioData.title || portfolioData.profile?.headline || portfolioData.personal?.headline || portfolioData.role || portfolioData.basics?.label || undefined;
       }
       if (['description', 'bio', 'summary', 'about'].includes(parts[1])) {
         return portfolioData.hero?.description || portfolioData.profile?.summary || portfolioData.profile?.bio || portfolioData.bio || portfolioData.summary || portfolioData.aboutMe || portfolioData.personal?.summary || undefined;
       }
-      if (['location', 'city'].includes(parts[1])) {
-        return portfolioData.hero?.location || portfolioData.profile?.location || portfolioData.location || portfolioData.personal?.location || undefined;
+      if (['location', 'city', 'address'].includes(parts[1])) {
+        return portfolioData.location || portfolioData.hero?.location || portfolioData.profile?.location || portfolioData.personalInfo?.location || portfolioData.personal?.location || portfolioData.basics?.location?.city || portfolioData.basics?.location?.address || portfolioData.basics?.location || portfolioData.city || portfolioData.address || undefined;
       }
     }
     if (parts.length === 1 && (parts[0] === 'name' || parts[0] === 'fullName')) {
-      return portfolioData.hero?.name || portfolioData.name || portfolioData.fullName || portfolioData.profile?.fullName || portfolioData.profile?.name || undefined;
+      const rawHeroName = portfolioData.hero?.name;
+      const isPlName = rawHeroName && (rawHeroName.includes('ANUSHKA') || rawHeroName.includes('Anushka') || rawHeroName === 'Portfolio' || rawHeroName === 'PORTFOLIO');
+      return (!isPlName && rawHeroName) || portfolioData.name || portfolioData.fullName || portfolioData.profile?.fullName || portfolioData.profile?.name || undefined;
     }
     let curr: any = portfolioData;
     for (let i = 0; i < parts.length; i++) {
