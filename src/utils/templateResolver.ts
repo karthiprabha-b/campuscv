@@ -118,7 +118,26 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
     };
   }
 
-  // 1. Check adminTemplateDb / catalog
+  // 1. Server-side / local disk fallback if in Node.js environment
+  if (typeof window === 'undefined') {
+    try {
+      const { getTemplateFilesServer } = require('../lib/serverTemplateStore');
+      const diskTmpl = getTemplateFilesServer(templateId);
+      if (diskTmpl && diskTmpl.files && Object.keys(diskTmpl.files).length > 0) {
+        const discovered = discoverTemplateCSS(diskTmpl.files, 'tpl', undefined, templateId);
+        return {
+          templateId,
+          isUploaded: true,
+          sectionFiles: diskTmpl.files,
+          customCSS: discovered.combinedCSS || '',
+          templateCode: diskTmpl.files['src/template.jsx'] || diskTmpl.files['template.jsx'] || diskTmpl.files['src/index.jsx'] || '',
+          source: 'adminDb'
+        };
+      }
+    } catch (e) {}
+  }
+
+  // 2. Check adminTemplateDb / catalog
   try {
     const adminTmpl = adminTemplateDb.getTemplateById(templateId);
     if (adminTmpl && adminTmpl.id === templateId && adminTmpl.sectionFiles && Object.keys(adminTmpl.sectionFiles).length > 0) {
@@ -136,7 +155,7 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
     }
   } catch (e) {}
 
-  // 2. Check templateStorage memory cache / registry
+  // 3. Check templateStorage memory cache / registry
   try {
     const cached = templateStorage.getTemplateSync(templateId);
     if (cached && cached.sectionFiles && Object.keys(cached.sectionFiles).length > 0) {
@@ -152,7 +171,7 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
     }
   } catch (e) {}
 
-  // 3. Check embedded files on portfolio JSON as fallback only
+  // 4. Check embedded files on portfolio JSON as fallback only for custom templates
   const embeddedTemplateId = portfolio?._sectionFilesTemplateId || portfolio?.sectionFilesTemplateId || portfolio?.manifest?.id || portfolio?.manifest?.template?.id;
   const embeddedId = portfolio?._sectionFilesTemplateId || portfolio?.sectionFilesTemplateId || portfolio?.manifest?.id || portfolio?.manifest?.template?.id || portfolio?.templateId;
   if (
@@ -169,25 +188,6 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
       templateCode: portfolio.templateCode || '',
       source: 'portfolio'
     };
-  }
-
-  // 4. Server-side / local disk fallback if in Node.js environment
-  if (typeof window === 'undefined') {
-    try {
-      const { getTemplateFilesServer } = require('../lib/serverTemplateStore');
-      const diskTmpl = getTemplateFilesServer(templateId);
-      if (diskTmpl && diskTmpl.files && Object.keys(diskTmpl.files).length > 0) {
-        const discovered = discoverTemplateCSS(diskTmpl.files, 'tpl', undefined, templateId);
-        return {
-          templateId,
-          isUploaded: true,
-          sectionFiles: diskTmpl.files,
-          customCSS: discovered.combinedCSS || '',
-          templateCode: diskTmpl.files['src/template.jsx'] || diskTmpl.files['template.jsx'] || diskTmpl.files['src/index.jsx'] || '',
-          source: 'adminDb'
-        };
-      }
-    } catch (e) {}
   }
 
   return {

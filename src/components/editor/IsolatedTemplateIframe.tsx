@@ -175,9 +175,9 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
     const sectionFiles: Record<string, string> =
       (runnerProps as any).sectionFiles ||
       (runnerProps as any).files ||
-      runnerProps.data?.sectionFiles ||
       (templateId ? templateStorage.getTemplateSync(templateId)?.sectionFiles : null) ||
       (templateId ? adminTemplateDb.getTemplateById(templateId)?.sectionFiles : null) ||
+      runnerProps.data?.sectionFiles ||
       {};
 
     // Avoid redundant doc.write if already initialized
