@@ -10,20 +10,40 @@ interface SkillsProps {
 }
 
 export default function Skills(props: SkillsProps = {}) {
-  const rawSkills =
-    props.skills ||
-    props.data?.skills ||
-    props.data?.skillCategories ||
-    props.data?.skillsList ||
-    props.data?.techStack ||
-    props.data?.profile?.skills ||
-    props.data?.personalInfo?.skills ||
-    [];
+  const rawSkillsCandidates = [
+    props.skills,
+    props.data?.skills,
+    props.data?.skillCategories,
+    props.data?.skillsList,
+    props.data?.technicalSkills,
+    props.data?.techStack,
+    props.data?.profile?.skills,
+    props.data?.personalInfo?.skills,
+    props.data?.personal?.skills,
+    props.data?.canonicalProfile?.skills,
+    props.data?.canonicalProfile?.technicalSkills,
+    props.data?.profile?.capabilities,
+    props.data?.competencies,
+    props.data?.expertise
+  ];
+
+  let rawSkills: any[] = [];
+  for (const c of rawSkillsCandidates) {
+    if (Array.isArray(c) && c.length > 0) {
+      rawSkills = c;
+      break;
+    }
+  }
+
+  const isDemoSkill = (name: string) => {
+    const s = String(name || '').toLowerCase();
+    return s.includes('figma (auto-layout') || s.includes('adobe creative suite') || s.includes('prototyping & wireframing');
+  };
 
   // Normalize categories locally if passed directly unnormalized
   let categories: SkillCategory[] = [];
 
-  if (Array.isArray(rawSkills) && rawSkills.length > 0) {
+  if (rawSkills.length > 0) {
     const isCategorized = rawSkills.some(
       (item: any) =>
         item &&
@@ -51,6 +71,14 @@ export default function Skills(props: SkillsProps = {}) {
           items
         };
       }).filter((c: any) => c.items.length > 0);
+
+      const hasRealSkills = categories.some(cat => cat.items.some(it => !isDemoSkill(it.name)));
+      if (hasRealSkills) {
+        categories = categories.map(cat => ({
+          ...cat,
+          items: cat.items.filter(it => !isDemoSkill(it.name))
+        })).filter(cat => cat.items.length > 0);
+      }
     } else {
       // Flat list
       const items: Array<{ name: string; percentage: number }> = rawSkills.map((sk: any) => {
@@ -61,10 +89,10 @@ export default function Skills(props: SkillsProps = {}) {
         };
       }).filter((it: any) => it.name.length > 0);
 
-      const aiKeywords = ['ai', 'artificial intelligence', 'ml', 'machine learning', 'data science', 'deep learning', 'nlp', 'computer vision', 'neural', 'pandas', 'numpy', 'scikit', 'tensorflow', 'pytorch', 'keras', 'opencv', 'generative', 'llm', 'rag', 'analytics', 'statistics', 'matplotlib', 'seaborn', 'scipy', 'jupyter', 'hugging face', 'langchain'];
-      const frontendKeywords = ['react', 'vue', 'angular', 'next', 'svelte', 'html', 'css', 'tailwind', 'sass', 'scss', 'javascript', 'typescript', 'js', 'ts', 'ui', 'ux', 'frontend', 'web', 'responsive', 'bootstrap', 'figma', 'design', 'canvas', 'svg', 'three.js', 'framer', 'client'];
-      const backendKeywords = ['node', 'express', 'nest', 'python', 'django', 'flask', 'fastapi', 'java', 'spring', 'go', 'golang', 'rust', 'c#', 'c++', 'c', '.net', 'php', 'laravel', 'sql', 'mysql', 'postgres', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'backend', 'server', 'database', 'prisma', 'mongoose', 'nosql', 'dynamodb'];
-      const toolsKeywords = ['git', 'github', 'gitlab', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'linux', 'webpack', 'vite', 'npm', 'yarn', 'pnpm', 'jira', 'agile', 'scrum', 'testing', 'jest', 'cypress', 'postman', 'nginx', 'bash', 'terminal', 'devops'];
+      const aiRegex = /\b(ai|artificial intelligence|ml|machine learning|data science|deep learning|nlp|natural language|computer vision|neural|neural network|pandas|numpy|scikit|sklearn|tensorflow|pytorch|keras|opencv|generative|llm|rag|analytics|statistics|data analysis|data analytics|matplotlib|seaborn|scipy|jupyter|hugging face|langchain|prompt engineering|transformers)\b/i;
+      const frontendRegex = /\b(react|react\.js|reactjs|vue|vue\.js|angular|next|next\.js|nextjs|svelte|html|html5|css|css3|tailwind|tailwindcss|tailwind css|sass|scss|javascript|typescript|js|ts|ui|ux|ui\/ux|frontend|front-end|web|web development|responsive|bootstrap|figma|canvas|svg|three\.js|threejs|framer|framer motion|redux|zustand)\b/i;
+      const backendRegex = /\b(node|node\.js|nodejs|express|express\.js|expressjs|nest|nestjs|python|django|flask|fastapi|java|spring|spring boot|go|golang|rust|c\+\+|cpp|c#|csharp|\.net|php|laravel|sql|mysql|postgres|postgresql|mongodb|redis|graphql|rest|rest api|rest apis|backend|back-end|server|database|databases|prisma|mongoose|nosql|dynamodb|firebase|supabase|sqlite)\b/i;
+      const toolsRegex = /\b(git|github|gitlab|docker|kubernetes|k8s|aws|azure|gcp|google cloud|cloud|ci\/cd|cicd|linux|unix|webpack|vite|npm|yarn|pnpm|jira|agile|scrum|testing|jest|cypress|postman|nginx|bash|terminal|devops|vs code|vscode)\b/i;
 
       const aiGroup: Array<{ name: string; percentage: number }> = [];
       const frontendGroup: Array<{ name: string; percentage: number }> = [];
@@ -73,14 +101,16 @@ export default function Skills(props: SkillsProps = {}) {
       const otherGroup: Array<{ name: string; percentage: number }> = [];
 
       items.forEach(skill => {
-        const lower = skill.name.toLowerCase();
-        if (aiKeywords.some(kw => lower.includes(kw))) {
+        const name = skill.name.trim();
+        if (!name) return;
+
+        if (aiRegex.test(name)) {
           aiGroup.push(skill);
-        } else if (frontendKeywords.some(kw => lower.includes(kw))) {
+        } else if (frontendRegex.test(name)) {
           frontendGroup.push(skill);
-        } else if (backendKeywords.some(kw => lower.includes(kw))) {
+        } else if (backendRegex.test(name)) {
           backendGroup.push(skill);
-        } else if (toolsKeywords.some(kw => lower.includes(kw))) {
+        } else if (toolsRegex.test(name)) {
           toolsGroup.push(skill);
         } else {
           otherGroup.push(skill);
@@ -104,7 +134,7 @@ export default function Skills(props: SkillsProps = {}) {
         if (categories.length === 0) {
           categories.push({ category: 'Core Skills & Competencies', items: otherGroup });
         } else if (categories.length < 4) {
-          categories.push({ category: 'Technologies & Tools', items: otherGroup });
+          categories.push({ category: 'Core Technologies & Tools', items: otherGroup });
         } else {
           let minCat = categories[0];
           for (const c of categories) {
@@ -114,6 +144,11 @@ export default function Skills(props: SkillsProps = {}) {
         }
       }
     }
+  }
+
+  // If no skills exist, return null
+  if (categories.length === 0) {
+    return null;
   }
 
   const totalSkillCount = categories.reduce((sum, cat) => sum + (cat.items?.length || 0), 0);

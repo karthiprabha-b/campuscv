@@ -398,14 +398,14 @@ export const achievements: AchievementItem[] = [
 ];
 
 export const contactData: ContactData = {
-  email: "hello@anushka.dev",
-  phone: "+91 98765 43210",
-  location: "Chennai, Tamil Nadu, India",
+  email: "",
+  phone: "",
+  location: "",
   socials: {
-    linkedin: "https://linkedin.com",
-    github: "https://github.com",
-    instagram: "https://instagram.com",
-    twitter: "https://twitter.com",
-    behance: "https://behance.net",
+    linkedin: "",
+    github: "",
+    instagram: "",
+    twitter: "",
+    behance: "",
   },
 };

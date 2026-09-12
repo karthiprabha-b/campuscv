@@ -147,8 +147,19 @@ export function reassemblePortfolio(
   // Ensure essential top-level fields are always populated
   assembled.name = assembled.name || raw.name || raw.personal?.fullName || assembled.profile?.fullName || assembled.profile?.name || raw.canonicalProfile?.personal?.fullName || '';
   assembled.tagline = assembled.tagline || raw.tagline || raw.personal?.headline || assembled.profile?.headline || raw.canonicalProfile?.personal?.headline || '';
+  assembled.headline = assembled.headline || assembled.tagline || raw.headline || raw.personal?.headline || assembled.profile?.headline || '';
   assembled.aboutMe = assembled.aboutMe || raw.aboutMe || raw.personal?.summary || assembled.profile?.summary || raw.canonicalProfile?.personal?.summary || '';
   assembled.profileImage = assembled.profileImage || raw.profileImage || raw.personal?.profilePhoto || assembled.profile?.photo || raw.canonicalProfile?.personal?.profilePhoto || raw.avatarUrl || '';
+  assembled.location = assembled.location || raw.location || raw.personal?.location || assembled.profile?.location || raw.canonicalProfile?.personal?.location || raw.contact?.location || raw.basics?.location?.city || raw.basics?.location?.address || '';
+  assembled.email = assembled.email || raw.email || raw.personal?.email || assembled.profile?.email || raw.contact?.email || raw.basics?.email || '';
+  assembled.phone = assembled.phone || raw.phone || raw.personal?.phone || assembled.profile?.phone || raw.contact?.phone || raw.basics?.phone || '';
+
+  assembled.contact = {
+    email: assembled.email,
+    phone: assembled.phone,
+    location: assembled.location,
+    socials: assembled.socialLinks || assembled.social || raw.contact?.socials || {}
+  };
 
   return assembled;
 }

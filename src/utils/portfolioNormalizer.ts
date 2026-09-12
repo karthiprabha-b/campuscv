@@ -255,6 +255,12 @@ export function normalizePortfolio(raw: any): PortfolioData {
       profileImage: resolvedImg,
       avatar: resolvedImg
     },
+    contact: {
+      email: emailVal,
+      phone: raw.phone || raw.personal?.phone || raw.profile?.phone || canonicalProfile.personal?.phone || '',
+      location: boundProps.location || raw.location || raw.personal?.location || raw.profile?.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || '',
+      socials: mergedSocials
+    },
     socials: mergedSocials,
     socialLinks: mergedSocials,
     social: mergedSocials,

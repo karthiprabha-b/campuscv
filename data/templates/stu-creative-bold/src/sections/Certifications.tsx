@@ -10,13 +10,49 @@ interface CertificationsProps {
 }
 
 export default function Certifications(props: CertificationsProps = {}) {
-  const certList: CertificationItem[] = Array.isArray(props.certifications) && props.certifications.length > 0
-    ? props.certifications
-    : (Array.isArray(props.data?.certifications) && props.data.certifications.length > 0
-      ? props.data.certifications
-      : (Array.isArray(props.data?.certificates) && props.data.certificates.length > 0
-        ? props.data.certificates
-        : fallbackCertifications));
+  const rawList =
+    (Array.isArray(props.certifications) && props.certifications.length > 0 ? props.certifications : null) ||
+    (Array.isArray(props.data?.certifications) && props.data.certifications.length > 0 ? props.data.certifications : null) ||
+    (Array.isArray(props.data?.certificates) && props.data.certificates.length > 0 ? props.data.certificates : null) ||
+    (Array.isArray(props.data?.credentials) && props.data.credentials.length > 0 ? props.data.credentials : null) ||
+    [];
+
+  const isDemo = (t: string, o?: string) => {
+    const s = `${t || ''} ${o || ''}`.toLowerCase();
+    return (
+      s.includes('meta careers') ||
+      s.includes('google ux') ||
+      s.includes('typescript enterprise') ||
+      s.includes('boot camp') ||
+      s.includes('advanced react & next.js')
+    );
+  };
+
+  let certList: CertificationItem[] = rawList.map((c: any) => ({
+    title: c.title || c.name || '',
+    organization: c.organization || c.issuer || c.provider || c.authority || '',
+    date: c.date || c.issueDate || c.year || '',
+    credentialUrl: c.credentialUrl || c.url || c.link || ''
+  })).filter((c: any) => c.title.length > 0);
+
+  // If user has real items, strip any demo placeholders
+  if (certList.some(c => !isDemo(c.title, c.organization))) {
+    certList = certList.filter(c => !isDemo(c.title, c.organization));
+  }
+
+  // If completely empty, do not render certifications section
+  if (!certList || certList.length === 0) {
+    return null;
+  }
+
+  const gridColsClass =
+    certList.length === 1
+      ? 'grid-cols-1 max-w-md mx-auto'
+      : certList.length === 2
+      ? 'grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto'
+      : certList.length === 3
+      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto'
+      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
   return (
     <section
@@ -45,7 +81,7 @@ export default function Certifications(props: CertificationsProps = {}) {
         </div>
 
         {/* Certifications Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={`grid ${gridColsClass} gap-6`}>
           {certList.map((cert: CertificationItem, idx: number) => (
             <div
               key={cert.title || idx}

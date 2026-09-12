@@ -57,13 +57,33 @@ export interface NormalizedPortfolioData {
 /**
  * Categorize a flat list of skills intelligently based on common technical keywords.
  */
+function getFirstNonEmptyArray(...candidates: any[]): any[] {
+  for (const c of candidates) {
+    if (Array.isArray(c) && c.length > 0) return c;
+    if (c && typeof c === 'object' && !Array.isArray(c) && Object.keys(c).length > 0) {
+      return [c];
+    }
+  }
+  return [];
+}
+
+function getFirstNonEmptyString(...candidates: any[]): string {
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim().length > 0) return c.trim();
+  }
+  return '';
+}
+
+/**
+ * Categorize a flat list of skills intelligently based on common technical keywords.
+ */
 function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: number }>): SkillCategory[] {
   if (!flatSkills || flatSkills.length === 0) return [];
 
-  const aiKeywords = ['ai', 'artificial intelligence', 'ml', 'machine learning', 'data science', 'deep learning', 'nlp', 'computer vision', 'neural', 'pandas', 'numpy', 'scikit', 'tensorflow', 'pytorch', 'keras', 'opencv', 'generative', 'llm', 'rag', 'analytics', 'statistics', 'matplotlib', 'seaborn', 'scipy', 'jupyter', 'hugging face', 'langchain'];
-  const frontendKeywords = ['react', 'vue', 'angular', 'next', 'svelte', 'html', 'css', 'tailwind', 'sass', 'scss', 'javascript', 'typescript', 'js', 'ts', 'ui', 'ux', 'frontend', 'web', 'responsive', 'bootstrap', 'figma', 'design', 'canvas', 'svg', 'three.js', 'framer', 'client'];
-  const backendKeywords = ['node', 'express', 'nest', 'python', 'django', 'flask', 'fastapi', 'java', 'spring', 'go', 'golang', 'rust', 'c#', 'c++', 'c', '.net', 'php', 'laravel', 'sql', 'mysql', 'postgres', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'backend', 'server', 'database', 'prisma', 'mongoose', 'nosql', 'dynamodb'];
-  const toolsKeywords = ['git', 'github', 'gitlab', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'linux', 'webpack', 'vite', 'npm', 'yarn', 'pnpm', 'jira', 'agile', 'scrum', 'testing', 'jest', 'cypress', 'postman', 'nginx', 'bash', 'terminal', 'devops'];
+  const aiRegex = /\b(ai|artificial intelligence|ml|machine learning|data science|deep learning|nlp|natural language|computer vision|neural|neural network|pandas|numpy|scikit|sklearn|tensorflow|pytorch|keras|opencv|generative|llm|rag|analytics|statistics|data analysis|data analytics|matplotlib|seaborn|scipy|jupyter|hugging face|langchain|prompt engineering|transformers)\b/i;
+  const frontendRegex = /\b(react|react\.js|reactjs|vue|vue\.js|angular|next|next\.js|nextjs|svelte|html|html5|css|css3|tailwind|tailwindcss|tailwind css|sass|scss|javascript|typescript|js|ts|ui|ux|ui\/ux|frontend|front-end|web|web development|responsive|bootstrap|figma|canvas|svg|three\.js|threejs|framer|framer motion|redux|zustand)\b/i;
+  const backendRegex = /\b(node|node\.js|nodejs|express|express\.js|expressjs|nest|nestjs|python|django|flask|fastapi|java|spring|spring boot|go|golang|rust|c\+\+|cpp|c#|csharp|\.net|php|laravel|sql|mysql|postgres|postgresql|mongodb|redis|graphql|rest|rest api|rest apis|backend|back-end|server|database|databases|prisma|mongoose|nosql|dynamodb|firebase|supabase|sqlite)\b/i;
+  const toolsRegex = /\b(git|github|gitlab|docker|kubernetes|k8s|aws|azure|gcp|google cloud|cloud|ci\/cd|cicd|linux|unix|webpack|vite|npm|yarn|pnpm|jira|agile|scrum|testing|jest|cypress|postman|nginx|bash|terminal|devops|vs code|vscode)\b/i;
 
   const aiGroup: Array<{ name: string; percentage: number }> = [];
   const frontendGroup: Array<{ name: string; percentage: number }> = [];
@@ -72,14 +92,16 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
   const otherGroup: Array<{ name: string; percentage: number }> = [];
 
   flatSkills.forEach(skill => {
-    const lower = skill.name.toLowerCase();
-    if (aiKeywords.some(kw => lower.includes(kw))) {
+    const name = skill.name.trim();
+    if (!name) return;
+
+    if (aiRegex.test(name)) {
       aiGroup.push(skill);
-    } else if (frontendKeywords.some(kw => lower.includes(kw))) {
+    } else if (frontendRegex.test(name)) {
       frontendGroup.push(skill);
-    } else if (backendKeywords.some(kw => lower.includes(kw))) {
+    } else if (backendRegex.test(name)) {
       backendGroup.push(skill);
-    } else if (toolsKeywords.some(kw => lower.includes(kw))) {
+    } else if (toolsRegex.test(name)) {
       toolsGroup.push(skill);
     } else {
       otherGroup.push(skill);
@@ -105,9 +127,8 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
     if (categories.length === 0) {
       categories.push({ category: 'Core Skills & Competencies', items: otherGroup });
     } else if (categories.length < 4) {
-      categories.push({ category: 'Technologies & Tools', items: otherGroup });
+      categories.push({ category: 'Core Technologies & Tools', items: otherGroup });
     } else {
-      // Append others to the smallest category
       let minCat = categories[0];
       for (const c of categories) {
         if (c.items.length < minCat.items.length) minCat = c;
@@ -116,7 +137,7 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
     }
   }
 
-  // If only 1 category with > 6 skills, split evenly into 2 or 3 visually appealing cards
+  // If only 1 category with > 6 skills, split into balanced cards
   if (categories.length === 1 && categories[0].items.length > 6) {
     const all = categories[0].items;
     if (all.length <= 10) {
@@ -141,40 +162,45 @@ function categorizeFlatSkills(flatSkills: Array<{ name: string; percentage: numb
 export function normalizeData(raw: any): NormalizedPortfolioData {
   const data = typeof raw === 'object' && raw !== null ? (raw.data || raw.portfolio || raw.cv || raw.resume || raw.profile || raw) : {};
 
-  // 1. Resolve Name (Prioritize real user names, falling back to edited hero.name, then template defaults)
+  // 1. Resolve Name
   const defaultTemplateNames = ["ANUSHKAA MUTHUKUMARAN", "Anushkaa Muthukumaran", "Anushka"];
   const incomingHeroName = (typeof data.hero?.name === 'string' ? data.hero.name.trim() : '') || '';
   const isDefaultHeroName = Boolean(incomingHeroName && defaultTemplateNames.some(d => incomingHeroName.toLowerCase().includes(d.toLowerCase())));
 
-  const resolvedName = (
-    (!isDefaultHeroName && incomingHeroName) ||
-    data.name ||
-    data.fullName ||
-    data.profile?.name ||
-    data.profile?.fullName ||
-    data.personalInfo?.name ||
-    data.personalInfo?.fullName ||
-    data.personal?.name ||
-    data.personal?.fullName ||
-    data.basics?.name ||
-    incomingHeroName ||
-    defaultHero.name ||
+  const resolvedName = getFirstNonEmptyString(
+    !isDefaultHeroName ? incomingHeroName : '',
+    data.name,
+    data.fullName,
+    data.profile?.fullName,
+    data.profile?.name,
+    data.personalInfo?.fullName,
+    data.personalInfo?.name,
+    data.personal?.fullName,
+    data.personal?.name,
+    data.canonicalProfile?.personal?.fullName,
+    data.canonicalProfile?.personal?.name,
+    data.basics?.name,
+    incomingHeroName,
     'Portfolio'
-  ).trim();
+  );
 
-  // 2. Resolve Title / Role (Prioritize explicit hero.title or edited title)
-  const resolvedTitle = (
-    data.hero?.title ||
-    data.title ||
-    data.headline ||
-    data.role ||
-    data.designation ||
-    data.profile?.headline ||
-    data.personalInfo?.headline ||
-    data.basics?.label ||
-    defaultHero.title ||
-    'Software Developer & Engineer'
-  ).trim();
+  // 2. Resolve Title / Role
+  const rawTitleVal = (typeof data.hero?.title === 'string' ? data.hero.title.trim() : '') || '';
+  const isDefaultTitle = rawTitleVal.toLowerCase().includes('ui/ux designer &') || rawTitleVal.toLowerCase() === 'software developer';
+  const resolvedTitle = getFirstNonEmptyString(
+    !isDefaultTitle ? rawTitleVal : '',
+    data.title,
+    data.headline,
+    data.role,
+    data.designation,
+    data.profile?.headline,
+    data.personalInfo?.headline,
+    data.personal?.headline,
+    data.canonicalProfile?.personal?.headline,
+    data.basics?.label,
+    rawTitleVal,
+    'Software Developer'
+  );
 
   // 3. Resolve Profile Avatar Image
   const rawOverride =
@@ -187,58 +213,64 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
     data.imageOverrides?.['about.avatarUrl'];
 
   const explicitAvatar = typeof rawOverride === 'object' && rawOverride !== null ? (rawOverride.src || rawOverride.value) : rawOverride;
-  const avatarUrl =
-    explicitAvatar ||
-    data.hero?.avatarUrl ||
-    data.avatarUrl ||
-    data.profileImage ||
-    data.profile?.photo ||
-    data.profile?.avatarUrl ||
-    data.personalInfo?.photo ||
-    data.avatar ||
-    data.photo ||
-    data.image ||
-    data.about?.avatarUrl ||
-    data.basics?.image ||
-    data.basics?.avatar ||
-    '/profile.png';
+  const avatarUrl = getFirstNonEmptyString(
+    explicitAvatar,
+    data.hero?.avatarUrl,
+    data.avatarUrl,
+    data.profileImage,
+    data.profile?.photo,
+    data.profile?.avatarUrl,
+    data.personalInfo?.photo,
+    data.personal?.profilePhoto,
+    data.canonicalProfile?.personal?.profilePhoto,
+    data.avatar,
+    data.photo,
+    data.image,
+    data.about?.avatarUrl,
+    data.basics?.image,
+    '/profile.png'
+  );
 
   // 4. Normalize Hero Section
   const heroIncoming = data.hero || {};
-  const secondaryCta =
-    heroIncoming.secondaryCtaText ||
-    data.secondaryCtaText ||
-    heroIncoming.secondaryButtonText ||
-    data.secondaryButtonText ||
-    (data.resumeUrl || data.resume ? "DOWNLOAD RESUME" : "GET IN TOUCH");
+  const secondaryCta = getFirstNonEmptyString(
+    heroIncoming.secondaryCtaText,
+    data.secondaryCtaText,
+    heroIncoming.secondaryButtonText,
+    data.secondaryButtonText,
+    data.resumeUrl || data.resume ? "DOWNLOAD RESUME" : "GET IN TOUCH"
+  );
 
-  const secondaryHref =
-    heroIncoming.secondaryCtaHref ||
-    data.secondaryCtaHref ||
-    heroIncoming.secondaryButtonHref ||
-    data.secondaryButtonHref ||
-    data.resumeUrl ||
-    data.resume ||
-    "#contact";
+  const secondaryHref = getFirstNonEmptyString(
+    heroIncoming.secondaryCtaHref,
+    data.secondaryCtaHref,
+    heroIncoming.secondaryButtonHref,
+    data.secondaryButtonHref,
+    data.resumeUrl,
+    data.resume,
+    "#contact"
+  );
 
   const hero: HeroData & { avatarUrl: string } = {
-    greeting: heroIncoming.greeting || data.greeting || defaultHero.greeting || "HEY, I'M",
+    greeting: heroIncoming.greeting || data.greeting || "HEY, I'M",
     name: heroIncoming.name || resolvedName,
     title: heroIncoming.title || resolvedTitle,
-    highlightedTitle: heroIncoming.highlightedTitle !== undefined ? heroIncoming.highlightedTitle : (data.highlightedTitle || heroIncoming.subtitle || defaultHero.highlightedTitle || ""),
-    description:
-      heroIncoming.description ||
-      heroIncoming.intro ||
-      heroIncoming.introductionText ||
-      data.bio ||
-      data.summary ||
-      data.profile?.summary ||
-      data.profile?.about ||
-      data.basics?.summary ||
-      defaultHero.description ||
-      "Builder-focused Software Developer with hands-on technical skills.",
-    primaryCtaText: heroIncoming.primaryCtaText || data.primaryCtaText || defaultHero.primaryCtaText || "VIEW MY WORK",
-    primaryCtaHref: heroIncoming.primaryCtaHref || data.primaryCtaHref || defaultHero.primaryCtaHref || "#projects",
+    highlightedTitle: heroIncoming.highlightedTitle !== undefined ? heroIncoming.highlightedTitle : (data.highlightedTitle || heroIncoming.subtitle || ""),
+    description: getFirstNonEmptyString(
+      heroIncoming.description,
+      heroIncoming.intro,
+      heroIncoming.introductionText,
+      data.bio,
+      data.summary,
+      data.profile?.summary,
+      data.profile?.about,
+      data.personal?.summary,
+      data.canonicalProfile?.personal?.summary,
+      data.basics?.summary,
+      "Passionate developer building scalable, high-performance software."
+    ),
+    primaryCtaText: heroIncoming.primaryCtaText || data.primaryCtaText || "VIEW MY WORK",
+    primaryCtaHref: heroIncoming.primaryCtaHref || data.primaryCtaHref || "#projects",
     secondaryCtaText: secondaryCta,
     secondaryCtaHref: secondaryHref,
     avatarUrl: explicitAvatar || heroIncoming.avatarUrl || avatarUrl,
@@ -270,27 +302,29 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
   }
 
   const about: AboutData = {
-    title: aboutRaw.title || data.aboutHeading || defaultAbout.title || "ABOUT ME",
-    subtitle: aboutRaw.subtitle || data.aboutSubtitle || defaultAbout.subtitle || "A Glimpse Into My Journey",
-    description:
-      (typeof aboutRaw === 'string' ? aboutRaw : aboutRaw.description) ||
-      aboutRaw.bio ||
-      aboutRaw.story ||
-      data.bio ||
-      data.aboutMe ||
-      data.summary ||
-      data.profile?.about ||
-      data.profile?.summary ||
-      defaultAbout.description ||
-      "Passionate developer focused on building impactful digital architectures.",
+    title: aboutRaw.title || data.aboutHeading || "ABOUT ME",
+    subtitle: aboutRaw.subtitle || data.aboutSubtitle || "A Glimpse Into My Journey",
+    description: getFirstNonEmptyString(
+      typeof aboutRaw === 'string' ? aboutRaw : aboutRaw.description,
+      aboutRaw.bio,
+      aboutRaw.story,
+      data.bio,
+      data.aboutMe,
+      data.summary,
+      data.profile?.about,
+      data.profile?.summary,
+      data.personal?.summary,
+      data.canonicalProfile?.personal?.summary,
+      "Passionate developer focused on building impactful digital architectures."
+    ),
     objective: aboutRaw.objective || data.objective || aboutRaw.mission || defaultAbout.objective,
     stats
   };
 
   // 6. Normalize Approach Steps
   let approachStepsList = defaultApproach;
-  const rawApproach = data.approachSteps || data.approach || data.workflow || data.process;
-  if (Array.isArray(rawApproach) && rawApproach.length > 0) {
+  const rawApproach = getFirstNonEmptyArray(data.approachSteps, data.approach, data.workflow, data.process);
+  if (rawApproach.length > 0) {
     approachStepsList = rawApproach.map((st: any, idx: number) => ({
       step: String(st.step || (idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`)),
       title: st.title || st.name || `Phase ${idx + 1}`,
@@ -300,9 +334,16 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
   }
 
   // 7. Normalize Education History
-  let educationList = defaultEducation;
-  const rawEdu = data.education || data.educationHistory || data.academics || data.educationList;
-  if (Array.isArray(rawEdu) && rawEdu.length > 0) {
+  let educationList: EducationItem[] = [];
+  const rawEdu = getFirstNonEmptyArray(
+    data.education,
+    data.educationHistory,
+    data.academics,
+    data.educationList,
+    data.profile?.education,
+    data.canonicalProfile?.education
+  );
+  if (rawEdu.length > 0) {
     educationList = rawEdu.map((edu: any) => ({
       degree: edu.degree || edu.title || edu.major || edu.course || 'Degree Program',
       institution: edu.institution || edu.school || edu.university || edu.college || 'Institution',
@@ -310,14 +351,34 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
       grade: edu.grade || edu.gpa || edu.cgpa || edu.score || edu.status || 'Graduated',
       description: edu.description || edu.details || (Array.isArray(edu.highlights) ? edu.highlights.join(' ') : '') || ''
     }));
+  } else if (!data.name && !data.id) {
+    educationList = defaultEducation;
   }
 
-  // 8. Normalize Skills — Comprehensive & Universal extraction across all CampusCV formats
+  // 8. Normalize Skills — Comprehensive & Universal extraction across all formats
   let skillsList: SkillCategory[] = [];
-  const rawSkills = data.skills || data.skillCategories || data.skillsList || data.techStack || data.profile?.skills || data.competencies;
+  const rawSkills = getFirstNonEmptyArray(
+    data.skills,
+    data.skillCategories,
+    data.skillsList,
+    data.technicalSkills,
+    data.techStack,
+    data.profile?.skills,
+    data.personalInfo?.skills,
+    data.personal?.skills,
+    data.canonicalProfile?.skills,
+    data.canonicalProfile?.technicalSkills,
+    data.profile?.capabilities,
+    data.competencies,
+    data.expertise
+  );
 
-  if (Array.isArray(rawSkills) && rawSkills.length > 0) {
-    // Check if rawSkills is already categorized
+  const isDemoSkill = (name: string) => {
+    const s = String(name || '').toLowerCase();
+    return s.includes('figma (auto-layout') || s.includes('adobe creative suite') || s.includes('prototyping & wireframing');
+  };
+
+  if (rawSkills.length > 0) {
     const isCategorized = rawSkills.some(
       (item: any) =>
         item &&
@@ -345,6 +406,15 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
           items
         };
       }).filter((c: any) => c.items.length > 0);
+
+      // Strip demo skills from categories if real skills exist
+      const hasRealSkills = skillsList.some(cat => cat.items.some(it => !isDemoSkill(it.name)));
+      if (hasRealSkills) {
+        skillsList = skillsList.map(cat => ({
+          ...cat,
+          items: cat.items.filter(it => !isDemoSkill(it.name))
+        })).filter(cat => cat.items.length > 0);
+      }
     } else {
       // Flat list of skills: strings or objects
       const flatList: Array<{ name: string; percentage: number; category?: string }> = [];
@@ -362,56 +432,71 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
         }
       });
 
-      // If skills had explicit categories embedded in items, group by those
-      const hasItemCategories = flatList.some(item => Boolean(item.category));
+      // Filter out demo skills if real user skills exist
+      const realSkills = flatList.filter(s => !isDemoSkill(s.name));
+      const activeList = realSkills.length > 0 ? realSkills : flatList;
+
+      const hasItemCategories = activeList.some(item => Boolean(item.category));
       if (hasItemCategories) {
         const catMap: Record<string, Array<{ name: string; percentage: number }>> = {};
-        flatList.forEach(item => {
+        activeList.forEach(item => {
           const cName = item.category || 'General Competencies';
           if (!catMap[cName]) catMap[cName] = [];
           catMap[cName].push({ name: item.name, percentage: item.percentage });
         });
         skillsList = Object.entries(catMap).map(([category, items]) => ({ category, items }));
       } else {
-        // Smart keyword categorization & grid balancing
-        skillsList = categorizeFlatSkills(flatList);
+        skillsList = categorizeFlatSkills(activeList);
       }
     }
-  } else if (rawSkills && typeof rawSkills === 'object') {
-    // Object format: { "Frontend": ["React", "CSS"], "Backend": ["Node", "SQL"] }
-    skillsList = Object.entries(rawSkills).map(([catName, items]: [string, any]) => {
-      const itemList = Array.isArray(items) ? items : [items];
-      return {
-        category: catName,
-        items: itemList.map((it: any) => ({
-          name: typeof it === 'string' ? it.trim() : (it?.name || it?.title || String(it)).trim(),
-          percentage: typeof it?.percentage === 'number' ? it.percentage : 85
-        })).filter((it: any) => it.name.length > 0)
-      };
-    }).filter(c => c.items.length > 0);
-  }
-
-  // Fallback to default skills if no valid skills were parsed
-  if (skillsList.length === 0) {
+  } else if (!data.name && !data.id && !data.username) {
     skillsList = defaultSkills;
   }
 
-  // 9. Normalize Certifications
-  let certList = defaultCertifications;
-  const rawCerts = data.certifications || data.certificates || data.credentials || data.awards;
-  if (Array.isArray(rawCerts) && rawCerts.length > 0) {
+  // 9. Normalize Certifications — STRICTLY no demo fallback if user data exists
+  let certList: CertificationItem[] = [];
+  const rawCerts = getFirstNonEmptyArray(
+    data.certifications,
+    data.certificates,
+    data.credentials,
+    data.awards,
+    data.profile?.certifications,
+    data.canonicalProfile?.certifications
+  );
+
+  const isDemoCert = (t: string, o?: string) => {
+    const s = `${t || ''} ${o || ''}`.toLowerCase();
+    return s.includes('meta careers') || s.includes('google ux') || s.includes('typescript enterprise') || s.includes('boot camp') || s.includes('advanced react & next.js');
+  };
+
+  if (rawCerts.length > 0) {
     certList = rawCerts.map((c: any) => ({
-      title: c.title || c.name || 'Professional Certification',
-      organization: c.organization || c.issuer || c.provider || c.authority || 'Verified Authority',
-      date: c.date || c.issueDate || c.year || '2025',
-      credentialUrl: c.credentialUrl || c.url || c.link || '#'
-    }));
+      title: c.title || c.name || '',
+      organization: c.organization || c.issuer || c.provider || c.authority || '',
+      date: c.date || c.issueDate || c.year || '',
+      credentialUrl: c.credentialUrl || c.url || c.link || ''
+    })).filter((c: any) => c.title.trim().length > 0);
+
+    // If real items exist, remove demo items
+    if (certList.some(c => !isDemoCert(c.title, c.organization))) {
+      certList = certList.filter(c => !isDemoCert(c.title, c.organization));
+    }
+  } else if (!data.name && !data.id && !data.username) {
+    certList = defaultCertifications;
   }
 
   // 10. Normalize Projects
-  let projectsList = defaultProjects;
-  const rawProjects = data.projects || data.portfolioProjects || data.works || data.featuredProjects;
-  if (Array.isArray(rawProjects) && rawProjects.length > 0) {
+  let projectsList: ProjectItem[] = [];
+  const rawProjects = getFirstNonEmptyArray(
+    data.projects,
+    data.portfolioProjects,
+    data.works,
+    data.featuredProjects,
+    data.profile?.projects,
+    data.canonicalProfile?.projects
+  );
+
+  if (rawProjects.length > 0) {
     projectsList = rawProjects.map((p: any) => ({
       title: p.title || p.name || 'Featured Project',
       category: p.category || p.type || 'Web Application',
@@ -421,12 +506,23 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
       liveUrl: p.liveUrl || p.live || p.demo || p.url || '',
       githubUrl: p.githubUrl || p.github || p.repo || ''
     }));
+  } else if (!data.name && !data.id && !data.username) {
+    projectsList = defaultProjects;
   }
 
   // 11. Normalize Work Experience
-  let expList = defaultExperiences;
-  const rawExp = data.experiences || data.experience || data.workExperience || data.work || data.timeline;
-  if (Array.isArray(rawExp) && rawExp.length > 0) {
+  let expList: ExperienceItem[] = [];
+  const rawExp = getFirstNonEmptyArray(
+    data.experiences,
+    data.experience,
+    data.workExperience,
+    data.work,
+    data.timeline,
+    data.profile?.experience,
+    data.canonicalProfile?.experience
+  );
+
+  if (rawExp.length > 0) {
     expList = rawExp.map((e: any) => {
       let descBullets: string[] = [];
       if (Array.isArray(e.description)) {
@@ -450,12 +546,14 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
         description: descBullets
       };
     });
+  } else if (!data.name && !data.id && !data.username) {
+    expList = defaultExperiences;
   }
 
   // 12. Normalize Testimonials
   let testimonialsList = defaultTestimonials;
-  const rawTestimonials = data.testimonials || data.feedback || data.reviews;
-  if (Array.isArray(rawTestimonials) && rawTestimonials.length > 0) {
+  const rawTestimonials = getFirstNonEmptyArray(data.testimonials, data.feedback, data.reviews);
+  if (rawTestimonials.length > 0) {
     testimonialsList = rawTestimonials.map((t: any) => ({
       quote: t.quote || t.content || t.message || t.feedback || 'Outstanding collaboration and delivery.',
       author: t.author || t.name || 'Colleague',
@@ -466,8 +564,8 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
 
   // 13. Normalize Achievements
   let achievementsList = defaultAchievements;
-  const rawAch = data.achievements || data.awards || data.honors || data.milestones;
-  if (Array.isArray(rawAch) && rawAch.length > 0) {
+  const rawAch = getFirstNonEmptyArray(data.achievements, data.awards, data.honors, data.milestones);
+  if (rawAch.length > 0) {
     achievementsList = rawAch.map((a: any) => ({
       title: a.title || a.name || 'Excellence Award',
       organization: a.organization || a.issuer || a.event || 'Global Tech Community',
@@ -476,18 +574,57 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
     }));
   }
 
-  // 14. Normalize Contact & Socials
+  // 14. Normalize Contact & Socials — STRICTLY clean real values, NO fake Chennai or fake phone fallbacks
   const contactRaw = data.contact || {};
+  const resolvedEmail = getFirstNonEmptyString(
+    contactRaw.email,
+    data.email,
+    data.ownerEmail,
+    data.profile?.email,
+    data.personalInfo?.email,
+    data.personal?.email,
+    data.basics?.email,
+    data.canonicalProfile?.personal?.email,
+    ''
+  );
+
+  const resolvedPhone = getFirstNonEmptyString(
+    contactRaw.phone,
+    data.phone,
+    data.phoneNumber,
+    data.profile?.phone,
+    data.personalInfo?.phone,
+    data.personal?.phone,
+    data.basics?.phone,
+    data.canonicalProfile?.personal?.phone,
+    ''
+  );
+
+  const resolvedLocation = getFirstNonEmptyString(
+    contactRaw.location,
+    data.location,
+    data.profile?.location,
+    data.personalInfo?.location,
+    data.personal?.location,
+    data.basics?.location?.city ? `${data.basics.location.city}${data.basics.location.region ? `, ${data.basics.location.region}` : ''}` : '',
+    data.basics?.location?.address,
+    data.city ? `${data.city}${data.state ? `, ${data.state}` : ''}` : '',
+    data.hero?.location,
+    data.canonicalProfile?.personal?.city ? [data.canonicalProfile.personal.city, data.canonicalProfile.personal.state, data.canonicalProfile.personal.country].filter(Boolean).join(', ') : '',
+    data.canonicalProfile?.personal?.location,
+    ''
+  );
+
   const contact: ContactData = {
-    email: contactRaw.email || data.email || data.ownerEmail || data.profile?.email || data.personalInfo?.email || data.basics?.email || defaultContact.email || '',
-    phone: contactRaw.phone || data.phone || data.phoneNumber || data.profile?.phone || data.personalInfo?.phone || data.basics?.phone || defaultContact.phone || '',
-    location: contactRaw.location || data.location || data.profile?.location || data.personalInfo?.location || data.basics?.location?.city || defaultContact.location || '',
+    email: resolvedEmail,
+    phone: resolvedPhone,
+    location: resolvedLocation,
     socials: {
-      linkedin: contactRaw.socials?.linkedin || data.socials?.linkedin || data.socialLinks?.linkedin || data.profile?.linkedin || defaultContact.socials.linkedin || '',
-      github: contactRaw.socials?.github || data.socials?.github || data.socialLinks?.github || data.profile?.github || defaultContact.socials.github || '',
-      instagram: contactRaw.socials?.instagram || data.socials?.instagram || data.socialLinks?.instagram || data.profile?.instagram || defaultContact.socials.instagram || '',
-      twitter: contactRaw.socials?.twitter || data.socials?.twitter || data.socialLinks?.twitter || data.profile?.twitter || defaultContact.socials.twitter || '',
-      behance: contactRaw.socials?.behance || data.socials?.behance || data.socialLinks?.behance || data.profile?.behance || defaultContact.socials.behance || ''
+      linkedin: getFirstNonEmptyString(contactRaw.socials?.linkedin, data.socials?.linkedin, data.socialLinks?.linkedin, data.profile?.linkedin, data.canonicalProfile?.social?.linkedin, ''),
+      github: getFirstNonEmptyString(contactRaw.socials?.github, data.socials?.github, data.socialLinks?.github, data.profile?.github, data.canonicalProfile?.social?.github, ''),
+      instagram: getFirstNonEmptyString(contactRaw.socials?.instagram, data.socials?.instagram, data.socialLinks?.instagram, data.profile?.instagram, data.canonicalProfile?.social?.instagram, ''),
+      twitter: getFirstNonEmptyString(contactRaw.socials?.twitter, data.socials?.twitter, data.socialLinks?.twitter, data.profile?.twitter, data.canonicalProfile?.social?.twitter, ''),
+      behance: getFirstNonEmptyString(contactRaw.socials?.behance, data.socials?.behance, data.socialLinks?.behance, data.profile?.behance, data.canonicalProfile?.social?.behance, '')
     }
   };
 
