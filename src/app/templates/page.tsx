@@ -76,6 +76,20 @@ export default function TemplatesGalleryPage() {
     loadTemplates();
   }, []);
 
+  // Plan tier sort order: free/trial → monthly → quarterly → yearly
+  const PLAN_TIER_ORDER: Record<string, number> = {
+    'free': 0,
+    'trial': 1,
+    'monthly': 1,
+    'quarterly': 2,
+    'yearly': 3,
+    'pro': 3,
+  };
+  const getTemplateTierOrder = (t: TemplateRecord): number => {
+    const tier = (t.planTier || 'free').toLowerCase();
+    return PLAN_TIER_ORDER[tier] ?? 1;
+  };
+
   // Filter templates
   const filteredTemplates = templates.filter(t => {
     const matchesCategory = selectedCategory === 'all' || 
@@ -91,7 +105,8 @@ export default function TemplatesGalleryPage() {
       t.author?.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
-  });
+  // Sort: free/trial → monthly → quarterly → yearly
+  }).sort((a, b) => getTemplateTierOrder(a) - getTemplateTierOrder(b));
 
   const handleUseTemplate = (template: TemplateRecord) => {
     if (isLoggedIn) {
@@ -213,6 +228,23 @@ export default function TemplatesGalleryPage() {
                       <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-slate-800 font-bold text-[11px] border border-slate-200 shadow-xs capitalize">
                         {template.category}
                       </span>
+                      {(() => {
+                        const rawTier = (template.planTier || (template.isPremium ? 'yearly' : 'monthly')).toLowerCase();
+                        const planTier = rawTier === 'free' ? 'free' : rawTier === 'quarterly' ? 'quarterly' : (rawTier === 'yearly' || rawTier === 'pro') ? 'yearly' : 'monthly';
+                        return (
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-wide text-white shadow-xs ${
+                            planTier === 'free'
+                              ? 'bg-emerald-600/90'
+                              : planTier === 'monthly'
+                                ? 'bg-sky-600/90'
+                                : planTier === 'quarterly'
+                                  ? 'bg-indigo-600/90'
+                                  : 'bg-violet-700/90'
+                          }`}>
+                            {planTier}
+                          </span>
+                        );
+                      })()}
                       {template.supportsDarkMode && (
                         <span className="px-2 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white font-bold text-[10px] flex items-center gap-1">
                           <Moon className="w-3 h-3 text-purple-400" />

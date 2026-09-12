@@ -294,14 +294,14 @@ export default function AdminPage() {
           onOpenUploadModal={() => setIsUploadModalOpen(true)}
         />
 
-        {/* Notification Toast Banner */}
+        {/* Notification Toast Banner with Orange/Emerald/Rose Accents */}
         {toast && (
-          <div className={`px-6 py-3.5 text-xs font-semibold flex items-center justify-between shadow-md sticky top-[64px] z-30 animate-fadeIn ${
+          <div className={`px-6 py-3.5 text-xs font-bold flex items-center justify-between shadow-md sticky top-[68px] z-30 animate-fadeIn ${
             toast.type === 'error'
               ? 'bg-rose-600 text-white border-b border-rose-700'
               : toast.type === 'success'
               ? 'bg-emerald-600 text-white border-b border-emerald-700'
-              : 'bg-purple-600 text-white border-b border-purple-700'
+              : 'bg-gradient-to-r from-orange-500 to-purple-600 text-white border-b border-orange-600'
           }`}>
             <div className="flex items-center gap-2.5">
               <span className="font-bold text-sm">
@@ -327,8 +327,8 @@ export default function AdminPage() {
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[#111318] font-bricolage">Featured Templates</h3>
-                  <button onClick={() => setActiveTab('library')} className="text-xs font-semibold text-purple-600 hover:text-purple-800 transition-colors">
+                  <h3 className="text-base font-extrabold text-slate-900 font-bricolage">Featured Templates</h3>
+                  <button onClick={() => setActiveTab('library')} className="text-xs font-bold text-orange-600 hover:text-orange-800 transition-colors cursor-pointer">
                     View all templates →
                   </button>
                 </div>

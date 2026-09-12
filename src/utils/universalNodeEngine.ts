@@ -890,12 +890,22 @@ export function applyPortfolioOverrides(
       .replace(/\.+/g, '.');
 
     const parts = normalizedPath.split('.');
-    if (parts[0] === 'hero') {
-      if (parts[1] === 'name') return portfolioData.profile?.fullName || portfolioData.profile?.name || portfolioData.name || portfolioData.fullName || undefined;
-      if (parts[1] === 'role') return portfolioData.profile?.headline || portfolioData.headline || portfolioData.role || undefined;
-      if (parts[1] === 'headline') return portfolioData.hero?.title || portfolioData.hero?.headline || portfolioData.heroHeadline || undefined;
-      if (parts[1] === 'description') return portfolioData.hero?.description || portfolioData.profile?.summary || portfolioData.aboutMe || undefined;
-      if (parts[1] === 'location') return portfolioData.hero?.location || portfolioData.profile?.location || portfolioData.location || undefined;
+    if (parts[0] === 'hero' || parts[0] === 'profile' || parts[0] === 'personal' || parts[0] === 'personalInfo' || parts[0] === 'basics') {
+      if (['name', 'fullName', 'brand'].includes(parts[1])) {
+        return portfolioData.hero?.name || portfolioData.profile?.fullName || portfolioData.profile?.name || portfolioData.personal?.fullName || portfolioData.personal?.name || portfolioData.name || portfolioData.fullName || portfolioData.basics?.name || undefined;
+      }
+      if (['role', 'headline', 'title', 'tagline'].includes(parts[1])) {
+        return portfolioData.hero?.title || portfolioData.hero?.role || portfolioData.hero?.headline || portfolioData.profile?.headline || portfolioData.headline || portfolioData.role || portfolioData.personal?.headline || undefined;
+      }
+      if (['description', 'bio', 'summary', 'about'].includes(parts[1])) {
+        return portfolioData.hero?.description || portfolioData.profile?.summary || portfolioData.profile?.bio || portfolioData.bio || portfolioData.summary || portfolioData.aboutMe || portfolioData.personal?.summary || undefined;
+      }
+      if (['location', 'city'].includes(parts[1])) {
+        return portfolioData.hero?.location || portfolioData.profile?.location || portfolioData.location || portfolioData.personal?.location || undefined;
+      }
+    }
+    if (parts.length === 1 && (parts[0] === 'name' || parts[0] === 'fullName')) {
+      return portfolioData.hero?.name || portfolioData.name || portfolioData.fullName || portfolioData.profile?.fullName || portfolioData.profile?.name || undefined;
     }
     let curr: any = portfolioData;
     for (let i = 0; i < parts.length; i++) {

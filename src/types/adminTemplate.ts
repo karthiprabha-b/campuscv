@@ -14,6 +14,7 @@ export const TemplateManifestSchema = z.object({
   supportedFeatures: z.array(z.string()).optional().default(["inline-editing", "custom-styles", "dark-mode"]),
   sections: z.array(z.string()).default(["Hero", "About", "Skills", "Projects", "Experience", "Contact"]),
   fontLinks: z.array(z.string()).optional().default([]),
+  planTier: z.enum(['free', 'monthly', 'quarterly', 'yearly', 'pro']).optional(),
   themeConfig: z.object({
     primaryColor: z.string().optional(),
     accentColor: z.string().optional(),
@@ -135,7 +136,8 @@ export interface TemplateRecord {
   bindingsJson?: string;
   createdAt: string;
   updatedAt: string;
-  // Marketplace fields
+  // Marketplace & Plan Tier fields
+  planTier?: 'free' | 'monthly' | 'quarterly' | 'yearly' | 'pro' | string;
   isPremium?: boolean;
   price?: number;
   purchasedBy?: string[];

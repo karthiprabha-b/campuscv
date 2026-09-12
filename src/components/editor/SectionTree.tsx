@@ -220,6 +220,8 @@ const TEMPLATE_SECTION_DEFAULTS: Record<string, string[]> = {
   'Card': ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact'],
   'centerd': ['hero', 'about', 'services', 'experience', 'projects', 'skills', 'education', 'contact'],
   'Centered': ['hero', 'about', 'services', 'experience', 'projects', 'skills', 'education', 'contact'],
+  'stu-creative-bold': ['hero', 'about', 'services', 'approach', 'education', 'skills', 'tools', 'certifications', 'projects', 'experience', 'testimonials', 'achievements', 'contact'],
+  'stu_creative_bold': ['hero', 'about', 'services', 'approach', 'education', 'skills', 'tools', 'certifications', 'projects', 'experience', 'testimonials', 'achievements', 'contact'],
 };
 
 export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddModal }: SectionTreeProps) {

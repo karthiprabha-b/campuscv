@@ -342,6 +342,7 @@ export interface PersistentTemplateRecord {
   category: string;
   version: string;
   currentVersionId: string;
+  planTier?: 'free' | 'monthly' | 'quarterly' | 'yearly' | 'pro' | string;
   author?: string;
   description?: string;
   thumbnail?: string;

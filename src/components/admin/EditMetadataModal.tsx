@@ -21,6 +21,7 @@ export default function EditMetadataModal({
   const [category, setCategory] = useState('Developer');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TemplateStatus>('active');
+  const [planTier, setPlanTier] = useState<string>('monthly');
   const [isPremium, setIsPremium] = useState(false);
   const [price, setPrice] = useState(0);
 
@@ -32,6 +33,7 @@ export default function EditMetadataModal({
       setCategory(template.category || 'Developer');
       setDescription(template.description || '');
       setStatus(template.status || 'active');
+      setPlanTier((template.planTier || (template.isPremium ? 'yearly' : 'monthly')).toLowerCase());
       setIsPremium(template.isPremium ?? false);
       setPrice(template.price ?? 0);
     }
@@ -48,6 +50,7 @@ export default function EditMetadataModal({
       category,
       description,
       status,
+      planTier,
       isPremium,
       price: isPremium ? price : 0,
     });
@@ -149,6 +152,31 @@ export default function EditMetadataModal({
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3 py-2 border border-zinc-200 rounded-xl font-normal text-zinc-800 focus:outline-none focus:border-[#7C3AED]"
             />
+          </div>
+
+          {/* Plan Access Tier */}
+          <div className="border border-purple-100 rounded-xl p-3.5 space-y-2 bg-purple-50/40">
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-zinc-800 uppercase tracking-wider text-[10px] block">
+                Subscription Plan Tier Access
+              </label>
+              <span className="text-[10px] font-mono text-purple-700 font-bold uppercase">
+                {planTier} plan required
+              </span>
+            </div>
+            <select
+              value={planTier}
+              onChange={(e) => setPlanTier(e.target.value)}
+              className="w-full px-3 py-2 border border-purple-200 rounded-xl font-bold text-zinc-900 focus:outline-none focus:border-[#7C3AED] bg-white text-xs"
+            >
+              <option value="free">Free Tier (Accessible to All Users)</option>
+              <option value="monthly">Monthly Plan (Monthly, Quarterly, Yearly)</option>
+              <option value="quarterly">Quarterly Plan (Quarterly, Yearly)</option>
+              <option value="yearly">Yearly / Pro Only (Exclusive to Yearly Plan)</option>
+            </select>
+            <p className="text-[10px] text-zinc-500 leading-tight">
+              Users on lower plans will see this template locked and will be prompted to upgrade to the {planTier.toUpperCase()} plan.
+            </p>
           </div>
 
           {/* Marketplace Pricing */}

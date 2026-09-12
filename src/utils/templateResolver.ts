@@ -62,6 +62,14 @@ const TEMPLATE_ALIASES: Record<string, string> = {
   'card-deck-portfolio': 'card',
   'card portfolio': 'card',
   'card-portfolio': 'card',
+  'stu-creative-bold': 'stu-creative-bold',
+  'stu_creative_bold': 'stu-creative-bold',
+  'stu creative bold': 'stu-creative-bold',
+  'creative-bold': 'stu-creative-bold',
+  'creative_bold': 'stu-creative-bold',
+  'creative bold': 'stu-creative-bold',
+  'creative bold portfolio': 'stu-creative-bold',
+  'bold creative': 'stu-creative-bold',
 };
 
 export function getCanonicalTemplateId(rawId?: string): string {

@@ -10,9 +10,23 @@ import {
   Users, 
   FileText, 
   Settings,
-  UploadCloud
+  UploadCloud,
+  Sparkles,
+  Receipt
 } from 'lucide-react';
 import CampusCvLogo from '../common/CampusCvLogo';
+
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+}
+
+interface SidebarSection {
+  title: string;
+  items: SidebarItem[];
+}
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -21,7 +35,7 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModal }: AdminSidebarProps) {
-  const sections = [
+  const sections: SidebarSection[] = [
     {
       title: 'OVERVIEW',
       items: [
@@ -42,9 +56,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModa
       ]
     },
     {
-      title: 'USERS',
+      title: 'USERS & FINANCE',
       items: [
-        { id: 'users', label: 'Users & Ledger', icon: Users },
+        { id: 'users', label: 'Users & Ledger', icon: Users, badge: 'Finance' },
       ]
     },
     {
@@ -57,36 +71,36 @@ export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModa
   ];
 
   return (
-    <aside className="w-[240px] shrink-0 min-h-screen bg-white border-r border-[#E7E9EE] flex flex-col justify-between fixed top-0 left-0 z-40 select-none font-sans">
-      <div className="flex flex-col gap-6 p-5">
+    <aside className="w-[240px] shrink-0 min-h-screen bg-white border-r border-slate-200/90 flex flex-col justify-between fixed top-0 left-0 z-40 select-none font-sans shadow-sm">
+      <div className="flex flex-col gap-5 p-5">
         
-        {/* Top Brand Header */}
-        <div className="flex flex-col gap-1.5 pb-3 border-b border-[#F0F1F5]">
-          <div className="flex items-center">
+        {/* Top Brand Header with CampusCV Multi-Color Logo */}
+        <div className="flex flex-col gap-2 pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between">
             <CampusCvLogo />
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200 font-mono">
+              Admin
+            </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 font-mono">
-            Admin Console
-          </span>
         </div>
 
-        {/* Upload Action Button */}
+        {/* Upload Action Button with 30-40% Brand Orange Gradient */}
         <button
           onClick={onOpenUploadModal}
-          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 bg-gradient-to-r from-orange-500 via-orange-600 to-purple-600 hover:from-orange-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 hover:shadow-orange-500/35 transition-all cursor-pointer active:scale-[0.98]"
         >
-          <UploadCloud className="w-4 h-4" />
+          <UploadCloud className="w-4 h-4 stroke-[2.5]" />
           <span>Upload Template</span>
         </button>
 
         {/* Navigation Sections */}
-        <nav className="space-y-5">
+        <nav className="space-y-4">
           {sections.map((sec, idx) => (
             <div key={idx} className="space-y-1">
-              <h4 className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider px-2 font-mono">
+              <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider px-2 font-mono">
                 {sec.title}
               </h4>
-              <div className="space-y-0.5 pt-1">
+              <div className="space-y-0.5 pt-0.5">
                 {sec.items.map((item) => {
                   const isActive = activeTab === item.id;
                   const Icon = item.icon;
@@ -94,17 +108,27 @@ export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModa
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] transition-all cursor-pointer relative ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all cursor-pointer relative group ${
                         isActive
-                          ? 'bg-purple-50 text-purple-700 font-semibold'
-                          : 'text-[#667085] hover:text-[#111318] hover:bg-[#F8F9FB] font-medium'
+                          ? 'bg-gradient-to-r from-orange-50 to-purple-50 text-orange-700 font-bold border border-orange-200/70 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
                       }`}
                     >
-                      {isActive && (
-                        <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-purple-600 rounded-r" />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {isActive && (
+                          <div className="absolute left-0 top-2 bottom-2 w-1 bg-orange-500 rounded-r" />
+                        )}
+                        <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-orange-600 stroke-[2.5]' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+
+                      {item.badge && (
+                        <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ${
+                          isActive ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {item.badge}
+                        </span>
                       )}
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-purple-600' : 'text-slate-400'}`} />
-                      <span className="truncate">{item.label}</span>
                     </button>
                   );
                 })}
@@ -114,15 +138,15 @@ export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModa
         </nav>
       </div>
 
-      {/* Bottom User Account Footer with Logout */}
-      <div className="p-4 border-t border-[#E7E9EE] bg-[#F8F9FB] flex items-center justify-between gap-2">
+      {/* Bottom User Account Footer with Sign Out */}
+      <div className="p-4 border-t border-slate-200/90 bg-slate-50/80 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
             A
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-[#111318] truncate font-bricolage">Admin Account</p>
-            <p className="text-[10px] text-[#667085] font-semibold font-mono truncate">Super Admin</p>
+            <p className="text-xs font-bold text-slate-900 truncate font-bricolage">Admin Account</p>
+            <p className="text-[10px] text-orange-600 font-bold font-mono truncate">Super Admin</p>
           </div>
         </div>
         <button
@@ -133,7 +157,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, onOpenUploadModa
             }
           }}
           title="Sign Out of Admin Console"
-          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

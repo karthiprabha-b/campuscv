@@ -112,11 +112,24 @@ export default function TemplateCard({
           </span>
         </div>
 
-        {/* Category Tag */}
-        <div className="absolute top-2.5 left-2.5">
+        {/* Category & Plan Tier Tags */}
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
           <span className="text-[10px] font-bold font-mono px-2 py-0.5 bg-white/90 backdrop-blur-md text-purple-700 rounded-md border border-purple-100 shadow-xs">
             {template.category}
           </span>
+          {(() => {
+            const rawTier = (template.planTier || (template.isPremium ? 'yearly' : 'monthly')).toLowerCase();
+            const tierBadge =
+              rawTier === 'free' ? 'bg-zinc-900 text-white border-zinc-700' :
+              rawTier === 'quarterly' ? 'bg-cyan-600 text-white border-cyan-500' :
+              (rawTier === 'yearly' || rawTier === 'pro') ? 'bg-amber-600 text-white border-amber-500' :
+              'bg-violet-700 text-white border-violet-600';
+            return (
+              <span className={`text-[9px] font-extrabold font-mono px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-xs ${tierBadge}`}>
+                {rawTier}
+              </span>
+            );
+          })()}
         </div>
       </div>
 

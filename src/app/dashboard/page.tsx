@@ -50,11 +50,15 @@ import {
   UserProfile, 
   PlanConfig, 
   CouponCode, 
-  Transaction 
+  Transaction,
+  checkTemplateAccess,
+  getUserPlanTier,
+  getPlanTemplateLimit
 } from '../../utils/mockDb';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { TemplateRecord } from '../../types/adminTemplate';
 import { getPortfolios, savePortfolio, deletePortfolio } from '../../lib/portfolioStore';
+import UpgradePlanModal from '../../components/common/UpgradePlanModal';
 
 export default function DashboardPage() {
   return (
@@ -108,6 +112,15 @@ function DashboardContent() {
     tx?: any;
   } | null>(null);
 
+  const [upgradeModalConfig, setUpgradeModalConfig] = useState<{
+    isOpen: boolean;
+    requiredTier?: 'free' | 'monthly' | 'quarterly' | 'yearly';
+    templateName?: string;
+    reason?: 'plan_tier' | 'limit_reached' | 'unpaid';
+    currentUsageCount?: number;
+    planLimit?: number;
+  } | null>(null);
+
   // Dynamic Razorpay SDK loader
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
@@ -135,6 +148,11 @@ function DashboardContent() {
       return { discount: 0, finalPrice: plan.price, isApplicable: false };
     }
 
+    const isTrial = (plan.id || '').toLowerCase().includes('trial') || 
+      (plan.id || '').toLowerCase().includes('test') || 
+      (plan.name || '').toLowerCase().includes('trial') || 
+      (plan.tier || '').toLowerCase() === 'trial';
+
     let discount = 0;
     if (appliedPlanCoupon.discountType === 'fixed') {
       discount = Math.min(plan.price, appliedPlanCoupon.discountValue || 0);
@@ -142,7 +160,17 @@ function DashboardContent() {
       const pct = appliedPlanCoupon.discountPercent ?? appliedPlanCoupon.discountValue ?? 0;
       discount = Math.round((plan.price * pct) / 100);
     }
-    const finalPrice = Math.max(0, plan.price - discount);
+
+    let finalPrice = plan.price - discount;
+    if (isTrial) {
+      finalPrice = Math.max(0, finalPrice);
+      discount = plan.price - finalPrice;
+    } else {
+      // Monthly, Quarterly, Yearly: Minimum value is ₹ 1 when 100% coupon is applied
+      finalPrice = Math.max(1, finalPrice);
+      discount = plan.price - finalPrice;
+    }
+
     return { discount, finalPrice, isApplicable: true };
   };
 
@@ -506,6 +534,9 @@ function DashboardContent() {
       
       const activeTemplates = await adminTemplateDb.syncWithServerRegistryAsync(false);
       setTemplates(activeTemplates.filter(t => (t.status || 'active') === 'active'));
+
+      // Always sync coupons from server so freshly created/deleted coupons take effect immediately
+      await mockDb.syncCouponsFromServer().catch(() => {});
     } catch (e) {
       console.error('[Dashboard refreshData error]', e);
     } finally {
@@ -643,8 +674,12 @@ function DashboardContent() {
     let couponCode: string | undefined = undefined;
 
     if (appliedPlanCoupon) {
-      const discount = (plan.price * (appliedPlanCoupon.discountPercent ?? 0)) / 100;
-      finalPrice = Math.max(0, plan.price - discount);
+      const isTrial = (plan.id || '').toLowerCase().includes('trial') || 
+        (plan.id || '').toLowerCase().includes('test') || 
+        (plan.name || '').toLowerCase().includes('trial') || 
+        (plan.tier || '').toLowerCase() === 'trial';
+      const discount = (plan.price * (appliedPlanCoupon.discountPercent ?? appliedPlanCoupon.discountValue ?? 0)) / 100;
+      finalPrice = isTrial ? Math.max(0, plan.price - discount) : Math.max(1, plan.price - discount);
       couponCode = appliedPlanCoupon.code;
       mockDb.useCoupon(appliedPlanCoupon.id);
     }
@@ -1041,109 +1076,138 @@ function DashboardContent() {
       {/* ══════════════════════════════════════════
           NAVIGATION BAR
       ══════════════════════════════════════════ */}
-      <header className="sticky top-0 z-40 h-[68px] bg-white/95 backdrop-blur-md border-b border-zinc-200 flex items-center px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 h-[60px] sm:h-[68px] bg-white/95 backdrop-blur-md border-b border-zinc-200 flex items-center px-3 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
-          {/* Left: Classic Logo Only */}
+          {/* Left: Logo */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center shrink-0">
-              <CampusCvLogo className="h-8 sm:h-9 w-auto" />
+              <CampusCvLogo className="h-7 sm:h-9 w-auto" />
             </Link>
           </div>
 
-          {/* Right: Nav Tabs (Overview, Templates, Plans & Billing) on right side BEFORE name + User dropdown */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-            <nav className="flex items-center gap-1 sm:gap-1.5">
-              <button
-                type="button"
-                onClick={() => setActiveTab('overview')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  activeTab === 'overview'
-                    ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-                }`}
-              >
-                Overview
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setActiveTab('templates')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  activeTab === 'templates'
-                    ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-                }`}
-              >
-                Templates
-              </button>
+          {/* Center: Nav Tabs — hidden on mobile, shown sm+ */}
+          <nav className="hidden sm:flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+              }`}
+            >
+              Overview
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setActiveTab('templates')}
+              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === 'templates'
+                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+              }`}
+            >
+              Templates
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('billing')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  activeTab === 'billing'
-                    ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-                }`}
-              >
-                Plans &amp; Billing
-              </button>
-            </nav>
+            <button
+              type="button"
+              onClick={() => setActiveTab('billing')}
+              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === 'billing'
+                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+              }`}
+            >
+              Plans &amp; Billing
+            </button>
+          </nav>
 
-            <div className="h-5 w-px bg-zinc-200 hidden sm:block" />
+          <div className="h-5 w-px bg-zinc-200 hidden sm:block" />
 
-            {/* User dropdown with avatar & name */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowUserDropdown(prev => !prev)}
-                className="flex items-center gap-2 sm:gap-2.5 pl-2 sm:pl-3 pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
-              >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white text-xs font-bold uppercase shrink-0">
-                  {user?.name?.[0] || 'U'}
+          {/* User dropdown with avatar & name */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowUserDropdown(prev => !prev)}
+              className="flex items-center gap-1.5 sm:gap-2.5 pl-2 sm:pl-3 pr-1.5 sm:pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
+            >
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white text-xs font-bold uppercase shrink-0">
+                {user?.name?.[0] || 'U'}
+              </div>
+              <span className="text-sm font-semibold text-zinc-800 hidden md:block max-w-[120px] lg:max-w-[160px] truncate">{user?.name || 'User'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showUserDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-zinc-200 shadow-xl shadow-zinc-900/10 overflow-hidden z-50">
+                <div className="p-3 border-b border-zinc-100">
+                  <p className="text-xs font-bold text-zinc-900">{user?.name}</p>
+                  <p className="text-[11px] text-zinc-500 truncate">{user?.email}</p>
                 </div>
-                <span className="text-sm font-semibold text-zinc-800 hidden sm:block">{user?.name || 'User'}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
-              </button>
-
-              {showUserDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-zinc-200 shadow-xl shadow-zinc-900/10 overflow-hidden z-50">
-                  <div className="p-3 border-b border-zinc-100">
-                    <p className="text-xs font-bold text-zinc-900">{user?.name}</p>
-                    <p className="text-[11px] text-zinc-500 truncate">{user?.email}</p>
-                  </div>
-                  <div className="p-1.5 space-y-0.5">
-                    <button
-                      onClick={() => { setShowProfileModal(true); setShowUserDropdown(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors text-left cursor-pointer"
-                    >
-                      <Settings className="w-4 h-4 text-zinc-400" />
-                      Account Settings
-                    </button>
-                    <div className="border-t border-zinc-100 my-1" />
-                    <button
-                      onClick={() => { if (confirm("Reset CampusCV Database? This will erase all local data.")) { localStorage.clear(); window.location.href = '/'; } }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors text-left cursor-pointer"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Reset All Data
-                    </button>
-                    <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 transition-colors text-left cursor-pointer">
-                      <LogOut className="w-4 h-4 text-zinc-400" />
-                      Sign Out
-                    </button>
-                  </div>
+                <div className="p-1.5 space-y-0.5">
+                  <button
+                    onClick={() => { setShowProfileModal(true); setShowUserDropdown(false); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors text-left cursor-pointer"
+                  >
+                    <Settings className="w-4 h-4 text-zinc-400" />
+                    Account Settings
+                  </button>
+                  <div className="border-t border-zinc-100 my-1" />
+                  <button
+                    onClick={() => { if (confirm("Reset CampusCV Database? This will erase all local data.")) { localStorage.clear(); window.location.href = '/'; } }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Reset All Data
+                  </button>
+                  <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 transition-colors text-left cursor-pointer">
+                    <LogOut className="w-4 h-4 text-zinc-400" />
+                    Sign Out
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
+      {/* ── Mobile Bottom Tab Bar (visible only on xs) ── */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-zinc-200 flex items-center h-14 px-2 safe-area-pb">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+            activeTab === 'overview' ? 'text-[#7C3AED]' : 'text-zinc-400'
+          }`}
+        >
+          <BarChart2 className="w-5 h-5" />
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('templates')}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+            activeTab === 'templates' ? 'text-[#7C3AED]' : 'text-zinc-400'
+          }`}
+        >
+          <LayoutGrid className="w-5 h-5" />
+          Templates
+        </button>
+        <button
+          onClick={() => setActiveTab('billing')}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+            activeTab === 'billing' ? 'text-[#7C3AED]' : 'text-zinc-400'
+          }`}
+        >
+          <CreditCard className="w-5 h-5" />
+          Billing
+        </button>
+      </nav>
+
       {/* ══════════════════════════════════════════
           MAIN CONTENT (TABS)
       ══════════════════════════════════════════ */}
-      <main className="w-full max-w-[1400px] mx-auto px-3.5 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-12 space-y-6 sm:space-y-8 text-left">
+      <main className="w-full max-w-[1400px] mx-auto px-3.5 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-12 space-y-6 sm:space-y-8 text-left pb-20 sm:pb-0">
 
         {/* ══════════════════════════════════════════
             TAB 1: OVERVIEW
@@ -1276,7 +1340,7 @@ function DashboardContent() {
                           className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-purple-50 hover:bg-purple-100 border border-purple-200/80 text-[#7C3AED] rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-2 sm:px-3"
                         >
                           <QrCode className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">QR Code &amp; Share</span>
+                          <span className="truncate">QR &amp; Share</span>
                         </button>
                         <button
                           onClick={handleCopyLink}
@@ -1389,13 +1453,25 @@ function DashboardContent() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {templates.map((t, idx) => {
+                {[...templates].sort((a, b) => {
+                    const TIER_ORDER: Record<string, number> = { 'free': 0, 'trial': 1, 'monthly': 1, 'quarterly': 2, 'yearly': 3, 'pro': 3 };
+                    const aRank = TIER_ORDER[(a.planTier || 'free').toLowerCase()] ?? 1;
+                    const bRank = TIER_ORDER[(b.planTier || 'free').toLowerCase()] ?? 1;
+                    return aRank - bRank;
+                  }).map((t, idx) => {
                   const isCurrentlyUsed = selectedPortfolio?.templateId === t.id;
+                  const access = checkTemplateAccess(user, t, userPortfolios.length);
+                  const isLocked = !isCurrentlyUsed && !access.isAccessible;
+
+                  const rawTier = (t.planTier || (t.isPremium ? 'yearly' : 'monthly')).toLowerCase();
+                  const planTier = rawTier === 'free' ? 'free' : rawTier === 'quarterly' ? 'quarterly' : (rawTier === 'yearly' || rawTier === 'pro') ? 'yearly' : 'monthly';
 
                   return (
                     <div
                       key={t.id ? `${t.id}-${idx}` : `dashboard-tpl-${idx}`}
-                      className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all shrink-0"
+                      className={`bg-white border rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all shrink-0 ${
+                        isLocked ? 'border-zinc-200/80 opacity-95' : 'border-zinc-200'
+                      }`}
                     >
                       {/* Large preview image */}
                       <div className="relative aspect-[16/10] w-full bg-zinc-100 overflow-hidden select-none">
@@ -1414,7 +1490,9 @@ function DashboardContent() {
                                 (e.currentTarget as HTMLImageElement).src = '/templates/designer/thumbnail.png';
                               }
                             }}
-                            className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
+                            className={`w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500 ${
+                              isLocked ? 'grayscale-[30%]' : ''
+                            }`}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
@@ -1422,12 +1500,31 @@ function DashboardContent() {
                           </div>
                         )}
 
-                        {/* Currently used badge */}
-                        {isCurrentlyUsed && (
+                        {/* Top Left: Plan Tier Badge */}
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                          <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold uppercase tracking-wider shadow-sm ${
+                            planTier === 'free'
+                              ? 'bg-emerald-500/90 text-white'
+                              : planTier === 'monthly'
+                                ? 'bg-sky-500/90 text-white'
+                                : planTier === 'quarterly'
+                                  ? 'bg-indigo-600/90 text-white'
+                                  : 'bg-violet-700/90 text-white'
+                          }`}>
+                            {planTier}
+                          </span>
+                        </div>
+
+                        {/* Top Right: Currently used or Locked badge */}
+                        {isCurrentlyUsed ? (
                           <div className="absolute top-3 right-3 bg-zinc-950/80 text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Check className="w-3 h-3" /> Active
                           </div>
-                        )}
+                        ) : isLocked ? (
+                          <div className="absolute top-3 right-3 bg-amber-500/95 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                            <Lock className="w-2.5 h-2.5" /> Locked
+                          </div>
+                        ) : null}
                       </div>
 
                       {/* Info + actions */}
@@ -1444,26 +1541,45 @@ function DashboardContent() {
 
                         {/* Action buttons pinned to bottom */}
                         <div className="pt-3 border-t border-zinc-100 flex items-center">
-                          <button
-                            onClick={() => {
-                              if (!user?.isPro || isExpired) {
-                                setActiveTab('billing');
-                                alert("Subscription Required: Please choose and purchase a plan to apply templates.");
-                                return;
-                              }
-                              handleApplyTemplateToPortfolio(t.id);
-                            }}
-                            disabled={isCurrentlyUsed || !selectedPortfolio}
-                            className={`w-full h-9 rounded-xl text-xs font-bold transition-all ${
-                              isCurrentlyUsed
-                                ? 'bg-zinc-100 text-zinc-400 cursor-default'
-                                : selectedPortfolio
-                                  ? 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm cursor-pointer'
-                                  : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                            }`}
-                          >
-                            {isCurrentlyUsed ? 'Active Template' : 'Use Template'}
-                          </button>
+                          {isLocked ? (
+                            <button
+                              onClick={() => {
+                                setUpgradeModalConfig({
+                                  isOpen: true,
+                                  templateName: t.name,
+                                  requiredTier: access.requiredTier,
+                                  reason: access.reason,
+                                  currentUsageCount: userPortfolios.length,
+                                  planLimit: access.planLimit,
+                                });
+                              }}
+                              className="w-full h-9 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>Upgrade to Unlock</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                if (!user?.isPro || isExpired) {
+                                  setActiveTab('billing');
+                                  alert("Subscription Required: Please choose and purchase a plan to apply templates.");
+                                  return;
+                                }
+                                handleApplyTemplateToPortfolio(t.id);
+                              }}
+                              disabled={isCurrentlyUsed || !selectedPortfolio}
+                              className={`w-full h-9 rounded-xl text-xs font-bold transition-all ${
+                                isCurrentlyUsed
+                                  ? 'bg-zinc-100 text-zinc-400 cursor-default'
+                                  : selectedPortfolio
+                                    ? 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm cursor-pointer'
+                                    : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                              }`}
+                            >
+                              {isCurrentlyUsed ? 'Active Template' : 'Use Template'}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2154,6 +2270,23 @@ function DashboardContent() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Upgrade Plan Modal */}
+      {upgradeModalConfig && (
+        <UpgradePlanModal
+          isOpen={upgradeModalConfig.isOpen}
+          onClose={() => setUpgradeModalConfig(null)}
+          templateName={upgradeModalConfig.templateName}
+          requiredTier={upgradeModalConfig.requiredTier}
+          reason={upgradeModalConfig.reason}
+          currentUsageCount={upgradeModalConfig.currentUsageCount}
+          planLimit={upgradeModalConfig.planLimit}
+          onUpgradeSuccess={(upgradedPlan) => {
+            setUser(mockAuth.getCurrentUser());
+            alert(`🎉 Successfully upgraded to ${upgradedPlan.name}! You can now use all templates in your new tier.`);
+          }}
+        />
       )}
 
     </div>

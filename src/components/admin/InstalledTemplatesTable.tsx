@@ -39,6 +39,7 @@ export default function InstalledTemplatesTable({
             <tr className="text-[#98A2B3] font-mono border-b border-[#E7E9EE] bg-[#F8F9FB]">
               <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Template</th>
               <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Category</th>
+              <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Plan Tier</th>
               <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Version</th>
               <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Status</th>
               <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Active Portfolios</th>
@@ -49,6 +50,12 @@ export default function InstalledTemplatesTable({
           <tbody className="divide-y divide-slate-100">
             {templates.filter(t => t.status !== 'deleted').map((tmpl) => {
               const isActive = tmpl.status === 'active';
+              const rawTier = (tmpl.planTier || (tmpl.isPremium ? 'yearly' : 'monthly')).toLowerCase();
+              const tierBadge = 
+                rawTier === 'free' ? 'bg-zinc-100 text-zinc-700 border-zinc-200' :
+                rawTier === 'quarterly' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' :
+                (rawTier === 'yearly' || rawTier === 'pro') ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                'bg-violet-50 text-violet-700 border-violet-200';
 
               return (
                 <tr key={tmpl.id} className="hover:bg-[#FAFAFA] transition-colors h-[60px]">
@@ -74,6 +81,13 @@ export default function InstalledTemplatesTable({
                   <td className="py-3 px-4">
                     <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-purple-50 text-purple-700 border border-purple-100 font-mono">
                       {tmpl.category}
+                    </span>
+                  </td>
+
+                  {/* Plan Tier Access */}
+                  <td className="py-3 px-4">
+                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase border font-mono ${tierBadge}`}>
+                      {rawTier}
                     </span>
                   </td>
 

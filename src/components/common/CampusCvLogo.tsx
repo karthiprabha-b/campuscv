@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 
 interface CampusCvLogoProps {
   className?: string;
@@ -15,21 +15,12 @@ export default function CampusCvLogo({
   src,
   alt = "CampusCV",
 }: CampusCvLogoProps) {
-  const [iconSrc, setIconSrc] = useState(src || '/assets/Campus%20CV%20Logo.png?v=brand1280');
-  const [wordSrc, setWordSrc] = useState('/assets/campus_cv_word.png?v=brand1280');
-  const [whiteSrc, setWhiteSrc] = useState(src || '/assets/Campus%20CV%20white.png?v=brand1280');
-
   if (variant === 'icon') {
     return (
       <img
-        src={iconSrc}
+        src={src || '/assets/campus_cv_icon.png?v=brand1280'}
         alt={alt}
-        onError={() => {
-          if (!iconSrc.includes('campus_cv_icon.png')) {
-            setIconSrc('/assets/campus_cv_icon.png?v=brand1280');
-          }
-        }}
-        className={`h-7 sm:h-8 w-auto object-contain select-none shrink-0 opacity-100 ${className}`}
+        className={`h-7 sm:h-8 w-auto object-contain select-none shrink-0 drop-shadow-xs ${className}`}
       />
     );
   }
@@ -37,14 +28,9 @@ export default function CampusCvLogo({
   if (variant === 'white') {
     return (
       <img
-        src={whiteSrc}
+        src={src || '/assets/campus_cv_logo_white.png?v=brand1280'}
         alt={alt}
-        onError={() => {
-          if (!whiteSrc.includes('campus_cv_white.png')) {
-            setWhiteSrc('/assets/campus_cv_white.png?v=brand1280');
-          }
-        }}
-        className={`h-7 sm:h-8 w-auto object-contain select-none shrink-0 opacity-100 ${className}`}
+        className={`h-7 sm:h-8 w-auto object-contain select-none shrink-0 drop-shadow-xs ${className}`}
       />
     );
   }
@@ -52,30 +38,18 @@ export default function CampusCvLogo({
   if (variant === 'word') {
     return (
       <img
-        src={wordSrc}
+        src={src || '/assets/campus_cv_word.png?v=brand1280'}
         alt={alt}
-        className={`h-4.5 sm:h-5 w-auto object-contain select-none shrink-0 opacity-100 ${className}`}
+        className={`h-4.5 sm:h-5 w-auto object-contain select-none shrink-0 drop-shadow-xs ${className}`}
       />
     );
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 select-none shrink-0 ${className}`}>
-      <img
-        src={iconSrc}
-        alt="CampusCV Logo"
-        onError={() => {
-          if (!iconSrc.includes('campus_cv_icon.png')) {
-            setIconSrc('/assets/campus_cv_icon.png?v=brand1280');
-          }
-        }}
-        className="h-8 sm:h-9 w-auto object-contain shrink-0 select-none opacity-100 drop-shadow-xs"
-      />
-      <img
-        src={wordSrc}
-        alt="CampusCV"
-        className="h-4.5 sm:h-5 w-auto object-contain shrink-0 select-none opacity-100 drop-shadow-xs"
-      />
-    </div>
+    <img
+      src={src || '/assets/campus_cv_logo.png?v=brand1280'}
+      alt={alt}
+      className={`h-7 sm:h-8 w-auto max-w-[135px] sm:max-w-[165px] object-contain select-none shrink-0 drop-shadow-xs ${className}`}
+    />
   );
 }

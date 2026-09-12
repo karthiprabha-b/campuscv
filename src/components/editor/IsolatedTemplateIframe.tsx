@@ -390,10 +390,10 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
               
               const computedH = Math.max(rootScrollH, rootOffsetH, bodyScrollH, docScrollH, 1200);
 
-              if (computedH > 0) {
-                setIframeHeight(prev => (Math.abs(prev - computedH) > 8 ? computedH : prev));
-                if (iframe.style.height !== `${computedH}px`) {
-                  iframe.style.height = `${computedH}px`;
+              if (computedH > 0 && iframe) {
+                const targetH = `${computedH}px`;
+                if (iframe.style.height !== targetH) {
+                  iframe.style.height = targetH;
                 }
               }
             });

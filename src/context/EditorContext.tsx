@@ -180,12 +180,30 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const [hoveredElement, setHoveredElement] = useState<SelectedElement | null>(null);
   const [inspectorMode, setInspectorMode] = useState<InspectorMode>(null);
-  const [detectedSections, setDetectedSections] = useState<DetectedSection[]>([]);
+  const [detectedSections, _setDetectedSections] = useState<DetectedSection[]>([]);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [isEditMode, setIsEditMode] = useState(true);
   const [isDebugMode, setIsDebugMode] = useState(false);
-  const [validationReport, setValidationReport] = useState<ValidationReport | null>(null);
+  const [validationReport, _setValidationReport] = useState<ValidationReport | null>(null);
   const [isInlineEditing, setIsInlineEditing] = useState(false);
+
+  const setDetectedSections = useCallback((sections: DetectedSection[]) => {
+    _setDetectedSections(prev => {
+      if (prev.length === sections.length && prev.every((s, i) => s.id === sections[i]?.id && s.label === sections[i]?.label && s.isVisible === sections[i]?.isVisible)) {
+        return prev;
+      }
+      return sections;
+    });
+  }, []);
+
+  const setValidationReport = useCallback((report: ValidationReport) => {
+    _setValidationReport(prev => {
+      if (prev && prev.scannedElementsCount === report.scannedElementsCount && prev.registeredCount === report.registeredCount && prev.autoBoundCount === report.autoBoundCount && prev.healthRatio === report.healthRatio) {
+        return prev;
+      }
+      return report;
+    });
+  }, []);
 
   const [lockedElements, setLockedElements] = useState<Set<string>>(new Set());
   const [hiddenElements, setHiddenElements] = useState<Set<string>>(new Set());

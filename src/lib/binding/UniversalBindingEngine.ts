@@ -140,11 +140,23 @@ export class UniversalBindingEngine {
 
           breakdown[fieldName] = `bound (${resolved.source})`;
 
-          // Apply text content binding cleanly without modifying CSS or layout, preserving child animation spans (.letter, .word, .txt-fx, svg)
-          if (tag !== 'IMG' && tag !== 'A') {
-            const hasAnimationSpans = Boolean(el.querySelector('.letter, .word, .txt-fx, [class*="anim"], [class*="reveal"], svg'));
-            if (!hasAnimationSpans && el.textContent !== boundStr) {
-              el.textContent = boundStr;
+          // Apply text content binding cleanly without modifying CSS or layout, preserving child animation spans (.letter, .word, .txt-fx) and SVGs
+          if (tag !== 'IMG') {
+            const hasAnimationSpans = Boolean(el.querySelector('.letter, .word, .txt-fx, [class*="anim"], [class*="reveal"]'));
+            const hasChildSvg = Boolean(el.querySelector('svg'));
+            if (!hasAnimationSpans && (!hasChildSvg || !['A', 'BUTTON'].includes(tag))) {
+              if (el.children.length === 0) {
+                if (el.textContent !== boundStr) {
+                  el.textContent = boundStr;
+                }
+              } else if (el.children.length === 1 && el.children[0].tagName === 'SPAN') {
+                const spanEl = el.children[0] as HTMLElement;
+                if (spanEl.textContent !== boundStr) {
+                  spanEl.textContent = boundStr;
+                }
+              } else if (!hasChildSvg && el.textContent !== boundStr) {
+                el.textContent = boundStr;
+              }
             }
           }
         }

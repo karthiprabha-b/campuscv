@@ -13,9 +13,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Layers, Palette, Globe, Check, LayoutGrid, Type, RotateCcw, Plus, X, ExternalLink, Copy, CheckCheck,
-  Pipette, Sliders, Search, Sparkles, SlidersHorizontal, ChevronDown, ChevronUp, Link as LinkIcon, ShieldCheck, AlertTriangle, FileText
+  Pipette, Sliders, Search, Sparkles, SlidersHorizontal, ChevronDown, ChevronUp, Link as LinkIcon, ShieldCheck, AlertTriangle, FileText, Lock
 } from 'lucide-react';
-import { PortfolioData, mockDb, mockAuth } from '../../utils/mockDb';
+import { PortfolioData, mockDb, mockAuth, checkTemplateAccess } from '../../utils/mockDb';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { resolveInstalledTemplateSync, resolveInstalledTemplateAsync } from '../../utils/installedTemplateResolver';
 import { useEditorContext } from '../../context/EditorContext';
@@ -24,6 +24,7 @@ import SectionTree from './SectionTree';
 import CampusCvLogo from '../common/CampusCvLogo';
 import CampusCvQrCode from '../common/CampusCvQrCode';
 import { THEME_COLOR_PRESETS, GOOGLE_FONT_PRESETS, FontPreset, getGoogleFontUrl } from '../../utils/themeTypographyPresets';
+import UpgradePlanModal from '../common/UpgradePlanModal';
 
 type TabKey = 'layers' | 'design' | 'publish';
 
@@ -216,12 +217,47 @@ function DesignPanel({
   }, []);
 
   // Filter templates: only free templates and purchased templates for the current user
+  const [currentUser, setCurrentUser] = useState<any>(() => mockAuth.getCurrentUser());
+  const [upgradeModal, setUpgradeModal] = useState<any | null>(null);
+
   const availableTemplates = useMemo(() => {
-    return syncedTemplates.filter(t => (t.status || 'active') === 'active');
-  }, [syncedTemplates]);
+    const TIER_ORDER: Record<string, number> = { 'free': 0, 'trial': 1, 'monthly': 1, 'quarterly': 2, 'yearly': 3, 'pro': 3 };
+    const currentTmplId = portfolio?.templateId || portfolio?.layoutStyle || '';
+    return syncedTemplates
+      .filter(t => (t.status || 'active') === 'active')
+      .filter(t => {
+        // If current portfolio is actively using this template, show it
+        if (currentTmplId && t.id === currentTmplId) return true;
+        // Only show templates that the user's purchased plan tier has access to
+        const access = checkTemplateAccess(currentUser, t);
+        return access.isAccessible;
+      })
+      .sort((a: any, b: any) => {
+        const aRank = TIER_ORDER[(a.planTier || 'free').toLowerCase()] ?? 1;
+        const bRank = TIER_ORDER[(b.planTier || 'free').toLowerCase()] ?? 1;
+        return aRank - bRank;
+      });
+  }, [syncedTemplates, currentUser, portfolio?.templateId, portfolio?.layoutStyle]);
+
+  useEffect(() => {
+    setCurrentUser(mockAuth.getCurrentUser());
+  }, []);
 
   const handleSelectTemplate = async (selectedTemplateId: string) => {
     if (!portfolio || !selectedTemplateId) return;
+
+    const targetTemplate = availableTemplates.find(t => t.id === selectedTemplateId);
+    const access = checkTemplateAccess(currentUser, targetTemplate);
+    if (!access.isAccessible) {
+      setUpgradeModal({
+        isOpen: true,
+        templateName: targetTemplate?.name || selectedTemplateId,
+        requiredTier: access.requiredTier,
+        reason: access.reason,
+        planLimit: access.planLimit,
+      });
+      return;
+    }
 
     const prevTemplateId = portfolio.templateId || portfolio.layoutStyle || '';
     if (prevTemplateId === selectedTemplateId) return;
@@ -246,7 +282,6 @@ function DesignPanel({
       sectionOrder: []
     };
 
-    const targetTemplate = availableTemplates.find(t => t.id === selectedTemplateId);
     const targetVersionId = targetTemplate?.currentVersionId || (targetTemplate as any)?.versionId;
     
     // Resolve full package files asynchronously (from API / cache / disk)
@@ -620,6 +655,12 @@ function DesignPanel({
         <div className="space-y-2">
           {availableTemplates.map(tmpl => {
             const isSelected = currentTemplateId === tmpl.id;
+            const access = checkTemplateAccess(currentUser, tmpl);
+            const isLocked = !isSelected && !access.isAccessible;
+
+            const rawTier = (tmpl.planTier || (tmpl.isPremium ? 'yearly' : 'monthly')).toLowerCase();
+            const planTier = rawTier === 'free' ? 'free' : rawTier === 'quarterly' ? 'quarterly' : (rawTier === 'yearly' || rawTier === 'pro') ? 'yearly' : 'monthly';
+
             return (
               <div
                 key={tmpl.id}
@@ -627,33 +668,69 @@ function DesignPanel({
                 className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                   isSelected
                     ? 'border-violet-500 bg-violet-50/50 ring-1 ring-violet-500 shadow-xs'
-                    : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/75 bg-white'
+                    : isLocked
+                      ? 'border-zinc-200 bg-zinc-50/50 hover:border-amber-300 opacity-90'
+                      : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/75 bg-white'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="relative w-10 h-10 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 overflow-hidden">
                     {tmpl.thumbnail ? (
-                      <img src={tmpl.thumbnail} alt={tmpl.name} className="w-full h-full object-cover" />
+                      <img src={tmpl.thumbnail} alt={tmpl.name} className={`w-full h-full object-cover ${isLocked ? 'grayscale-[30%]' : ''}`} />
                     ) : (
                       <LayoutGrid className="w-5 h-5 text-zinc-400" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-zinc-900 truncate">{tmpl.name}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-zinc-900 truncate">{tmpl.name}</p>
+                      <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${
+                        planTier === 'free'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : planTier === 'monthly'
+                            ? 'bg-sky-100 text-sky-700'
+                            : planTier === 'quarterly'
+                              ? 'bg-indigo-100 text-indigo-700'
+                              : 'bg-violet-100 text-violet-700'
+                      }`}>
+                        {planTier}
+                      </span>
+                    </div>
                     <p className="text-[10px] text-zinc-500 truncate">{tmpl.category || 'Portfolio'}</p>
                   </div>
                 </div>
 
-                {isSelected && (
+                {isSelected ? (
                   <div className="w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3" />
                   </div>
-                )}
+                ) : isLocked ? (
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-bold shrink-0">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span>Lock</span>
+                  </div>
+                ) : null}
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Upgrade Plan Modal */}
+      {upgradeModal && (
+        <UpgradePlanModal
+          isOpen={upgradeModal.isOpen}
+          onClose={() => setUpgradeModal(null)}
+          templateName={upgradeModal.templateName}
+          requiredTier={upgradeModal.requiredTier}
+          reason={upgradeModal.reason}
+          planLimit={upgradeModal.planLimit}
+          onUpgradeSuccess={(upgradedPlan) => {
+            setCurrentUser(mockAuth.getCurrentUser());
+            alert(`🎉 Successfully upgraded to ${upgradedPlan.name}! You can now switch to this template.`);
+          }}
+        />
+      )}
 
     </div>
   );

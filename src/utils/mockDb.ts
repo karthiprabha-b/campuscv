@@ -219,6 +219,8 @@ export interface PlanConfig {
   storage: string;
   storageMB: number;
   desc: string;
+  tier?: 'free' | 'monthly' | 'quarterly' | 'yearly';
+  allowedTemplateCount?: number;
   subBadge?: string;
   features?: string[];
   buttonText?: string;
@@ -249,11 +251,13 @@ export const defaultPlans: PlanConfig[] = [
     price: 30,
     storage: '500 MB',
     storageMB: 500,
-    desc: '',
+    desc: '30 Days Access',
+    tier: 'monthly',
+    allowedTemplateCount: 3,
     features: [
       '1 Month Access',
       'Portfolio Website',
-      '3 Templates',
+      '3 Templates Selection',
       'QR Code & Custom URL',
     ],
     buttonText: 'START TRIAL FOR ₹ 30',
@@ -267,6 +271,8 @@ export const defaultPlans: PlanConfig[] = [
     storage: '500 MB',
     storageMB: 500,
     desc: 'Perfect for getting started',
+    tier: 'monthly',
+    allowedTemplateCount: 3,
     features: [
       'Portfolio website',
       '3 Template selection',
@@ -286,6 +292,8 @@ export const defaultPlans: PlanConfig[] = [
     storage: '1 GB',
     storageMB: 1024,
     desc: '90 Days Access',
+    tier: 'quarterly',
+    allowedTemplateCount: 6,
     features: [
       'Everything in Monthly',
       'Personal URL',
@@ -304,11 +312,13 @@ export const defaultPlans: PlanConfig[] = [
     storage: '2 GB',
     storageMB: 2048,
     desc: 'Best Value',
+    tier: 'yearly',
+    allowedTemplateCount: 12,
     subBadge: 'Just ₹100 per month',
     isPopular: true,
     features: [
       'Everything in Quarterly',
-      '12 Template selection',
+      'All 12+ Templates selection',
       'Unlimited updates',
     ],
     buttonText: 'GET YEARLY PLAN',
@@ -316,6 +326,111 @@ export const defaultPlans: PlanConfig[] = [
     razorpayPlanId: 'plan_TZ2Ui2Jy2k0Oa2',
   },
 ];
+
+/**
+ * Normalizes user plan tier string to canonical tier level
+ */
+export function getUserPlanTier(user: UserProfile | null): 'free' | 'monthly' | 'quarterly' | 'yearly' {
+  if (!user || !user.isPro) return 'free';
+  if (user.subscriptionExpires && new Date(user.subscriptionExpires).getTime() < Date.now()) {
+    return 'free';
+  }
+  const p = (user.planType || '').toLowerCase();
+  if (p.includes('year') || p.includes('365') || p.includes('annual')) return 'yearly';
+  if (p.includes('quarter') || p.includes('90')) return 'quarterly';
+  if (p.includes('month') || p.includes('30') || p.includes('trial')) return 'monthly';
+  return 'monthly';
+}
+
+/**
+ * Returns allowed template count quota for given plan tier
+ */
+export function getPlanTemplateLimit(userOrTier: UserProfile | string | null): number {
+  const tier = typeof userOrTier === 'string' ? userOrTier.toLowerCase() : getUserPlanTier(userOrTier);
+  if (tier === 'yearly' || tier.includes('year') || tier.includes('365')) return 12;
+  if (tier === 'quarterly' || tier.includes('quarter') || tier.includes('90')) return 6;
+  if (tier === 'monthly' || tier.includes('month') || tier.includes('30') || tier.includes('trial')) return 3;
+  return 1; // Free tier
+}
+
+const TIER_HIERARCHY: Record<string, number> = {
+  'free': 0,
+  'monthly': 1,
+  'quarterly': 2,
+  'yearly': 3,
+  'pro': 2
+};
+
+/**
+ * Checks if user is eligible to use / switch to a template
+ */
+export function checkTemplateAccess(
+  user: UserProfile | null,
+  template: any,
+  currentUsageCount: number = 0
+): {
+  isAccessible: boolean;
+  reason?: 'plan_tier' | 'limit_reached' | 'unpaid';
+  requiredTier: 'free' | 'monthly' | 'quarterly' | 'yearly';
+  planLimit: number;
+  userTier: 'free' | 'monthly' | 'quarterly' | 'yearly';
+  message?: string;
+} {
+  const rawTier = (template?.planTier || (template?.isPremium ? 'yearly' : 'monthly')).toString().toLowerCase();
+  const requiredTier: 'free' | 'monthly' | 'quarterly' | 'yearly' = 
+    rawTier === 'free' ? 'free' : 
+    rawTier === 'quarterly' ? 'quarterly' : 
+    (rawTier === 'yearly' || rawTier === 'pro') ? 'yearly' : 'monthly';
+
+  const userTier = getUserPlanTier(user);
+  const planLimit = getPlanTemplateLimit(user);
+
+  // 1. Check if user is unpaid / expired on a paid template
+  if (requiredTier !== 'free' && (!user || !user.isPro || userTier === 'free')) {
+    return {
+      isAccessible: false,
+      reason: 'unpaid',
+      requiredTier,
+      planLimit,
+      userTier,
+      message: `Subscription required. This template requires a ${requiredTier.toUpperCase()} plan.`
+    };
+  }
+
+  // 2. Check Tier Hierarchy (Monthly cannot access Quarterly / Yearly; Quarterly cannot access Yearly)
+  const userRank = TIER_HIERARCHY[userTier] ?? 0;
+  const reqRank = TIER_HIERARCHY[requiredTier] ?? 1;
+
+  if (userRank < reqRank) {
+    return {
+      isAccessible: false,
+      reason: 'plan_tier',
+      requiredTier,
+      planLimit,
+      userTier,
+      message: `Upgrade required. This template is available on the ${requiredTier.toUpperCase()} plan.`
+    };
+  }
+
+  // 3. Check template usage count limit
+  if (currentUsageCount >= planLimit && planLimit < 999) {
+    return {
+      isAccessible: false,
+      reason: 'limit_reached',
+      requiredTier: userTier === 'monthly' ? 'quarterly' : 'yearly',
+      planLimit,
+      userTier,
+      message: `You have reached your ${userTier.toUpperCase()} plan limit of ${planLimit} templates. Upgrade to unlock more!`
+    };
+  }
+
+  return {
+    isAccessible: true,
+    requiredTier,
+    planLimit,
+    userTier
+  };
+}
 
 export const defaultCoupons: CouponCode[] = [];
 
@@ -844,6 +959,12 @@ export const mockDb = {
             if (found.name === 'Test Plan' || found.name === 'Monthly Trial') {
               found.name = '1 Month Trial';
             }
+            if (!found.buttonText || found.buttonText.includes('5') || found.buttonText.includes('TEST')) {
+              found.buttonText = 'START TRIAL FOR ₹ 30';
+            }
+            if (!found.price || found.price === 5) {
+              found.price = 30;
+            }
             if (!found.features || found.features.some((f: string) => f.includes('AutoPay') || f.includes('5.00') || f.includes('Recurring') || f.includes('Every Month') || f.includes('One-Time') || f.includes('30 Days Full Access') || f.includes('All Templates Access'))) {
               found.features = [
                 '1 Month Access',
@@ -964,28 +1085,38 @@ export const mockDb = {
   },
   validateCouponAsync: async (code: string, planId?: string): Promise<CouponCode | null> => {
     if (!code) return null;
-    // 1. Try local cache
-    const local = mockDb.validateCoupon(code, planId);
-    if (local) return local;
+    const cleanCode = code.trim().toUpperCase();
 
-    // 2. Fetch live from server
+    // 1. Always try server first — server is the source of truth
     if (typeof window !== 'undefined') {
       try {
-        const cleanCode = encodeURIComponent(code.trim().toUpperCase());
-        const url = `/api/coupons?validate=${cleanCode}${planId ? `&planId=${encodeURIComponent(planId)}` : ''}`;
+        const encoded = encodeURIComponent(cleanCode);
+        const url = `/api/coupons?validate=${encoded}${planId ? `&planId=${encodeURIComponent(planId)}` : ''}`;
         const res = await fetch(url, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data.valid && data.coupon) {
+            // Update local cache with the fresh server copy
             mockDb.saveCoupon(data.coupon);
             return data.coupon;
+          } else {
+            // Server says invalid/deleted — remove it from local cache so it stops working
+            const local = mockDb.getCoupons();
+            const staleCoupon = local.find(c => (c.code || '').trim().toUpperCase() === cleanCode);
+            if (staleCoupon) {
+              const freshList = local.filter(c => (c.code || '').trim().toUpperCase() !== cleanCode);
+              localStorage.setItem('portly_coupons', JSON.stringify(freshList));
+            }
+            return null;
           }
         }
       } catch (e) {
-        console.warn('[MOCKDB] Server coupon validation error:', e);
+        console.warn('[MOCKDB] Server coupon validation unreachable, falling back to local cache:', e);
       }
     }
-    return null;
+
+    // 2. Fallback: use local cache only if server is unreachable
+    return mockDb.validateCoupon(code, planId);
   },
   useCoupon: (id: string) => {
     const list = mockDb.getCoupons();

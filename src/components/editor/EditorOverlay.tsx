@@ -145,7 +145,7 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
             background: 'transparent',
             boxShadow: 'none',
             pointerEvents: 'none',
-            transition: 'top 40ms, left 40ms, width 40ms, height 40ms',
+            transition: 'none',
           }}
         >
           {/* Label Tag */}
