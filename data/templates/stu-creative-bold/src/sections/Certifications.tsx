@@ -18,13 +18,13 @@ export default function Certifications(props: CertificationsProps = {}) {
     [];
 
   const isDemo = (t: string, o?: string) => {
-    const s = `${t || ''} ${o || ''}`.toLowerCase();
+    const title = (t || '').toLowerCase().trim();
     return (
-      s.includes('meta careers') ||
-      s.includes('google ux') ||
-      s.includes('typescript enterprise') ||
-      s.includes('boot camp') ||
-      s.includes('advanced react & next.js')
+      title.includes('google ux design') ||
+      title.includes('typescript enterprise') ||
+      title.includes('full-stack web engineering boot camp') ||
+      title.includes('advanced react & next.js') ||
+      title === 'professional certification'
     );
   };
 
@@ -36,8 +36,14 @@ export default function Certifications(props: CertificationsProps = {}) {
   })).filter((c: any) => c.title.length > 0);
 
   // If user has real items, strip any demo placeholders
-  if (certList.some(c => !isDemo(c.title, c.organization))) {
+  const hasReal = certList.some(c => !isDemo(c.title, c.organization));
+  if (hasReal) {
     certList = certList.filter(c => !isDemo(c.title, c.organization));
+  } else {
+    // If only demo certs exist, do not render certifications section for real user profiles
+    if (props.data?.name || props.data?.username || props.data?.id) {
+      certList = [];
+    }
   }
 
   // If completely empty, do not render certifications section

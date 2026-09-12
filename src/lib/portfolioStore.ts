@@ -110,9 +110,35 @@ export async function loadPortfolio(idOrUsername: string): Promise<any | null> {
         }
       }
 
-      // Auto-populate top-level collection arrays from canonicalProfile if missing
-      if (parsed.canonicalProfile && typeof parsed.canonicalProfile === 'object') {
-        const cp = parsed.canonicalProfile;
+      // Auto-populate top-level collection arrays from canonicalProfile or latest user profile
+      let cp = parsed.canonicalProfile && typeof parsed.canonicalProfile === 'object' && Object.keys(parsed.canonicalProfile).length > 0 ? parsed.canonicalProfile : null;
+      if (!cp || !Array.isArray(cp.skills) || cp.skills.length === 0) {
+        try {
+          const profileRow = db.prepare("SELECT data FROM portfolios WHERE published = -1 ORDER BY updatedAt DESC LIMIT 1").get() as any;
+          if (profileRow) {
+            const prof = JSON.parse(profileRow.data);
+            cp = prof.canonicalProfile || prof;
+            parsed.canonicalProfile = cp;
+          }
+        } catch (e) {}
+      }
+
+      if (cp) {
+        const isDemoSkillList = (arr: any[]) => {
+          if (!Array.isArray(arr) || arr.length === 0) return true;
+          const demoKeywords = ['react / next.js', 'typescript', 'html5 & css3', 'tailwind css', 'node.js & express', 'sql & mongodb', 'rest apis'];
+          let flat: string[] = [];
+          arr.forEach(item => {
+            if (typeof item === 'string') flat.push(item.toLowerCase());
+            else if (item && typeof item === 'object') {
+              if (Array.isArray(item.items)) item.items.forEach((it: any) => flat.push((it.name || it || '').toLowerCase()));
+              else flat.push((item.name || item.title || item.skill || '').toLowerCase());
+            }
+          });
+          if (flat.length === 0) return true;
+          return flat.every(s => demoKeywords.some(d => s.includes(d) || d.includes(s)));
+        };
+
         if ((!parsed.experience || !Array.isArray(parsed.experience) || parsed.experience.length === 0) && Array.isArray(cp.experience) && cp.experience.length > 0) {
           parsed.experience = cp.experience;
         }
@@ -122,7 +148,7 @@ export async function loadPortfolio(idOrUsername: string): Promise<any | null> {
         if ((!parsed.projects || !Array.isArray(parsed.projects) || parsed.projects.length === 0) && Array.isArray(cp.projects) && cp.projects.length > 0) {
           parsed.projects = cp.projects;
         }
-        if ((!parsed.skills || !Array.isArray(parsed.skills) || parsed.skills.length === 0) && Array.isArray(cp.skills) && cp.skills.length > 0) {
+        if ((!parsed.skills || !Array.isArray(parsed.skills) || parsed.skills.length === 0 || isDemoSkillList(parsed.skills)) && Array.isArray(cp.skills) && cp.skills.length > 0 && !isDemoSkillList(cp.skills)) {
           parsed.skills = cp.skills;
         }
         if ((!parsed.certifications || !Array.isArray(parsed.certifications) || parsed.certifications.length === 0) && Array.isArray(cp.certifications) && cp.certifications.length > 0) {
@@ -130,8 +156,13 @@ export async function loadPortfolio(idOrUsername: string): Promise<any | null> {
         }
         if (!parsed.name && cp.personal?.fullName) parsed.name = cp.personal.fullName;
         if (!parsed.tagline && cp.personal?.headline) parsed.tagline = cp.personal.headline;
+        if (!parsed.headline && cp.personal?.headline) parsed.headline = cp.personal.headline;
         if (!parsed.aboutMe && cp.personal?.summary) parsed.aboutMe = cp.personal.summary;
         if (!parsed.profileImage && cp.personal?.profilePhoto) parsed.profileImage = cp.personal.profilePhoto;
+        if (!parsed.email && cp.personal?.email) parsed.email = cp.personal.email;
+        if (!parsed.phone && cp.personal?.phone) parsed.phone = cp.personal.phone;
+        const loc = [cp.personal?.city, cp.personal?.state, cp.personal?.country].filter(Boolean).join(', ');
+        if (!parsed.location && loc) parsed.location = loc;
       }
 
       // Ensure projects array is ALWAYS an Array, never undefined
