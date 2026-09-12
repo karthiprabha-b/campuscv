@@ -152,115 +152,174 @@ export function normalizePortfolio(raw: any): PortfolioData {
     }
   }
 
-  const normalizedObj: PortfolioData = {
-    ...raw,
-    ...boundProps,
-    name: boundProps.name || raw.name,
-    fullName: boundProps.fullName || raw.fullName,
-    headline: boundProps.headline || raw.headline,
-    role: boundProps.role || raw.role,
-    location: boundProps.location || raw.location,
-    profileImage: resolvedImg || boundProps.profileImage || raw.profileImage,
-    avatarUrl: resolvedImg || boundProps.avatarUrl || raw.avatarUrl,
-    avatar: resolvedImg,
-    photo: resolvedImg,
-    image: resolvedImg,
-    email: emailVal,
-    aboutMe: boundProps.aboutMe || raw.aboutMe,
-    hero: {
-      name: raw.hero?.name || boundProps.name || raw.name || canonicalProfile.personal?.fullName || '',
-      role: raw.hero?.role || boundProps.role || raw.role || canonicalProfile.personal?.headline || '',
-      title: raw.hero?.title || raw.tagline || raw.headline || boundProps.headline || canonicalProfile.personal?.headline || '',
-      subtitle: raw.hero?.subtitle || raw.tagline || boundProps.headline || canonicalProfile.personal?.headline || '',
-      degree: raw.hero?.degree || raw.university || (canonicalProfile.education?.[0] ? `${canonicalProfile.education[0].degree || ''} at ${canonicalProfile.education[0].institution || (canonicalProfile.education[0] as any).school || ''}`.trim() : ''),
-      university: raw.hero?.university || raw.university || (canonicalProfile.education?.[0]?.institution || (canonicalProfile.education?.[0] as any)?.school || ''),
-      location: raw.hero?.location || boundProps.location || raw.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.country].filter(Boolean).join(', ') || '',
-      graduation: raw.hero?.graduation || raw.graduation || ((canonicalProfile.education?.[0] as any)?.year || (canonicalProfile.education?.[0] as any)?.period || ''),
-      ...(raw.hero || {}),
-      ...(boundProps.hero || {}),
-      avatarUrl: resolvedImg || raw.hero?.avatarUrl || boundProps.hero?.avatarUrl,
-      profileImage: resolvedImg || raw.hero?.profileImage || boundProps.hero?.profileImage,
-      image: resolvedImg,
-      photo: resolvedImg
-    },
-    about: {
-      ...(raw.about || {}),
-      ...(boundProps.about || {}),
-      avatarUrl: resolvedImg || raw.about?.avatarUrl || boundProps.about?.avatarUrl,
-      profileImage: resolvedImg || raw.about?.profileImage || boundProps.about?.profileImage,
-      image: resolvedImg,
-      photo: resolvedImg
-    },
-    projects: Array.isArray(raw.projects) ? raw.projects : (boundProps.projects !== undefined ? boundProps.projects : []),
-    experience: Array.isArray(raw.experience) ? raw.experience : (boundProps.experience !== undefined ? boundProps.experience : []),
-    skills: Array.isArray(raw.skills) ? raw.skills : (boundProps.skills !== undefined ? boundProps.skills : []),
-    education: (Array.isArray(raw.education) && raw.education.length > 0 ? raw.education : (canonicalProfile.education || boundProps.education || [])).map((edu: any, idx: number) => {
-      const start = (edu.startDate || edu.startYear || edu.start || edu.from || '').toString().trim();
-      const end = (edu.endDate || edu.endYear || edu.end || edu.to || edu.graduationYear || edu.graduation || '').toString().trim();
-      const period = (edu.period || edu.duration || edu.years || edu.year || (start && end ? `${start} – ${end}` : (start || end || ''))).toString().trim();
-      const field = (edu.fieldOfStudy || edu.field || edu.department || edu.specialization || edu.major || '').toString().trim();
-      const inst = (edu.institution || edu.school || edu.university || edu.college || '').toString().trim();
-      const deg = (edu.degree || edu.title || edu.qualification || '').toString().trim();
-      return {
-        ...edu,
-        id: edu.id || `edu-${idx + 1}`,
-        degree: deg,
-        institution: inst,
-        school: inst,
-        university: inst,
-        startDate: start,
-        endDate: end,
-        startYear: start,
-        endYear: end,
-        period,
-        duration: period,
-        year: period,
-        years: period,
-        fieldOfStudy: field,
-        field,
-        department: field,
-        specialization: field
-      };
-    }),
-    certifications: Array.isArray(raw.certifications) ? raw.certifications : (Array.isArray(raw.awards) ? raw.awards : (boundProps.certifications !== undefined ? boundProps.certifications : (canonicalProfile.certifications || []))),
-    services: Array.isArray(raw.services) ? raw.services : (boundProps.services !== undefined ? boundProps.services : []),
-    testimonials: Array.isArray(raw.testimonials) ? raw.testimonials : (boundProps.testimonials !== undefined ? boundProps.testimonials : []),
-    personal: {
-      name: boundProps.name || raw.name || raw.personal?.name || canonicalProfile.personal?.fullName || '',
-      fullName: boundProps.fullName || raw.fullName || raw.personal?.fullName || canonicalProfile.personal?.fullName || '',
-      role: boundProps.role || raw.role || raw.headline || raw.personal?.headline || canonicalProfile.personal?.headline || '',
-      headline: boundProps.headline || raw.headline || raw.personal?.headline || canonicalProfile.personal?.headline || '',
-      location: boundProps.location || raw.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || '',
-      email: emailVal,
-      phone: raw.phone || canonicalProfile.personal?.phone || '',
-      profilePhoto: resolvedImg,
-      avatarUrl: resolvedImg,
-      summary: boundProps.aboutMe || raw.aboutMe || canonicalProfile.personal?.summary || '',
-      availability: raw.personal?.availability || ''
-    },
-    profile: {
-      name: boundProps.name || raw.name || raw.profile?.name || '',
-      fullName: boundProps.fullName || raw.fullName || raw.profile?.fullName || '',
-      headline: boundProps.headline || raw.headline || raw.profile?.headline || '',
-      role: boundProps.headline || raw.headline || raw.profile?.role || raw.profile?.headline || '',
-      summary: boundProps.aboutMe || raw.aboutMe || raw.profile?.summary || '',
-      bio: boundProps.aboutMe || raw.aboutMe || raw.profile?.bio || raw.profile?.summary || '',
-      about: boundProps.aboutMe || raw.aboutMe || raw.profile?.about || '',
-      location: boundProps.location || raw.location || raw.profile?.location || '',
-      email: emailVal,
-      phone: raw.phone || raw.profile?.phone || '',
-      avatarUrl: resolvedImg,
+    // Helper to check if a skills list is strictly the initial demo/seed list
+    const isDemoSkillList = (arr: any[]) => {
+      if (!Array.isArray(arr) || arr.length === 0) return true;
+      const demoKeywords = ['react / next.js', 'typescript', 'html5 & css3', 'tailwind css', 'node.js & express', 'sql & mongodb', 'rest apis', 'figma (auto-layout', 'adobe creative suite', 'prototyping & wireframing'];
+      let flat: string[] = [];
+      arr.forEach(item => {
+        if (typeof item === 'string') flat.push(item.toLowerCase());
+        else if (item && typeof item === 'object') {
+          if (Array.isArray(item.items)) {
+            item.items.forEach((it: any) => flat.push((it.name || it || '').toLowerCase()));
+          } else {
+            flat.push((item.name || item.title || item.skill || '').toLowerCase());
+          }
+        }
+      });
+      if (flat.length === 0) return true;
+      return flat.every(s => demoKeywords.some(d => s.includes(d) || d.includes(s)));
+    };
+
+    const isExactDemoCertTitle = (title: string) => {
+      const t = (title || '').toLowerCase().trim();
+      return (
+        t.includes('google ux design') ||
+        t.includes('typescript enterprise') ||
+        t.includes('full-stack web engineering boot camp') ||
+        t.includes('advanced react & next.js') ||
+        t === 'professional certification'
+      );
+    };
+
+    const resolvedSkills = (() => {
+      const canonicalSkills = Array.isArray(canonicalProfile.skills) ? canonicalProfile.skills : [];
+      if (canonicalSkills.length > 0 && isDemoSkillList(raw.skills)) {
+        return canonicalSkills;
+      }
+      if (Array.isArray(raw.skills) && raw.skills.length > 0) {
+        return raw.skills;
+      }
+      return boundProps.skills !== undefined ? boundProps.skills : canonicalSkills;
+    })();
+
+    const resolvedCertifications = (() => {
+      const candidateList = Array.isArray(raw.certifications) && raw.certifications.length > 0
+        ? raw.certifications
+        : (Array.isArray(raw.awards) && raw.awards.length > 0
+            ? raw.awards
+            : (boundProps.certifications !== undefined ? boundProps.certifications : (canonicalProfile.certifications || [])));
+      
+      if (Array.isArray(candidateList) && candidateList.length > 0) {
+        const hasReal = candidateList.some((c: any) => !isExactDemoCertTitle(c.title || c.name || ''));
+        if (hasReal) {
+          return candidateList.filter((c: any) => !isExactDemoCertTitle(c.title || c.name || ''));
+        }
+      }
+      return candidateList;
+    })();
+
+    const resolvedLocation = boundProps.location || raw.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || raw.personal?.location || raw.profile?.location || '';
+
+    const normalizedObj: PortfolioData = {
+      ...raw,
+      ...boundProps,
+      name: boundProps.name || raw.name,
+      fullName: boundProps.fullName || raw.fullName,
+      headline: boundProps.headline || raw.headline,
+      role: boundProps.role || raw.role,
+      location: resolvedLocation,
+      profileImage: resolvedImg || boundProps.profileImage || raw.profileImage,
+      avatarUrl: resolvedImg || boundProps.avatarUrl || raw.avatarUrl,
+      avatar: resolvedImg,
       photo: resolvedImg,
       image: resolvedImg,
-      profileImage: resolvedImg,
-      avatar: resolvedImg
-    },
-    contact: {
       email: emailVal,
-      phone: raw.phone || raw.personal?.phone || raw.profile?.phone || canonicalProfile.personal?.phone || '',
-      location: boundProps.location || raw.location || raw.personal?.location || raw.profile?.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || '',
-      socials: mergedSocials
-    },
+      aboutMe: boundProps.aboutMe || raw.aboutMe,
+      hero: {
+        name: raw.hero?.name || boundProps.name || raw.name || canonicalProfile.personal?.fullName || '',
+        role: raw.hero?.role || boundProps.role || raw.role || canonicalProfile.personal?.headline || '',
+        title: raw.hero?.title || raw.tagline || raw.headline || boundProps.headline || canonicalProfile.personal?.headline || '',
+        subtitle: raw.hero?.subtitle || raw.tagline || boundProps.headline || canonicalProfile.personal?.headline || '',
+        degree: raw.hero?.degree || raw.university || (canonicalProfile.education?.[0] ? `${canonicalProfile.education[0].degree || ''} at ${canonicalProfile.education[0].institution || (canonicalProfile.education[0] as any).school || ''}`.trim() : ''),
+        university: raw.hero?.university || raw.university || (canonicalProfile.education?.[0]?.institution || (canonicalProfile.education?.[0] as any)?.school || ''),
+        location: raw.hero?.location || resolvedLocation,
+        graduation: raw.hero?.graduation || raw.graduation || ((canonicalProfile.education?.[0] as any)?.year || (canonicalProfile.education?.[0] as any)?.period || ''),
+        ...(raw.hero || {}),
+        ...(boundProps.hero || {}),
+        avatarUrl: resolvedImg || raw.hero?.avatarUrl || boundProps.hero?.avatarUrl,
+        profileImage: resolvedImg || raw.hero?.profileImage || boundProps.hero?.profileImage,
+        image: resolvedImg,
+        photo: resolvedImg
+      },
+      about: {
+        ...(raw.about || {}),
+        ...(boundProps.about || {}),
+        avatarUrl: resolvedImg || raw.about?.avatarUrl || boundProps.about?.avatarUrl,
+        profileImage: resolvedImg || raw.about?.profileImage || boundProps.about?.profileImage,
+        image: resolvedImg,
+        photo: resolvedImg
+      },
+      projects: Array.isArray(raw.projects) ? raw.projects : (boundProps.projects !== undefined ? boundProps.projects : []),
+      experience: Array.isArray(raw.experience) ? raw.experience : (boundProps.experience !== undefined ? boundProps.experience : []),
+      skills: resolvedSkills,
+      education: (Array.isArray(raw.education) && raw.education.length > 0 ? raw.education : (canonicalProfile.education || boundProps.education || [])).map((edu: any, idx: number) => {
+        const start = (edu.startDate || edu.startYear || edu.start || edu.from || '').toString().trim();
+        const end = (edu.endDate || edu.endYear || edu.end || edu.to || edu.graduationYear || edu.graduation || '').toString().trim();
+        const period = (edu.period || edu.duration || edu.years || edu.year || (start && end ? `${start} – ${end}` : (start || end || ''))).toString().trim();
+        const field = (edu.fieldOfStudy || edu.field || edu.department || edu.specialization || edu.major || '').toString().trim();
+        const inst = (edu.institution || edu.school || edu.university || edu.college || '').toString().trim();
+        const deg = (edu.degree || edu.title || edu.qualification || '').toString().trim();
+        return {
+          ...edu,
+          id: edu.id || `edu-${idx + 1}`,
+          degree: deg,
+          institution: inst,
+          school: inst,
+          university: inst,
+          startDate: start,
+          endDate: end,
+          startYear: start,
+          endYear: end,
+          period,
+          duration: period,
+          year: period,
+          years: period,
+          fieldOfStudy: field,
+          field,
+          department: field,
+          specialization: field
+        };
+      }),
+      certifications: resolvedCertifications,
+      services: Array.isArray(raw.services) ? raw.services : (boundProps.services !== undefined ? boundProps.services : []),
+      testimonials: Array.isArray(raw.testimonials) ? raw.testimonials : (boundProps.testimonials !== undefined ? boundProps.testimonials : []),
+      personal: {
+        name: boundProps.name || raw.name || raw.personal?.name || canonicalProfile.personal?.fullName || '',
+        fullName: boundProps.fullName || raw.fullName || raw.personal?.fullName || canonicalProfile.personal?.fullName || '',
+        role: boundProps.role || raw.role || raw.headline || raw.personal?.headline || canonicalProfile.personal?.headline || '',
+        headline: boundProps.headline || raw.headline || raw.personal?.headline || canonicalProfile.personal?.headline || '',
+        location: resolvedLocation,
+        email: emailVal,
+        phone: raw.phone || canonicalProfile.personal?.phone || '',
+        profilePhoto: resolvedImg,
+        avatarUrl: resolvedImg,
+        summary: boundProps.aboutMe || raw.aboutMe || canonicalProfile.personal?.summary || '',
+        availability: raw.personal?.availability || ''
+      },
+      profile: {
+        name: boundProps.name || raw.name || raw.profile?.name || '',
+        fullName: boundProps.fullName || raw.fullName || raw.profile?.fullName || '',
+        headline: boundProps.headline || raw.headline || raw.profile?.headline || '',
+        role: boundProps.headline || raw.headline || raw.profile?.role || raw.profile?.headline || '',
+        summary: boundProps.aboutMe || raw.aboutMe || raw.profile?.summary || '',
+        bio: boundProps.aboutMe || raw.aboutMe || raw.profile?.bio || raw.profile?.summary || '',
+        about: boundProps.aboutMe || raw.aboutMe || raw.profile?.about || '',
+        location: resolvedLocation,
+        email: emailVal,
+        phone: raw.phone || raw.profile?.phone || '',
+        avatarUrl: resolvedImg,
+        photo: resolvedImg,
+        image: resolvedImg,
+        profileImage: resolvedImg,
+        avatar: resolvedImg
+      },
+      contact: {
+        email: emailVal,
+        phone: raw.phone || raw.personal?.phone || raw.profile?.phone || canonicalProfile.personal?.phone || '',
+        location: resolvedLocation,
+        socials: mergedSocials
+      },
     socials: mergedSocials,
     socialLinks: mergedSocials,
     social: mergedSocials,

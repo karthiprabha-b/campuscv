@@ -27,11 +27,37 @@ export default function Skills(props: SkillsProps = {}) {
     props.data?.expertise
   ];
 
+  const isDemoSkillList = (arr: any[]) => {
+    if (!Array.isArray(arr) || arr.length === 0) return true;
+    const demoKeywords = ['react / next.js', 'typescript', 'html5 & css3', 'tailwind css', 'node.js & express', 'sql & mongodb', 'rest apis', 'figma (auto-layout', 'adobe creative suite', 'prototyping & wireframing'];
+    let flat: string[] = [];
+    arr.forEach(item => {
+      if (typeof item === 'string') flat.push(item.toLowerCase());
+      else if (item && typeof item === 'object') {
+        if (Array.isArray(item.items)) {
+          item.items.forEach((it: any) => flat.push((it.name || it || '').toLowerCase()));
+        } else {
+          flat.push((item.name || item.title || item.skill || '').toLowerCase());
+        }
+      }
+    });
+    if (flat.length === 0) return true;
+    return flat.every(s => demoKeywords.some(d => s.includes(d) || d.includes(s)));
+  };
+
   let rawSkills: any[] = [];
   for (const c of rawSkillsCandidates) {
-    if (Array.isArray(c) && c.length > 0) {
+    if (Array.isArray(c) && c.length > 0 && !isDemoSkillList(c)) {
       rawSkills = c;
       break;
+    }
+  }
+  if (rawSkills.length === 0) {
+    for (const c of rawSkillsCandidates) {
+      if (Array.isArray(c) && c.length > 0) {
+        rawSkills = c;
+        break;
+      }
     }
   }
 
