@@ -221,71 +221,15 @@ export const educationHistory: EducationItem[] = [
   },
 ];
 
-export const skillCategories: SkillCategory[] = [
-  {
-    category: "Frontend Development",
-    items: [
-      { name: "React / Next.js", percentage: 90 },
-      { name: "TypeScript", percentage: 85 },
-      { name: "HTML5 & CSS3", percentage: 95 },
-      { name: "Tailwind CSS", percentage: 92 },
-    ],
-  },
-  {
-    category: "Backend & Systems",
-    items: [
-      { name: "Node.js & Express", percentage: 78 },
-      { name: "SQL & MongoDB", percentage: 80 },
-      { name: "REST APIs", percentage: 88 },
-    ],
-  },
-  {
-    category: "UI/UX & Design",
-    items: [
-      { name: "Figma (Auto-layout, Components)", percentage: 92 },
-      { name: "Adobe Creative Suite", percentage: 75 },
-      { name: "Prototyping & Wireframing", percentage: 88 },
-    ],
-  },
-];
+export const skillCategories: SkillCategory[] = [];
 
 export const toolsIUse: ToolItem[] = [
-  { name: "Figma", iconName: "figma" },
-  { name: "Adobe XD", iconName: "adobe-xd" },
-  { name: "Photoshop", iconName: "photoshop" },
-  { name: "Illustrator", iconName: "illustrator" },
   { name: "VS Code", iconName: "vscode" },
   { name: "GitHub", iconName: "github" },
-  { name: "Notion", iconName: "notion" },
   { name: "Postman", iconName: "postman" },
 ];
 
-export const certifications: CertificationItem[] = [
-  {
-    title: "Advanced React & Next.js Frameworks",
-    organization: "Meta Careers",
-    date: "Dec 2025",
-    credentialUrl: "https://coursera.org/verify/meta-react",
-  },
-  {
-    title: "Google UX Design Professional Certificate",
-    organization: "Google Career Certificates",
-    date: "Jun 2025",
-    credentialUrl: "https://coursera.org/verify/google-ux",
-  },
-  {
-    title: "TypeScript Enterprise Patterns",
-    organization: "Frontend Masters",
-    date: "Mar 2025",
-    credentialUrl: "#",
-  },
-  {
-    title: "Full-Stack Web Engineering Boot Camp",
-    organization: "Codecademy",
-    date: "Aug 2024",
-    credentialUrl: "#",
-  },
-];
+export const certifications: CertificationItem[] = [];
 
 export const projects: ProjectItem[] = [
   {

@@ -233,7 +233,34 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     } catch (e) { }
   }
 
+  const KNOWN_TEMPLATE_DIR_MAP: Record<string, string[]> = {
+    'student-portfolio': ['stu-creative-bold'],
+    'student': ['stu-creative-bold'],
+    'student_portfolio': ['stu-creative-bold'],
+    'stu-creative-bold': ['stu-creative-bold'],
+    'creative-bold': ['stu-creative-bold'],
+    'doctor-portfolio': ['Doctor', 'doctor'],
+    'doctor': ['Doctor', 'doctor'],
+    'designer-portfolio': ['Designer portfolio', 'designer-portfolio'],
+    'designer': ['Designer portfolio', 'designer-portfolio'],
+    'slash-model': ['slash model', 'slash-model'],
+    'slash': ['slash model', 'slash-model'],
+    'static-panel': ['Static Panel', 'static-panel'],
+    'static': ['Static Panel', 'static-panel'],
+    'centerd': ['centerd', 'Centered'],
+    'centered': ['centerd', 'Centered'],
+    'card': ['Card', 'card'],
+    'card-deck': ['Card', 'card'],
+    'executive-lawyer-portfolio': ['stu_lawyer', 'stu-lawyer'],
+    'stu_lawyer': ['stu_lawyer', 'stu-lawyer'],
+    'stu-lawyer': ['stu_lawyer', 'stu-lawyer'],
+    'lawyer': ['stu_lawyer', 'stu-lawyer']
+  };
+
+  const directMapped = KNOWN_TEMPLATE_DIR_MAP[templateId.toLowerCase().trim()] || [];
+
   const candidates = Array.from(new Set([
+    ...directMapped,
     templateId,
     templateId.toLowerCase(),
     templateId.charAt(0).toUpperCase() + templateId.slice(1),

@@ -9,7 +9,8 @@ const templateMapping: Record<string, string> = {
   'cs-portfolio': 'cs-portfolio',
   'designer-portfolio': 'Designer portfolio',
   'Designer portfolio': 'Designer portfolio',
-  'student-portfolio': 'student-portfolio',
+  'stu-creative-bold': 'stu-creative-bold',
+  'student-portfolio': 'stu-creative-bold',
   'doctor-portfolio': 'Doctor',
   'Doctor': 'Doctor',
   'slash-model': 'slash model',
@@ -19,7 +20,10 @@ const templateMapping: Record<string, string> = {
   'centerd': 'centerd',
   'Centered': 'centerd',
   'card': 'Card',
-  'Card': 'Card'
+  'Card': 'Card',
+  'stu_lawyer': 'stu_lawyer',
+  'stu-lawyer': 'stu_lawyer',
+  'executive-lawyer-portfolio': 'stu_lawyer'
 };
 
 for (const [regKey, dirName] of Object.entries(templateMapping)) {
