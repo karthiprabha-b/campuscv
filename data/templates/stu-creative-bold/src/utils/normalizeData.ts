@@ -470,8 +470,11 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
       const realSkills = flatList.filter(s => !isDemoSkill(s.name));
       const activeList = realSkills.length > 0 ? realSkills : flatList;
 
-      const hasItemCategories = activeList.some(item => Boolean(item.category));
-      if (hasItemCategories) {
+      // If all items share generic category name like 'Technical Skills', categorize automatically into 4 cards
+      const uniqueCats = new Set(activeList.map(item => item.category).filter(Boolean));
+      const isGenericSingleCat = uniqueCats.size <= 1 && (uniqueCats.has('Technical Skills') || uniqueCats.has('Technical') || uniqueCats.has('Core Skills') || uniqueCats.has('General Competencies') || uniqueCats.size === 0);
+
+      if (!isGenericSingleCat && uniqueCats.size > 1) {
         const catMap: Record<string, Array<{ name: string; percentage: number }>> = {};
         activeList.forEach(item => {
           const cName = item.category || 'General Competencies';

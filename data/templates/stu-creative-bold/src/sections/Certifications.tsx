@@ -13,6 +13,7 @@ export default function Certifications(props: CertificationsProps = {}) {
   const rawList =
     (Array.isArray(props.certifications) && props.certifications.length > 0 ? props.certifications : null) ||
     (Array.isArray(props.data?.certifications) && props.data.certifications.length > 0 ? props.data.certifications : null) ||
+    (Array.isArray(props.data?.canonicalProfile?.certifications) && props.data.canonicalProfile.certifications.length > 0 ? props.data.canonicalProfile.certifications : null) ||
     (Array.isArray(props.data?.certificates) && props.data.certificates.length > 0 ? props.data.certificates : null) ||
     (Array.isArray(props.data?.credentials) && props.data.credentials.length > 0 ? props.data.credentials : null) ||
     [];
