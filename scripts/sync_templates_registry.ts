@@ -10,6 +10,8 @@ const templateMapping: Record<string, string> = {
   'designer-portfolio': 'Designer portfolio',
   'Designer portfolio': 'Designer portfolio',
   'stu-creative-bold': 'stu-creative-bold',
+  'stu_creative_bold': 'stu-creative-bold',
+  'Stu_creative_bold': 'stu-creative-bold',
   'student-portfolio': 'stu-creative-bold',
   'doctor-portfolio': 'Doctor',
   'Doctor': 'Doctor',

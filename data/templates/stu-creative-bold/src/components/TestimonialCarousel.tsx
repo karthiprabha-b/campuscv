@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Quote } from "lucide-react";
-import { testimonials as fallbackTestimonials, TestimonialItem } from "@/data/portfolio";
+import { TestimonialItem } from "@/data/portfolio";
 
 interface TestimonialCarouselProps {
   data?: any;
@@ -10,21 +10,27 @@ interface TestimonialCarouselProps {
 }
 
 export default function TestimonialCarousel(props: TestimonialCarouselProps = {}) {
-  const testimonialsList: TestimonialItem[] = Array.isArray(props.testimonials) && props.testimonials.length > 0
+  const rawList = (Array.isArray(props.testimonials) && props.testimonials.length > 0)
     ? props.testimonials
-    : (Array.isArray(props.data?.testimonials) && props.data.testimonials.length > 0
+    : ((Array.isArray(props.data?.testimonials) && props.data.testimonials.length > 0)
       ? props.data.testimonials
-      : fallbackTestimonials);
+      : ((Array.isArray(props.data?.feedback) && props.data.feedback.length > 0)
+        ? props.data.feedback
+        : ((Array.isArray(props.data?.reviews) && props.data.reviews.length > 0)
+          ? props.data.reviews
+          : [])));
 
   const [index, setIndex] = useState(0);
 
-  // Disable auto-timer in editor iframe to prevent selection box flickering
+  const testimonialsList: TestimonialItem[] = (rawList || []).map((t: any) => ({
+    quote: t.quote || t.content || t.message || t.feedback || "",
+    author: t.author || t.name || "Colleague",
+    role: t.role || t.title || t.designation || "",
+    avatar: t.avatar || t.avatarUrl || t.image || ""
+  })).filter((t: TestimonialItem) => Boolean(t.quote && t.quote.trim() !== ""));
+
   useEffect(() => {
     if (testimonialsList.length <= 1) return;
-    if (typeof window !== "undefined" && window.parent && window.parent !== window) {
-      // In editor iframe mode, keep static or manual to ensure zero editor flicker
-      return;
-    }
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % testimonialsList.length);
     }, 6000);
@@ -44,11 +50,16 @@ export default function TestimonialCarousel(props: TestimonialCarouselProps = {}
   const current = testimonialsList[index % testimonialsList.length];
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto overflow-hidden px-4 md:px-8 py-6">
+    <div
+      data-cv={`testimonials[${index % testimonialsList.length}]`}
+      data-cv-item
+      className="relative w-full max-w-4xl mx-auto overflow-hidden px-4 md:px-8 py-6"
+    >
       {/* Testimonial Panel */}
       <div className="relative min-h-[160px] flex items-center justify-center">
         <div
-          className="w-full text-center flex flex-col items-center transition-opacity duration-200"
+          key={index}
+          className="w-full text-center flex flex-col items-center transition-opacity duration-300"
         >
           <Quote className="w-10 h-10 text-[#FFC107]/50 mb-4 stroke-[1.5]" />
           <p className="text-sm sm:text-base md:text-lg font-medium leading-relaxed max-w-2xl text-[#111111] italic">
@@ -62,15 +73,20 @@ export default function TestimonialCarousel(props: TestimonialCarouselProps = {}
                 src={current.avatar}
                 alt={current.author}
                 className="w-10 h-10 rounded-full object-cover border-2 border-[#FFC107] shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             )}
             <div className="text-left">
               <h5 className="text-xs sm:text-sm font-bold text-[#111111] leading-none">
                 {current.author}
               </h5>
-              <span className="text-[10px] sm:text-xs text-[#666666]">
-                {current.role}
-              </span>
+              {current.role && (
+                <span className="text-[10px] sm:text-xs text-[#666666]">
+                  {current.role}
+                </span>
+              )}
             </div>
           </div>
         </div>

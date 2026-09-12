@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Linkedin, Github, Instagram, Twitter, ArrowUp, Mail, Phone, MapPin } from "lucide-react";
+import { Linkedin, Github, Instagram, Twitter, ArrowUp, Mail, Phone, MapPin, Globe } from "lucide-react";
 import { NavLink, ContactData } from "@/data/portfolio";
 
 interface FooterProps {
@@ -13,50 +13,14 @@ interface FooterProps {
 
 export default function Footer(props: FooterProps = {}) {
   const contact = props.contact || props.data?.contact || {};
-  const email =
-    contact.email ||
-    props.data?.email ||
-    props.data?.canonicalProfile?.personal?.email ||
-    props.data?.profile?.email ||
-    props.data?.personalInfo?.email ||
-    props.data?.personal?.email ||
-    props.data?.basics?.email ||
-    "";
-  const phone =
-    contact.phone ||
-    props.data?.phone ||
-    props.data?.canonicalProfile?.personal?.phone ||
-    props.data?.profile?.phone ||
-    props.data?.personalInfo?.phone ||
-    props.data?.personal?.phone ||
-    props.data?.basics?.phone ||
-    "";
-  const canonicalLoc = props.data?.canonicalProfile?.personal
-    ? [props.data.canonicalProfile.personal.city, props.data.canonicalProfile.personal.state, props.data.canonicalProfile.personal.country].filter(Boolean).join(', ')
-    : '';
-  const location =
-    contact.location ||
-    props.data?.location ||
-    canonicalLoc ||
-    props.data?.canonicalProfile?.personal?.location ||
-    props.data?.profile?.location ||
-    props.data?.personalInfo?.location ||
-    props.data?.personal?.location ||
-    props.data?.basics?.location?.city ||
-    props.data?.basics?.location?.address ||
-    props.data?.basics?.location ||
-    props.data?.city ||
-    props.data?.address ||
-    "";
-  const socials = contact.socials || props.data?.socials || props.data?.socialLinks || {};
+  const email = contact.email || props.data?.email || props.data?.ownerEmail || props.data?.personal?.email || props.data?.canonicalProfile?.personal?.email || props.data?.profile?.email || "";
+  const phone = contact.phone || props.data?.phone || props.data?.phoneNumber || props.data?.personal?.phone || props.data?.canonicalProfile?.personal?.phone || props.data?.profile?.phone || "";
+  const location = contact.location || props.data?.location || props.data?.personal?.location || props.data?.canonicalProfile?.personal?.city || props.data?.profile?.location || "";
+  const socials = contact.socials || props.data?.socials || props.data?.socialLinks || props.data?.canonicalProfile?.social || props.data?.social || {};
 
-  const rawHeroName = props.data?.hero?.name;
-  const isPlaceholderName = rawHeroName && (rawHeroName.includes('ANUSHKA') || rawHeroName.includes('Anushka') || rawHeroName === 'Portfolio' || rawHeroName === 'PORTFOLIO');
-  const resolvedName = (!isPlaceholderName && rawHeroName) || props.name || props.data?.name || props.data?.fullName || props.data?.profile?.fullName || props.data?.profile?.name || props.data?.personalInfo?.name || props.data?.personal?.name || props.data?.basics?.name || "Portfolio";
-  const brandName = resolvedName.toUpperCase();
-
-  const rawTitle = props.data?.hero?.title || props.data?.title || props.data?.headline || props.data?.role || props.data?.profile?.headline || props.data?.personalInfo?.headline || props.data?.basics?.label || "Software Developer";
-  const cleanTitle = rawTitle.replace(/\s*&\s*$/, '').trim();
+  const rawName = props.name || props.data?.name || props.data?.fullName || props.data?.hero?.name || props.data?.personal?.fullName || props.data?.canonicalProfile?.personal?.fullName || "Portfolio";
+  const brandName = rawName.toUpperCase().endsWith('.') ? rawName.toUpperCase() : `${rawName.toUpperCase().split(' ')[0]}.`;
+  const professionTitle = props.data?.title || props.data?.hero?.title || props.data?.headline || props.data?.personal?.headline || props.data?.canonicalProfile?.personal?.headline || "Software Developer & Engineer";
 
   const defaultLinks: NavLink[] = [
     { label: "Home", href: "#home" },
@@ -77,6 +41,10 @@ export default function Footer(props: FooterProps = {}) {
     }
   };
 
+  const hasSocials = Boolean(
+    socials.linkedin || socials.github || socials.instagram || socials.twitter || socials.behance || (socials as any).website || (socials as any).dribbble
+  );
+
   return (
     <footer
       style={{ backgroundColor: "#111111", color: "#ffffff" }}
@@ -84,64 +52,73 @@ export default function Footer(props: FooterProps = {}) {
     >
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
         <div className="space-y-4">
-          <h3
-            data-field="name"
-            data-cv="profile.name"
-            data-node-id="text:footer:root:h3:brand"
-            data-node-type="text"
-            className="text-2xl font-black tracking-tight text-[#FFC107] uppercase"
-          >
-            {brandName}
-          </h3>
+          <h3 className="text-2xl font-black tracking-tight text-[#FFC107]">{brandName}</h3>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-sm">
-            {cleanTitle} — crafting robust, high-performance digital applications.
+            {professionTitle} crafting robust, high-performance digital applications.
           </p>
-          <div className="flex items-center space-x-3 pt-2">
-            {socials.linkedin && (
-              <a
-                href={socials.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-            )}
-            {socials.github && (
-              <a
-                href={socials.github}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
-                aria-label="GitHub"
-              >
-                <Github className="w-4 h-4" />
-              </a>
-            )}
-            {socials.instagram && (
-              <a
-                href={socials.instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-            )}
-            {socials.twitter && (
-              <a
-                href={socials.twitter}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-            )}
-          </div>
+          {hasSocials && (
+            <div
+              data-field="contact.socials"
+              data-cv="contact.socials"
+              className="flex items-center space-x-3 pt-2"
+            >
+              {socials.linkedin && (
+                <a
+                  href={socials.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
+              )}
+              {socials.github && (
+                <a
+                  href={socials.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
+                  aria-label="GitHub"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+              )}
+              {socials.instagram && (
+                <a
+                  href={socials.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+              )}
+              {socials.twitter && (
+                <a
+                  href={socials.twitter}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="w-4 h-4" />
+                </a>
+              )}
+              {((socials as any).website || (socials as any).url) && (
+                <a
+                  href={(socials as any).website || (socials as any).url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 bg-white/10 hover:bg-[#FFC107] hover:text-[#111111] rounded-full transition-all duration-200"
+                  aria-label="Website"
+                >
+                  <Globe className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
@@ -163,7 +140,7 @@ export default function Footer(props: FooterProps = {}) {
             {email && (
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#FFC107] shrink-0" />
-                <a href={`mailto:${email}`} className="hover:text-[#FFC107] transition-colors">{email}</a>
+                <a href={`mailto:${email}`} className="hover:text-[#FFC107] transition-colors break-all">{email}</a>
               </li>
             )}
             {phone && (
@@ -179,14 +156,14 @@ export default function Footer(props: FooterProps = {}) {
               </li>
             )}
             {!email && !phone && !location && (
-              <li className="text-gray-400">Reach out via the contact section.</li>
+              <li className="text-gray-400 text-xs">Reach out via the contact section.</li>
             )}
           </ul>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400">
-        <p>© {new Date().getFullYear()} {resolvedName}. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {rawName}. All rights reserved.</p>
         <button
           onClick={handleScrollToTop}
           className="mt-4 sm:mt-0 flex items-center space-x-1.5 text-gray-300 hover:text-[#FFC107] transition-colors duration-200 cursor-pointer"

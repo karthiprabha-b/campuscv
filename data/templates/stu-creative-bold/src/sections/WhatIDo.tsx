@@ -37,7 +37,6 @@ export default function WhatIDo(props: WhatIDoProps = {}) {
     <section
       id="services"
       data-section="services"
-      data-node-id="section:services:root:section:0"
       className="py-24 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-[#111111]/10 relative z-10 bg-[#FAF9F6]"
     >
       <div className="max-w-7xl mx-auto">
@@ -60,15 +59,17 @@ export default function WhatIDo(props: WhatIDoProps = {}) {
           {servicesList.map((svc: Service, idx: number) => (
             <div
               key={svc.title || idx}
-              data-node-id={`container:services:card:${idx}`}
-              className="p-8 bg-white rounded-md flex flex-col items-start text-left border border-[#111111]/10 shadow-xs hover:border-[#FFC107] transition-colors duration-150 relative group overflow-hidden"
+              className="p-8 bg-white rounded-md flex flex-col items-start text-left border border-[#111111]/10 shadow-sm hover:shadow-md hover:border-[#FFC107] hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden"
             >
+              {/* Highlight Backdrop Hover Effect */}
+              <div className="absolute inset-0 bg-[#FFC107] opacity-0 group-hover:opacity-[0.05] transition-opacity duration-300 pointer-events-none" />
+
               {/* Icon Container */}
               <div
-                className="p-4 rounded-full mb-6 group-hover:bg-[#FFC107] transition-colors duration-150"
+                className="p-4 rounded-full mb-6 group-hover:bg-[#FFC107] transition-all duration-300"
                 style={{ backgroundColor: "rgba(255, 193, 7, 0.15)" }}
               >
-                <div>
+                <div className="group-hover:scale-110 transition-transform duration-300">
                   {getIcon(svc.icon)}
                 </div>
               </div>

@@ -1,71 +1,38 @@
 "use client";
 
 import React from "react";
-import { ArrowDownRight, ArrowDown, MessageSquare, FileText } from "lucide-react";
+import { ArrowDownRight, ArrowDown, MessageSquare } from "lucide-react";
 import { HeroData } from "@/data/portfolio";
 
 interface HeroProps {
   data?: any;
-  hero?: Partial<HeroData> & { avatarUrl?: string; [key: string]: any };
+  hero?: Partial<HeroData> & { avatarUrl?: string };
 }
 
 export default function Hero(props: HeroProps = {}) {
   const incoming = props.hero || props.data?.hero || props.data || {};
-  const rawIncomingName = incoming.name;
-  const isPlaceholderName = rawIncomingName && (rawIncomingName.includes('ANUSHKA') || rawIncomingName.includes('Anushka') || rawIncomingName === 'Portfolio' || rawIncomingName === 'PORTFOLIO');
-  const rawName = (!isPlaceholderName && rawIncomingName) || props.data?.name || props.data?.fullName || props.data?.profile?.fullName || props.data?.profile?.name || props.data?.personalInfo?.name || props.data?.personal?.name || props.data?.basics?.name || "Portfolio";
-
-  const rawIncomingTitle = incoming.title;
-  const isPlaceholderTitle = rawIncomingTitle && (rawIncomingTitle.includes('UI/UX Designer &') || rawIncomingTitle.includes('UI/UX Designer'));
-  const rawTitle =
-    (!isPlaceholderTitle && rawIncomingTitle) ||
-    props.data?.headline ||
-    props.data?.title ||
-    props.data?.role ||
-    props.data?.designation ||
-    props.data?.profile?.headline ||
-    props.data?.personalInfo?.headline ||
-    props.data?.personal?.headline ||
-    props.data?.basics?.label ||
-    props.data?.tagline ||
-    "SOFTWARE DEVELOPER";
-
-  const cleanTitle = String(rawTitle).replace(/\s*&\s*$/, '').trim();
-
-  const secondaryText =
-    incoming.secondaryCtaText ||
-    props.data?.secondaryCtaText ||
-    incoming.secondaryButtonText ||
-    props.data?.secondaryButtonText ||
-    (props.data?.resumeUrl || incoming.resumeUrl ? "DOWNLOAD RESUME" : "GET IN TOUCH");
-
-  const secondaryHref =
-    incoming.secondaryCtaHref ||
-    props.data?.secondaryCtaHref ||
-    incoming.secondaryButtonHref ||
-    props.data?.secondaryButtonHref ||
-    props.data?.resumeUrl ||
-    incoming.resumeUrl ||
-    "#contact";
-
+  const rawName = incoming.name || props.data?.name || props.data?.fullName || props.data?.personal?.fullName || "Portfolio";
+  
   const hero: HeroData & { avatarUrl?: string } = {
     greeting: incoming.greeting || props.data?.greeting || "HEY, I'M",
     name: rawName,
-    title: cleanTitle,
+    title: incoming.title || props.data?.title || props.data?.headline || "SOFTWARE DEVELOPER",
     highlightedTitle: incoming.highlightedTitle || props.data?.highlightedTitle || "",
-    description: incoming.description || incoming.intro || incoming.introductionText || props.data?.profile?.summary || props.data?.bio || props.data?.summary || "Builder-focused Developer with hands-on technical skills.",
-    primaryCtaText: incoming.primaryCtaText || props.data?.primaryCtaText || "VIEW MY WORK",
-    primaryCtaHref: incoming.primaryCtaHref || props.data?.primaryCtaHref || "#projects",
-    secondaryCtaText: secondaryText,
-    secondaryCtaHref: secondaryHref,
-    avatarUrl: incoming.avatarUrl || props.data?.avatarUrl || props.data?.profile?.photo || props.data?.profileImage || props.data?.avatar || "/profile.png"
+    description: incoming.description || incoming.intro || incoming.introductionText || props.data?.bio || props.data?.summary || props.data?.aboutMe || props.data?.profile?.summary || "Passionate developer focused on building modern web applications.",
+    primaryCtaText: incoming.primaryCtaText || "VIEW MY WORK",
+    primaryCtaHref: incoming.primaryCtaHref || "#projects",
+    secondaryCtaText: incoming.secondaryCtaText || "GET IN TOUCH",
+    secondaryCtaHref: incoming.secondaryCtaHref || "#contact",
+    avatarUrl: incoming.avatarUrl || props.data?.avatarUrl || props.data?.profileImage || props.data?.profile?.photo || props.data?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
   };
+
+  const nameWords = (hero.name || "Portfolio").split(" ").filter(Boolean);
 
   return (
     <section
       id="home"
       data-section="hero"
-      data-node-id="section:hero:root:section:0"
+      data-cv-section="hero"
       className="relative min-h-[90vh] pt-28 pb-16 flex items-center px-6 sm:px-12 md:px-16 lg:px-24 overflow-hidden z-10 bg-[#FAF9F6]"
     >
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -73,27 +40,28 @@ export default function Hero(props: HeroProps = {}) {
         <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
           <span
             data-field="hero.greeting"
-            data-node-id="text:hero:root:span:greeting"
+            data-cv="hero.greeting"
             className="text-xs sm:text-sm font-black tracking-widest text-[#111111]/70 uppercase"
           >
             {hero.greeting}
           </span>
 
           <h1
-            data-field="hero.name"
-            data-cv="profile.name"
-            data-node-id="text:hero:root:h1:0"
-            className="text-4xl sm:text-6xl md:text-7xl font-black tracking-wide leading-tight text-[#111111] uppercase max-w-2xl break-words"
-            style={{ wordBreak: 'break-word' }}
+            data-field="name"
+            data-cv="hero.name"
+            className="text-4xl sm:text-6xl md:text-7xl font-black tracking-wide leading-tight text-[#111111]"
           >
-            {hero.name}
+            {nameWords.map((word: string, i: number) => (
+              <span key={i} className="block">
+                {word}
+              </span>
+            ))}
           </h1>
 
           <div className="inline-flex">
             <span
               data-field="hero.title"
-              data-cv="profile.headline"
-              data-node-id="text:hero:root:span:title"
+              data-cv="hero.role"
               className="bg-[#FFC107] text-[#111111] text-xs sm:text-sm font-black tracking-wider uppercase px-4 py-2 shadow-xs rounded-xs font-bold"
             >
               {hero.title} {hero.highlightedTitle}
@@ -102,21 +70,19 @@ export default function Hero(props: HeroProps = {}) {
 
           <p
             data-field="hero.description"
-            data-cv="profile.bio"
-            data-node-id="text:hero:root:p:desc"
+            data-cv="hero.description"
             className="text-sm sm:text-base leading-relaxed text-[#666666] max-w-xl font-normal"
           >
             {hero.description}
           </p>
 
-          {/* Action Buttons with Zero Layout Thrash / Zero Flicker */}
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
             <a
               href={hero.primaryCtaHref || "#projects"}
               data-field="hero.primaryCtaText"
-              data-field-href="hero.primaryCtaHref"
-              data-cv="hero.primaryCta"
-              data-node-id="button:hero:root:a:primary_cta"
+              data-cv="hero.primaryButton"
+              data-node-id="hero:root:btn:0"
               className="inline-flex items-center justify-center px-8 py-4 bg-[#111111] text-[#FAF9F6] text-xs sm:text-sm font-black tracking-widest uppercase border-2 border-[#111111] hover:bg-[#FFC107] hover:border-[#FFC107] hover:text-[#111111] transition-colors duration-150 shadow-sm rounded-xs cursor-pointer select-none"
             >
               {hero.primaryCtaText || "VIEW MY WORK"}
@@ -126,33 +92,28 @@ export default function Hero(props: HeroProps = {}) {
             <a
               href={hero.secondaryCtaHref || "#contact"}
               data-field="hero.secondaryCtaText"
-              data-field-href="hero.secondaryCtaHref"
-              data-cv="hero.secondaryCta"
-              data-node-id="button:hero:root:a:secondary_cta"
+              data-cv="hero.secondaryButton"
+              data-node-id="hero:root:btn:1"
               className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-[#111111] text-[#111111] text-xs sm:text-sm font-black tracking-widest uppercase hover:bg-[#111111] hover:text-[#FAF9F6] transition-colors duration-150 rounded-xs cursor-pointer select-none"
             >
               {hero.secondaryCtaText || "GET IN TOUCH"}
-              {hero.secondaryCtaText?.toLowerCase().includes("resume") ? (
-                <FileText className="w-4 h-4 ml-2 stroke-[2.5]" />
-              ) : (
-                <MessageSquare className="w-4 h-4 ml-2 stroke-[2.5]" />
-              )}
+              <MessageSquare className="w-4 h-4 ml-2 stroke-[2.5]" />
             </a>
           </div>
         </div>
 
-        {/* Right Side: Crisp High-Resolution Layered Ring Layout (No Flickering Animations) */}
+        {/* Right Side: Crisp High-Resolution Layered Ring Layout */}
         <div className="lg:col-span-5 flex justify-center lg:justify-end items-center relative py-12 lg:py-0 select-none">
           <div className="relative w-72 h-72 sm:w-96 sm:h-96">
             
-            {/* Crisp Golden Layered Ring (Static, Crisp, Anti-Aliased) */}
+            {/* Crisp Golden Layered Ring */}
             <div className="absolute -inset-3 rounded-full border-2 border-[#FFC107] pointer-events-none opacity-90" />
             <div className="absolute -inset-1 rounded-full border border-[#111111]/15 pointer-events-none" />
 
             {/* Back Shadow Offset Circle */}
             <div className="absolute top-3 left-3 w-full h-full rounded-full bg-[#111111]/5 border border-[#111111]/10 pointer-events-none" />
 
-            {/* Floating Star Vector (Static Crisp Accent) */}
+            {/* Floating Star Vector */}
             <div className="absolute -top-3 left-4 text-[#FFC107] w-8 h-8 stroke-[2] pointer-events-none drop-shadow-xs">
               <svg viewBox="0 0 24 24" fill="none" stroke="#FFC107">
                 <path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" />
@@ -177,11 +138,11 @@ export default function Hero(props: HeroProps = {}) {
                 src={hero.avatarUrl}
                 alt={hero.name}
                 data-field="hero.avatarUrl"
-                data-cv="profile.avatarUrl"
-                data-node-id="image:hero:root:img:0"
+                data-cv="hero.profileImage"
+                data-node-id="hero:root:img:0"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
                 }}
               />
             </div>
@@ -202,4 +163,3 @@ export default function Hero(props: HeroProps = {}) {
     </section>
   );
 }
-

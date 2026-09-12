@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Mail, Phone, MapPin } from "lucide-react";
-import { contactData as fallbackContactData, ContactData } from "@/data/portfolio";
+import { Mail, Phone, MapPin, Linkedin, Github, Instagram, Twitter, Globe } from "lucide-react";
+import { ContactData } from "@/data/portfolio";
 
 interface ContactProps {
   data?: any;
@@ -13,85 +13,31 @@ interface ContactProps {
 }
 
 export default function Contact(props: ContactProps = {}) {
-  const rawContact = props.contact || props.data?.contact || {};
-  const canonicalPersonal = props.data?.canonicalProfile?.personal || {};
-  const canonicalCity = [canonicalPersonal.city, canonicalPersonal.state, canonicalPersonal.country].filter(Boolean).join(', ');
-
-  const email =
-    props.email ||
-    rawContact.email ||
-    props.data?.email ||
-    props.data?.ownerEmail ||
-    canonicalPersonal.email ||
-    props.data?.profile?.email ||
-    props.data?.personalInfo?.email ||
-    props.data?.personal?.email ||
-    props.data?.basics?.email ||
-    "";
-
-  const phone =
-    props.phone ||
-    rawContact.phone ||
-    props.data?.phone ||
-    props.data?.phoneNumber ||
-    canonicalPersonal.phone ||
-    props.data?.profile?.phone ||
-    props.data?.personalInfo?.phone ||
-    props.data?.personal?.phone ||
-    props.data?.basics?.phone ||
-    "";
-
-  const location =
-    props.location ||
-    rawContact.location ||
-    props.data?.location ||
-    canonicalCity ||
-    canonicalPersonal.location ||
-    props.data?.profile?.location ||
-    props.data?.personalInfo?.location ||
-    props.data?.personal?.location ||
-    props.data?.basics?.location?.city ||
-    props.data?.basics?.location?.address ||
-    props.data?.basics?.location ||
-    props.data?.city ||
-    props.data?.address ||
-    "";
-
-  const socials =
-    rawContact.socials ||
-    props.data?.socials ||
-    props.data?.socialLinks ||
-    props.data?.profile?.socials ||
-    props.data?.canonicalProfile?.social ||
-    {};
-
   const contact: ContactData = {
-    email,
-    phone,
-    location,
-    socials
+    email: props.email || props.contact?.email || props.data?.contact?.email || props.data?.email || props.data?.ownerEmail || props.data?.personal?.email || props.data?.canonicalProfile?.personal?.email || props.data?.profile?.email || "",
+    phone: props.phone || props.contact?.phone || props.data?.contact?.phone || props.data?.phone || props.data?.phoneNumber || props.data?.personal?.phone || props.data?.canonicalProfile?.personal?.phone || props.data?.profile?.phone || "",
+    location: props.location || props.contact?.location || props.data?.contact?.location || props.data?.location || props.data?.personal?.location || props.data?.canonicalProfile?.personal?.city || props.data?.profile?.location || "",
+    socials: props.contact?.socials || props.data?.contact?.socials || props.data?.socials || props.data?.socialLinks || props.data?.canonicalProfile?.social || props.data?.social || {}
   };
 
-  const hasAnyContact = Boolean(contact.email || contact.phone || contact.location);
+  const socials = contact.socials || {};
+  const hasSocials = Boolean(
+    socials.linkedin || socials.github || socials.instagram || socials.twitter || socials.behance || (socials as any).dribbble || (socials as any).portfolio || (socials as any).website
+  );
 
   return (
     <section
       id="contact"
       data-section="contact"
-      data-node-id="section:contact:root:section:0"
+      data-cv-section="contact"
       className="py-24 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-[#111111]/10 relative z-10 bg-[#FAF9F6]"
     >
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
         <div className="flex flex-col items-center space-y-3 mb-10">
-          <span
-            data-field="contact.subtitle"
-            className="text-xs font-black tracking-widest text-[#FFC107] uppercase"
-          >
+          <span className="text-xs font-black tracking-widest text-[#FFC107] uppercase">
             Get in Touch
           </span>
           <h2
-            data-field="contact.title"
-            data-node-id="text:contact:root:h2:0"
             className="text-3xl sm:text-4xl md:text-5xl font-black text-[#111111]"
             style={{ lineHeight: 1.15, letterSpacing: '0.01em' }}
           >
@@ -100,21 +46,14 @@ export default function Contact(props: ContactProps = {}) {
           <div className="w-12 h-1 bg-[#FFC107] mt-2" style={{ backgroundColor: "#FFC107" }} />
         </div>
 
-        <p
-          data-field="contact.description"
-          data-node-id="text:contact:root:p:desc"
-          className="text-xs sm:text-sm text-[#666666] leading-relaxed max-w-md mb-10"
-        >
+        <p className="text-xs sm:text-sm text-[#666666] leading-relaxed max-w-md mb-10">
           Have an exciting project idea, a job opportunity, or just want to say hi? Reach out directly via mail or phone.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-3xl">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-6 justify-center w-full max-w-3xl">
           {/* Email */}
           {contact.email && (
-            <div
-              data-node-id="container:contact:card:email"
-              className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-150 shadow-sm flex-1"
-            >
+            <div className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-300 shadow-sm flex-1 min-w-[240px]">
               <div
                 className="p-3 rounded-full text-[#111111] shrink-0"
                 style={{ backgroundColor: "rgba(255, 193, 7, 0.2)" }}
@@ -126,9 +65,8 @@ export default function Contact(props: ContactProps = {}) {
                 <a
                   href={`mailto:${contact.email}`}
                   data-field="contact.email"
-                  data-cv="profile.email"
-                  data-node-id="text:contact:root:a:email"
-                  className="text-xs sm:text-sm font-bold text-[#111111] hover:text-[#FFC107] transition-colors duration-150 break-all"
+                  data-cv="contact.email"
+                  className="text-xs sm:text-sm font-bold text-[#111111] hover:text-[#FFC107] transition-colors break-all"
                 >
                   {contact.email}
                 </a>
@@ -138,10 +76,7 @@ export default function Contact(props: ContactProps = {}) {
 
           {/* Phone */}
           {contact.phone && (
-            <div
-              data-node-id="container:contact:card:phone"
-              className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-150 shadow-sm flex-1"
-            >
+            <div className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-300 shadow-sm flex-1 min-w-[240px]">
               <div
                 className="p-3 rounded-full text-[#111111] shrink-0"
                 style={{ backgroundColor: "rgba(255, 193, 7, 0.2)" }}
@@ -153,9 +88,8 @@ export default function Contact(props: ContactProps = {}) {
                 <a
                   href={`tel:${contact.phone}`}
                   data-field="contact.phone"
-                  data-cv="profile.phone"
-                  data-node-id="text:contact:root:a:phone"
-                  className="text-xs sm:text-sm font-bold text-[#111111] hover:text-[#FFC107] transition-colors duration-150"
+                  data-cv="contact.phone"
+                  className="text-xs sm:text-sm font-bold text-[#111111] hover:text-[#FFC107] transition-colors"
                 >
                   {contact.phone}
                 </a>
@@ -165,10 +99,7 @@ export default function Contact(props: ContactProps = {}) {
 
           {/* Location */}
           {contact.location && (
-            <div
-              data-node-id="container:contact:card:location"
-              className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-150 shadow-sm flex-1"
-            >
+            <div className="flex items-center space-x-4 p-5 bg-white border border-[#111111]/10 rounded-md hover:border-[#FFC107] transition-colors duration-300 shadow-sm flex-1 min-w-[240px]">
               <div
                 className="p-3 rounded-full text-[#111111] shrink-0"
                 style={{ backgroundColor: "rgba(255, 193, 7, 0.2)" }}
@@ -179,8 +110,7 @@ export default function Contact(props: ContactProps = {}) {
                 <h4 className="text-[10px] font-black text-[#666666] tracking-wider uppercase">Location</h4>
                 <span
                   data-field="contact.location"
-                  data-cv="profile.location"
-                  data-node-id="text:contact:root:span:location"
+                  data-cv="contact.location"
                   className="text-xs sm:text-sm font-bold text-[#111111]"
                 >
                   {contact.location}
@@ -188,26 +118,72 @@ export default function Contact(props: ContactProps = {}) {
               </div>
             </div>
           )}
-
-          {/* Fallback if all 3 are missing */}
-          {!hasAnyContact && (
-            <div
-              data-node-id="container:contact:card:general"
-              className="flex items-center justify-center space-x-4 p-6 bg-white border border-[#111111]/10 rounded-md shadow-sm w-full max-w-md"
-            >
-              <div
-                className="p-3 rounded-full text-[#111111] shrink-0"
-                style={{ backgroundColor: "rgba(255, 193, 7, 0.2)" }}
-              >
-                <Mail className="w-5 h-5 stroke-[2]" />
-              </div>
-              <div className="text-left">
-                <h4 className="text-xs font-black text-[#111111] tracking-wider uppercase">Direct Inquiries</h4>
-                <p className="text-xs text-[#666666]">Available for software opportunities and collaborations.</p>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Social Links Row if present */}
+        {hasSocials && (
+          <div
+            data-field="contact.socials"
+            data-cv="contact.socials"
+            className="flex items-center justify-center space-x-4 mt-8"
+          >
+            {socials.linkedin && (
+              <a
+                href={socials.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-white border border-[#111111]/10 hover:border-[#FFC107] hover:bg-[#FFC107] text-[#111111] rounded-full transition-all duration-200 shadow-sm"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+            )}
+            {socials.github && (
+              <a
+                href={socials.github}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-white border border-[#111111]/10 hover:border-[#FFC107] hover:bg-[#FFC107] text-[#111111] rounded-full transition-all duration-200 shadow-sm"
+                aria-label="GitHub"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+            )}
+            {socials.instagram && (
+              <a
+                href={socials.instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-white border border-[#111111]/10 hover:border-[#FFC107] hover:bg-[#FFC107] text-[#111111] rounded-full transition-all duration-200 shadow-sm"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            )}
+            {socials.twitter && (
+              <a
+                href={socials.twitter}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-white border border-[#111111]/10 hover:border-[#FFC107] hover:bg-[#FFC107] text-[#111111] rounded-full transition-all duration-200 shadow-sm"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-4 h-4" />
+              </a>
+            )}
+            {((socials as any).portfolio || (socials as any).website || (socials as any).dribbble || (socials as any).behance) && (
+              <a
+                href={(socials as any).portfolio || (socials as any).website || (socials as any).dribbble || (socials as any).behance}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-white border border-[#111111]/10 hover:border-[#FFC107] hover:bg-[#FFC107] text-[#111111] rounded-full transition-all duration-200 shadow-sm"
+                aria-label="Portfolio"
+              >
+                <Globe className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

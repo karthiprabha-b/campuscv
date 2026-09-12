@@ -39,23 +39,6 @@
     ]
   },
   {
-    "id": "services",
-    "name": "What I Do (Services)",
-    "category": "Services",
-    "fields": [
-      {
-        "key": "services",
-        "label": "Services List",
-        "type": "array",
-        "itemSchema": [
-          { "key": "title", "label": "Service Title", "type": "text" },
-          { "key": "description", "label": "Service Description", "type": "textarea" },
-          { "key": "icon", "label": "Icon (Layers, Code, Sparkles, Target)", "type": "text" }
-        ]
-      }
-    ]
-  },
-  {
     "id": "approach",
     "name": "Workflow Approach",
     "category": "Workflow",
@@ -112,22 +95,6 @@
               { "key": "percentage", "label": "Proficiency (0-100)", "type": "number" }
             ]
           }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "tools",
-    "name": "Tools I Use",
-    "category": "Tools",
-    "fields": [
-      {
-        "key": "tools",
-        "label": "Toolchain",
-        "type": "array",
-        "itemSchema": [
-          { "key": "name", "label": "Tool Name", "type": "text" },
-          { "key": "iconName", "label": "Icon Key (figma, vscode, github, photoshop, adobe-xd, illustrator, notion, postman)", "type": "text" }
         ]
       }
     ]

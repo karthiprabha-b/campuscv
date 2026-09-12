@@ -84,7 +84,6 @@ export default function Tools(props: ToolsProps = {}) {
     <section
       id="tools"
       data-section="tools"
-      data-node-id="section:tools:root:section:0"
       className="py-24 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-[#111111]/10 relative z-10 bg-[#FAF9F6]"
     >
       <div className="max-w-7xl mx-auto">
@@ -94,7 +93,7 @@ export default function Tools(props: ToolsProps = {}) {
             Stack
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-wide leading-tight text-[#111111]">
-            TOOLS &amp; SOFTWARE
+            TOOLS & SOFTWARE
           </h2>
           <div className="w-12 h-1 bg-[#FFC107] mt-2" style={{ backgroundColor: "#FFC107" }} />
         </div>
@@ -104,11 +103,10 @@ export default function Tools(props: ToolsProps = {}) {
           {toolsList.map((tool: ToolItem, idx: number) => (
             <div
               key={tool.name || idx}
-              data-node-id={`container:tools:card:${idx}`}
-              className="p-6 bg-white border-2 border-[#111111]/10 rounded-md flex flex-col items-center justify-center text-center space-y-3 shadow-xs hover:border-[#FFC107] transition-colors duration-150 group cursor-pointer"
+              className="p-6 bg-white border-2 border-[#111111]/10 rounded-md flex flex-col items-center justify-center text-center space-y-3 shadow-xs hover:shadow-lg hover:border-[#FFC107] hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
             >
               {/* Tool Icon */}
-              <div className="p-3 bg-[#111111]/[0.03] group-hover:bg-[#FFC107]/20 rounded-xl transition-colors duration-150">
+              <div className="p-3 bg-[#111111]/[0.03] group-hover:bg-[#FFC107]/20 rounded-xl transition-all duration-300 transform group-hover:scale-110">
                 <ToolLogo iconName={tool.iconName || (tool as any).icon} />
               </div>
 

@@ -16,16 +16,21 @@
   "about.description": "src/sections/About.tsx",
   "about.objective": "src/sections/About.tsx",
   "about.stats": "src/sections/About.tsx",
+  "stats": "src/sections/About.tsx",
   "approachSteps": "src/sections/Approach.tsx",
+  "approach": "src/sections/Approach.tsx",
+  "process": "src/sections/Approach.tsx",
   "education": "src/sections/Education.tsx",
   "skills": "src/sections/Skills.tsx",
   "certifications": "src/sections/Certifications.tsx",
   "projects": "src/sections/Projects.tsx",
   "experiences": "src/sections/Experience.tsx",
+  "experience": "src/sections/Experience.tsx",
   "testimonials": "src/components/TestimonialCarousel.tsx",
   "achievements": "src/sections/Achievements.tsx",
   "contact.email": "src/sections/Contact.tsx",
   "contact.phone": "src/sections/Contact.tsx",
   "contact.location": "src/sections/Contact.tsx",
-  "contact.socials": "src/components/Footer.tsx"
+  "contact.socials": "src/components/Footer.tsx",
+  "socialLinks": "src/components/Footer.tsx"
 }
