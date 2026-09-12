@@ -1027,9 +1027,14 @@ export function applyPortfolioOverrides(
 export function reorderDOMSections(rootEl: HTMLElement, sectionOrder: string[] = []): void {
   if (!rootEl || !Array.isArray(sectionOrder) || sectionOrder.length < 2) return;
 
-  // If the root element or its children is a dynamic React-rendered template (like Card deck or centerd)
-  // that manages its own section ordering via React state and props, avoid mutating raw DOM nodes.
-  if (rootEl.querySelector('[data-campuscv-template="card"], [data-campuscv-template="centerd"], .card-deck-template-root')) {
+  // If the root element or its children is a dynamic React-rendered template (like Card deck, stu-creative-bold, centerd)
+  // that manages its own section ordering via React state and JSX, avoid mutating raw DOM nodes to prevent virtual DOM de-sync and infinite reconciliation loops.
+  if (
+    rootEl.querySelector('[data-campuscv-template], [data-template-id], .card-deck-template-root, .uploaded-template-runner, .template-runtime-root') ||
+    rootEl.closest('[data-campuscv-template], [data-template-id], .uploaded-template-runner, .template-runtime-root') ||
+    rootEl.getAttribute('data-template-id') ||
+    rootEl.classList.contains('uploaded-template-runner')
+  ) {
     return;
   }
 
@@ -1221,6 +1226,14 @@ export function attachNodeOverrideObserver(
   const getData: () => any = typeof getPortfolioData === 'function'
     ? getPortfolioData
     : () => getPortfolioData;
+
+  const currentData = getData();
+  const renderMode = currentData?.renderMode || currentData?.mode;
+  // In published mode (/username or /p/username), do not attach persistent MutationObserver.
+  // Overrides are already applied statically on mount. A persistent observer causes hover/Tailwind flicker loops.
+  if (renderMode === 'published' || currentData?.isEditMode === false) {
+    return () => { };
+  }
 
   if (activeObserver) {
     try { activeObserver.disconnect(); } catch (e) { }

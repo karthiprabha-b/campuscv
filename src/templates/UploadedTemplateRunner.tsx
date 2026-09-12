@@ -1698,17 +1698,20 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
       applyPortfolioOverrides(rootEl, { ...dataRef.current, renderMode, mode: renderMode });
     });
 
-    // Attach observer after a short delay so it doesn't fire during initial paint
-    const timerId = setTimeout(() => {
-      const rootEl = getOverrideRoot();
-      if (!rootEl) return;
-      const tId = getPortfolioTemplateId(dataRef.current);
-      attachNodeOverrideObserver(rootEl, () => ({ ...dataRef.current, renderMode, mode: renderMode }), tId);
-    }, 100);
+    // Attach observer after a short delay so it doesn't fire during initial paint (editor mode only)
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+    if (isEditMode) {
+      timerId = setTimeout(() => {
+        const rootEl = getOverrideRoot();
+        if (!rootEl) return;
+        const tId = getPortfolioTemplateId(dataRef.current);
+        attachNodeOverrideObserver(rootEl, () => ({ ...dataRef.current, renderMode, mode: renderMode }), tId);
+      }, 100);
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
-      clearTimeout(timerId);
+      if (timerId) clearTimeout(timerId);
     };
   }, [rendered]); // eslint-disable-line react-hooks/exhaustive-deps
 
