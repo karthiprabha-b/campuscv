@@ -14,45 +14,65 @@ interface ContactProps {
 
 export default function Contact(props: ContactProps = {}) {
   const rawContact = props.contact || props.data?.contact || {};
+  const canonicalPersonal = props.data?.canonicalProfile?.personal || {};
+  const canonicalCity = [canonicalPersonal.city, canonicalPersonal.state, canonicalPersonal.country].filter(Boolean).join(', ');
+
+  const email =
+    props.email ||
+    rawContact.email ||
+    props.data?.email ||
+    props.data?.ownerEmail ||
+    canonicalPersonal.email ||
+    props.data?.profile?.email ||
+    props.data?.personalInfo?.email ||
+    props.data?.personal?.email ||
+    props.data?.basics?.email ||
+    "";
+
+  const phone =
+    props.phone ||
+    rawContact.phone ||
+    props.data?.phone ||
+    props.data?.phoneNumber ||
+    canonicalPersonal.phone ||
+    props.data?.profile?.phone ||
+    props.data?.personalInfo?.phone ||
+    props.data?.personal?.phone ||
+    props.data?.basics?.phone ||
+    "";
+
+  const location =
+    props.location ||
+    rawContact.location ||
+    props.data?.location ||
+    canonicalCity ||
+    canonicalPersonal.location ||
+    props.data?.profile?.location ||
+    props.data?.personalInfo?.location ||
+    props.data?.personal?.location ||
+    props.data?.basics?.location?.city ||
+    props.data?.basics?.location?.address ||
+    props.data?.basics?.location ||
+    props.data?.city ||
+    props.data?.address ||
+    "";
+
+  const socials =
+    rawContact.socials ||
+    props.data?.socials ||
+    props.data?.socialLinks ||
+    props.data?.profile?.socials ||
+    props.data?.canonicalProfile?.social ||
+    {};
+
   const contact: ContactData = {
-    email:
-      props.email ||
-      rawContact.email ||
-      props.data?.email ||
-      props.data?.profile?.email ||
-      props.data?.personalInfo?.email ||
-      props.data?.personal?.email ||
-      props.data?.basics?.email ||
-      "",
-    phone:
-      props.phone ||
-      rawContact.phone ||
-      props.data?.phone ||
-      props.data?.profile?.phone ||
-      props.data?.personalInfo?.phone ||
-      props.data?.personal?.phone ||
-      props.data?.basics?.phone ||
-      "",
-    location:
-      props.location ||
-      rawContact.location ||
-      props.data?.location ||
-      props.data?.profile?.location ||
-      props.data?.personalInfo?.location ||
-      props.data?.personal?.location ||
-      props.data?.basics?.location?.city ||
-      props.data?.basics?.location?.address ||
-      props.data?.basics?.location ||
-      props.data?.city ||
-      props.data?.address ||
-      "",
-    socials:
-      rawContact.socials ||
-      props.data?.socials ||
-      props.data?.socialLinks ||
-      props.data?.profile?.socials ||
-      {}
+    email,
+    phone,
+    location,
+    socials
   };
+
+  const hasAnyContact = Boolean(contact.email || contact.phone || contact.location);
 
   return (
     <section
@@ -165,6 +185,25 @@ export default function Contact(props: ContactProps = {}) {
                 >
                   {contact.location}
                 </span>
+              </div>
+            </div>
+          )}
+
+          {/* Fallback if all 3 are missing */}
+          {!hasAnyContact && (
+            <div
+              data-node-id="container:contact:card:general"
+              className="flex items-center justify-center space-x-4 p-6 bg-white border border-[#111111]/10 rounded-md shadow-sm w-full max-w-md"
+            >
+              <div
+                className="p-3 rounded-full text-[#111111] shrink-0"
+                style={{ backgroundColor: "rgba(255, 193, 7, 0.2)" }}
+              >
+                <Mail className="w-5 h-5 stroke-[2]" />
+              </div>
+              <div className="text-left">
+                <h4 className="text-xs font-black text-[#111111] tracking-wider uppercase">Direct Inquiries</h4>
+                <p className="text-xs text-[#666666]">Available for software opportunities and collaborations.</p>
               </div>
             </div>
           )}

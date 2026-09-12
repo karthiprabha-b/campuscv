@@ -144,15 +144,69 @@ export function reassemblePortfolio(
     if (cs.sectionOrder) assembled.sectionOrder = cs.sectionOrder;
   }
 
+  // Resolve skills: If assembled.skills is demo-only and canonicalProfile has real skills, prioritize canonicalProfile.skills
+  const isDemoSkillList = (arr: any[]) => {
+    if (!Array.isArray(arr) || arr.length === 0) return true;
+    const demoKeywords = ['react / next.js', 'typescript', 'html5 & css3', 'tailwind css', 'node.js & express', 'sql & mongodb', 'rest apis', 'figma (auto-layout', 'adobe creative suite', 'prototyping & wireframing'];
+    let flat: string[] = [];
+    arr.forEach(item => {
+      if (typeof item === 'string') flat.push(item.toLowerCase());
+      else if (item && typeof item === 'object') {
+        if (Array.isArray(item.items)) {
+          item.items.forEach((it: any) => flat.push((it.name || it || '').toLowerCase()));
+        } else {
+          flat.push((item.name || item.title || item.skill || '').toLowerCase());
+        }
+      }
+    });
+    if (flat.length === 0) return true;
+    return flat.every(s => demoKeywords.some(d => s.includes(d) || d.includes(s)));
+  };
+
+  const canonicalSkills = Array.isArray(assembled.canonicalProfile?.skills) ? assembled.canonicalProfile.skills : [];
+  if (isDemoSkillList(assembled.skills) && canonicalSkills.length > 0 && !isDemoSkillList(canonicalSkills)) {
+    assembled.skills = canonicalSkills;
+  }
+
+  const resolvedCityState = [assembled.canonicalProfile?.personal?.city, assembled.canonicalProfile?.personal?.state, assembled.canonicalProfile?.personal?.country].filter(Boolean).join(', ');
+
   // Ensure essential top-level fields are always populated
   assembled.name = assembled.name || raw.name || raw.personal?.fullName || assembled.profile?.fullName || assembled.profile?.name || raw.canonicalProfile?.personal?.fullName || '';
   assembled.tagline = assembled.tagline || raw.tagline || raw.personal?.headline || assembled.profile?.headline || raw.canonicalProfile?.personal?.headline || '';
   assembled.headline = assembled.headline || assembled.tagline || raw.headline || raw.personal?.headline || assembled.profile?.headline || '';
   assembled.aboutMe = assembled.aboutMe || raw.aboutMe || raw.personal?.summary || assembled.profile?.summary || raw.canonicalProfile?.personal?.summary || '';
   assembled.profileImage = assembled.profileImage || raw.profileImage || raw.personal?.profilePhoto || assembled.profile?.photo || raw.canonicalProfile?.personal?.profilePhoto || raw.avatarUrl || '';
-  assembled.location = assembled.location || raw.location || raw.personal?.location || assembled.profile?.location || raw.canonicalProfile?.personal?.location || raw.contact?.location || raw.basics?.location?.city || raw.basics?.location?.address || '';
-  assembled.email = assembled.email || raw.email || raw.personal?.email || assembled.profile?.email || raw.contact?.email || raw.basics?.email || '';
-  assembled.phone = assembled.phone || raw.phone || raw.personal?.phone || assembled.profile?.phone || raw.contact?.phone || raw.basics?.phone || '';
+  assembled.location =
+    assembled.location ||
+    raw.location ||
+    raw.personal?.location ||
+    assembled.profile?.location ||
+    resolvedCityState ||
+    assembled.canonicalProfile?.personal?.location ||
+    raw.contact?.location ||
+    raw.basics?.location?.city ||
+    raw.basics?.location?.address ||
+    '';
+  assembled.email =
+    assembled.email ||
+    raw.email ||
+    assembled.canonicalProfile?.personal?.email ||
+    raw.canonicalProfile?.personal?.email ||
+    raw.personal?.email ||
+    assembled.profile?.email ||
+    raw.contact?.email ||
+    raw.basics?.email ||
+    '';
+  assembled.phone =
+    assembled.phone ||
+    raw.phone ||
+    assembled.canonicalProfile?.personal?.phone ||
+    raw.canonicalProfile?.personal?.phone ||
+    raw.personal?.phone ||
+    assembled.profile?.phone ||
+    raw.contact?.phone ||
+    raw.basics?.phone ||
+    '';
 
   assembled.contact = {
     email: assembled.email,

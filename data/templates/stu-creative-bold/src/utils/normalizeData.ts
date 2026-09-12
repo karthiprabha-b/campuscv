@@ -357,21 +357,55 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
 
   // 8. Normalize Skills — Comprehensive & Universal extraction across all formats
   let skillsList: SkillCategory[] = [];
-  const rawSkills = getFirstNonEmptyArray(
+  const isDemoSkillList = (arr: any[]) => {
+    if (!Array.isArray(arr) || arr.length === 0) return true;
+    const demoKeywords = ['react / next.js', 'typescript', 'html5 & css3', 'tailwind css', 'node.js & express', 'sql & mongodb', 'rest apis', 'figma (auto-layout', 'adobe creative suite', 'prototyping & wireframing'];
+    let flat: string[] = [];
+    arr.forEach(item => {
+      if (typeof item === 'string') flat.push(item.toLowerCase());
+      else if (item && typeof item === 'object') {
+        if (Array.isArray(item.items)) {
+          item.items.forEach((it: any) => flat.push((it.name || it || '').toLowerCase()));
+        } else {
+          flat.push((item.name || item.title || item.skill || '').toLowerCase());
+        }
+      }
+    });
+    if (flat.length === 0) return true;
+    return flat.every(s => demoKeywords.some(d => s.includes(d) || d.includes(s)));
+  };
+
+  const rawSkillsCandidates = [
+    data.canonicalProfile?.skills,
+    data.canonicalProfile?.technicalSkills,
+    data.profile?.skills,
+    data.personalInfo?.skills,
+    data.personal?.skills,
     data.skills,
     data.skillCategories,
     data.skillsList,
     data.technicalSkills,
     data.techStack,
-    data.profile?.skills,
-    data.personalInfo?.skills,
-    data.personal?.skills,
-    data.canonicalProfile?.skills,
-    data.canonicalProfile?.technicalSkills,
     data.profile?.capabilities,
     data.competencies,
     data.expertise
-  );
+  ];
+
+  let rawSkills: any[] = [];
+  for (const c of rawSkillsCandidates) {
+    if (Array.isArray(c) && c.length > 0 && !isDemoSkillList(c)) {
+      rawSkills = c;
+      break;
+    }
+  }
+  if (rawSkills.length === 0) {
+    for (const c of rawSkillsCandidates) {
+      if (Array.isArray(c) && c.length > 0) {
+        rawSkills = c;
+        break;
+      }
+    }
+  }
 
   const isDemoSkill = (name: string) => {
     const s = String(name || '').toLowerCase();
@@ -464,22 +498,32 @@ export function normalizeData(raw: any): NormalizedPortfolioData {
     data.canonicalProfile?.certifications
   );
 
-  const isDemoCert = (t: string, o?: string) => {
-    const s = `${t || ''} ${o || ''}`.toLowerCase();
-    return s.includes('meta careers') || s.includes('google ux') || s.includes('typescript enterprise') || s.includes('boot camp') || s.includes('advanced react & next.js');
+  const isExactDemoCertTitle = (title: string) => {
+    const t = (title || '').toLowerCase().trim();
+    return (
+      t.includes('google ux design') ||
+      t.includes('typescript enterprise') ||
+      t.includes('full-stack web engineering boot camp') ||
+      t.includes('advanced react & next.js') ||
+      t === 'professional certification'
+    );
   };
 
   if (rawCerts.length > 0) {
-    certList = rawCerts.map((c: any) => ({
+    const mapped = rawCerts.map((c: any) => ({
       title: c.title || c.name || '',
       organization: c.organization || c.issuer || c.provider || c.authority || '',
       date: c.date || c.issueDate || c.year || '',
       credentialUrl: c.credentialUrl || c.url || c.link || ''
     })).filter((c: any) => c.title.trim().length > 0);
 
-    // If real items exist, remove demo items
-    if (certList.some(c => !isDemoCert(c.title, c.organization))) {
-      certList = certList.filter(c => !isDemoCert(c.title, c.organization));
+    const hasRealCert = mapped.some((c: any) => !isExactDemoCertTitle(c.title));
+    if (hasRealCert) {
+      certList = mapped.filter((c: any) => !isExactDemoCertTitle(c.title));
+    } else if (!data.name && !data.id && !data.username) {
+      certList = defaultCertifications;
+    } else {
+      certList = [];
     }
   } else if (!data.name && !data.id && !data.username) {
     certList = defaultCertifications;

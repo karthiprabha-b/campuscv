@@ -13,11 +13,32 @@ interface FooterProps {
 
 export default function Footer(props: FooterProps = {}) {
   const contact = props.contact || props.data?.contact || {};
-  const email = contact.email || props.data?.email || props.data?.profile?.email || props.data?.personalInfo?.email || props.data?.personal?.email || props.data?.basics?.email || "";
-  const phone = contact.phone || props.data?.phone || props.data?.profile?.phone || props.data?.personalInfo?.phone || props.data?.personal?.phone || props.data?.basics?.phone || "";
+  const email =
+    contact.email ||
+    props.data?.email ||
+    props.data?.canonicalProfile?.personal?.email ||
+    props.data?.profile?.email ||
+    props.data?.personalInfo?.email ||
+    props.data?.personal?.email ||
+    props.data?.basics?.email ||
+    "";
+  const phone =
+    contact.phone ||
+    props.data?.phone ||
+    props.data?.canonicalProfile?.personal?.phone ||
+    props.data?.profile?.phone ||
+    props.data?.personalInfo?.phone ||
+    props.data?.personal?.phone ||
+    props.data?.basics?.phone ||
+    "";
+  const canonicalLoc = props.data?.canonicalProfile?.personal
+    ? [props.data.canonicalProfile.personal.city, props.data.canonicalProfile.personal.state, props.data.canonicalProfile.personal.country].filter(Boolean).join(', ')
+    : '';
   const location =
     contact.location ||
     props.data?.location ||
+    canonicalLoc ||
+    props.data?.canonicalProfile?.personal?.location ||
     props.data?.profile?.location ||
     props.data?.personalInfo?.location ||
     props.data?.personal?.location ||
