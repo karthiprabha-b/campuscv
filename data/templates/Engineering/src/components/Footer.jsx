@@ -18,9 +18,28 @@ export default function Footer(props = {}) {
   const norm = data?.profile ? data : normalizeEngineeringData(data);
   const { profile } = norm;
 
-  const scrollToTop = () => {
+  const scrollToTop = (e) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const homeEl = document.getElementById('home') || document.getElementById('hero') || document.querySelector('header') || document.body;
+    if (homeEl && typeof homeEl.scrollIntoView === 'function') {
+      homeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement?.scrollTo?.({ top: 0, behavior: 'smooth' });
+      document.body?.scrollTo?.({ top: 0, behavior: 'smooth' });
+      try {
+        let parent = document.querySelector('footer')?.parentElement;
+        while (parent) {
+          if (parent.scrollHeight > parent.clientHeight) {
+            parent.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          parent = parent.parentElement;
+        }
+      } catch (err) {}
     }
   };
 
@@ -114,14 +133,16 @@ export default function Footer(props = {}) {
           </div>
 
           {/* Back to Top Floating Button */}
-          <button
+          <a
+            href="#home"
             onClick={scrollToTop}
+            role="button"
             className="w-11 h-11 rounded-full bg-slate-900 hover:bg-gradient-cyan-pill hover:text-slate-950 text-white border border-slate-700/60 shadow-md flex items-center justify-center transition-all hover:scale-105 shrink-0 cursor-pointer"
             aria-label="Back to Top"
             title="Scroll to Top"
           >
             <ArrowUp className="w-5 h-5" />
-          </button>
+          </a>
         </div>
 
         {/* Bottom Metadata & Socials */}

@@ -6,8 +6,29 @@ import { ArrowUp, Cpu, Github, Linkedin, Twitter } from 'lucide-react';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 
 export default function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = (e?: React.MouseEvent) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const homeEl = document.getElementById('home') || document.getElementById('hero') || document.querySelector('header') || document.body;
+    if (homeEl && typeof homeEl.scrollIntoView === 'function') {
+      homeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement?.scrollTo?.({ top: 0, behavior: 'smooth' });
+      document.body?.scrollTo?.({ top: 0, behavior: 'smooth' });
+      try {
+        let parent = document.querySelector('footer')?.parentElement;
+        while (parent) {
+          if (parent.scrollHeight > parent.clientHeight) {
+            parent.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          parent = parent.parentElement;
+        }
+      } catch (err) {}
+    }
   };
 
   return (
