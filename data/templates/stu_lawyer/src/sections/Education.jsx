@@ -103,7 +103,7 @@ export default function Education(props = {}) {
                   {/* Card Content Box */}
                   <div className="ml-12 sm:ml-0 sm:w-1/2 sm:px-8 w-full">
                     <div 
-                      className="bg-[#FAF8F4] p-6 sm:p-8 border shadow-luxury transition-all duration-300 relative group"
+                      className="bg-[#FAF8F4] p-6 sm:p-8 border shadow-luxury relative group"
                       style={{ borderColor: 'rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3)' }}
                     >
                       {/* Corner Highlight */}

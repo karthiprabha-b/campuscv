@@ -69,13 +69,11 @@ export default function Navbar(props = {}) {
 
   return (
     <header
-      className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-luxury py-3 border-b border-stone-200'
-          : 'bg-[#FAF8F5]/90 backdrop-blur-md py-4 border-b border-stone-200'
+      className={`sticky top-0 left-0 right-0 z-50 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-shadow duration-300 ${
+        scrolled ? 'shadow-luxury' : 'shadow-sm'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
         {/* Left: Branding & Logo */}
         <a href="#hero" className="flex items-center gap-3 group text-decoration-none">
           <div 

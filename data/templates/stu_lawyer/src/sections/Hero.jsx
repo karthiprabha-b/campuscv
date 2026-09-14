@@ -10,9 +10,9 @@ export default function Hero(props = {}) {
   const title = hero?.title || data?.title || data?.personalInfo?.title || "Senior Legal Counsel & Partner";
   const smallLabel = hero?.smallLabel || data?.smallLabel || "WELCOME TO MY EXECUTIVE PORTFOLIO";
   const headline = hero?.headline || data?.headline || "Strategic Legal Counsel.";
-  const highlightText = hero?.highlightText || data?.highlightText || "Committed to Excellence.";
+  const highlightText = typeof hero?.highlightText === 'string' ? hero.highlightText : (typeof data?.highlightText === 'string' ? data.highlightText : '');
   const intro = hero?.intro || data?.intro || hero?.introductionText || data?.bio || data?.profile?.about || "Providing high-stakes corporate counsel, regulatory compliance strategies, and bespoke legal advisory for fortune leaders, startups, and high-net-worth clients.";
-  const summary = hero?.summary || data?.summary || "Over 8+ years of expertise in corporate jurisprudence, cross-border M&A negotiations, commercial litigation defense, and intellectual property protection.";
+  const summary = typeof hero?.summary === 'string' ? hero.summary : (typeof data?.summary === 'string' ? data.summary : '');
   const avatarUrl = hero?.avatarUrl || data?.avatarUrl || data?.personalInfo?.photoUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1000";
   const badgeYears = hero?.badgeYears || data?.badgeYears || "8+";
   const badgeLabel = hero?.badgeLabel || data?.badgeLabel || "Years Legal Excellence";
@@ -25,7 +25,7 @@ export default function Hero(props = {}) {
   };
 
   return (
-    <section id="hero" data-cv-section="hero" className="relative min-h-screen pt-32 pb-20 flex items-center overflow-hidden bg-[#FAF8F4]">
+    <section id="hero" data-cv-section="hero" className="relative py-16 sm:py-20 lg:py-24 flex items-center overflow-hidden bg-[#FAF8F4]">
       {/* Background Subtle Ambient Glow */}
       <div 
         className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none opacity-40"
@@ -89,7 +89,7 @@ export default function Hero(props = {}) {
             <div className="flex flex-wrap gap-4 mb-10">
               <a
                 href="#projects"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold tracking-widest uppercase shadow-md hover:brightness-105 transition-all border"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold tracking-widest uppercase shadow-md hover:brightness-105 transition-colors border"
                 style={{
                   backgroundColor: 'var(--campuscv-accent, #C89B3C)',
                   color: 'var(--primary-foreground, #FFFFFF)',
@@ -101,7 +101,7 @@ export default function Hero(props = {}) {
               </a>
               <a
                 href="#contact"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 bg-white text-sm font-bold tracking-widest uppercase transition-all hover:bg-stone-50"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 bg-white text-sm font-bold tracking-widest uppercase transition-colors hover:bg-stone-50"
                 style={{
                   borderColor: 'var(--campuscv-accent, #C89B3C)',
                   color: 'var(--campuscv-accent, #C89B3C)'
@@ -133,7 +133,7 @@ export default function Hero(props = {}) {
                       href={soc.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 border border-stone-200 text-gray-700 hover:text-[var(--campuscv-accent,#C89B3C)] hover:border-[var(--campuscv-accent,#C89B3C)] transition-all duration-300 hover:-translate-y-1 bg-white shadow-sm"
+                      className="p-2.5 border border-stone-200 text-gray-700 hover:text-[var(--campuscv-accent,#C89B3C)] hover:border-[var(--campuscv-accent,#C89B3C)] transition-colors duration-200 bg-white shadow-sm"
                       aria-label={soc.name}
                     >
                       <Icon className="w-4 h-4" />

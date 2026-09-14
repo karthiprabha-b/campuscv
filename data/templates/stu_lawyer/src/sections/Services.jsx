@@ -62,7 +62,7 @@ export default function Services(props = {}) {
             return (
               <div
                 key={serv?.id || index}
-                className="group bg-[#FAF8F4] p-8 border shadow-sm hover:shadow-gold-glow flex flex-col justify-between transition-all duration-300 hover:-translate-y-2"
+                className="group bg-[#FAF8F4] p-8 border shadow-sm hover:shadow-gold-glow flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2"
                 style={{ borderColor: 'rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3)' }}
               >
                 <div>

@@ -117,7 +117,7 @@ export default function Projects(props = {}) {
           {filteredProjects.map((proj, idx) => (
             <div
               key={proj?.id || idx}
-              className="bg-[#FAF8F4] border shadow-luxury transition-all duration-300 overflow-hidden flex flex-col justify-between group hover:-translate-y-2"
+              className="bg-[#FAF8F4] border shadow-luxury transition-transform duration-300 overflow-hidden flex flex-col justify-between group hover:-translate-y-2"
               style={{ borderColor: 'rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3)' }}
             >
               <div>

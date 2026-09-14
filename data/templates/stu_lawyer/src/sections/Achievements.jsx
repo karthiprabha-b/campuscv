@@ -44,7 +44,7 @@ export default function Achievements(props = {}) {
             return (
               <div
                 key={m?.id || index}
-                className="relative p-6 bg-[#FAF8F4] border shadow-sm hover:shadow-gold-glow transition-all duration-300 group"
+                className="relative p-6 bg-[#FAF8F4] border shadow-sm hover:shadow-gold-glow transition-shadow duration-300 group"
                 style={{ borderColor: 'rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3)' }}
               >
                 {/* Top Border Highlight */}

@@ -70,12 +70,12 @@ export default function Experience(props = {}) {
           {experience.map((exp, index) => (
             <div
               key={exp?.id || index}
-              className="bg-white p-8 border shadow-luxury transition-all duration-300 relative group"
+              className="bg-white p-8 border shadow-luxury relative group"
               style={{ borderColor: 'rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3)' }}
             >
               {/* Left Edge Accent Bar */}
               <div 
-                className="absolute top-0 bottom-0 left-0 w-1.5 group-hover:w-2 transition-all"
+                className="absolute top-0 bottom-0 left-0 w-1.5 group-hover:w-2 transition-[width]"
                 style={{
                   background: 'linear-gradient(to bottom, var(--campuscv-accent-dark, #A67D28), var(--campuscv-accent, #C89B3C), var(--campuscv-accent-light, #D5B350))'
                 }}

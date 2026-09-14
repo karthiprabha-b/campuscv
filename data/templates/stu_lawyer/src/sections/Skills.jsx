@@ -132,7 +132,7 @@ export default function Skills(props = {}) {
             return (
               <div
                 key={cat?.category || catIdx}
-                className="bg-white p-8 border border-stone-200/80 shadow-luxury transition-all duration-300 flex flex-col justify-between"
+                className="bg-white p-8 border border-stone-200/80 shadow-luxury flex flex-col justify-between"
               >
                 <div>
                   {/* Category Header */}
