@@ -64,6 +64,15 @@ export function detectElementSemanticField(el: HTMLElement): DetectionResult | n
   const text = (el.innerText || el.textContent || '').trim();
   const lowerText = text.toLowerCase();
 
+  // Exclude elements inside code blocks, terminal widgets, preformatted blocks, or syntax containers from generic semantic auto-binding
+  const isCodeOrTerminal = Boolean(
+    el.closest('.terminal-window, .terminal-body, .terminal-header, .terminal-dots, pre, code, kbd, samp, [class*="terminal"], [class*="syntax"], [class*="code-"], [data-no-bind="true"]') ||
+    el.querySelector('.t-kw, .t-var, .t-str, .dot-red, .dot-green')
+  );
+  if (isCodeOrTerminal) {
+    return null;
+  }
+
   const href = (el.getAttribute('href') || '').toLowerCase();
   const src = tag === 'IMG' ? ((el as HTMLImageElement).src || '').toLowerCase() : '';
   const alt = (el.getAttribute('alt') || '').toLowerCase();
@@ -179,14 +188,37 @@ export function detectElementSemanticField(el: HTMLElement): DetectionResult | n
     if (DEMO_TITLES.has(lowerText)) {
       return { field: 'headline', confidence: 0.96, source: 'DEMO_PLACEHOLDER', originalValue: text };
     }
-    if ((tag === 'H2' || tag === 'H3' || classes.includes('role') || classes.includes('headline') || classes.includes('subtitle')) && text.length > 3 && text.length < 80) {
+    const isExplicitRoleOrHeadline = 
+      classes.includes('role') || 
+      classes.includes('headline') || 
+      classes.includes('subtitle') || 
+      classes.includes('tagline') ||
+      classes.includes('hero-role') ||
+      classes.includes('hero-subtitle') ||
+      id.includes('role') ||
+      id.includes('headline') ||
+      id.includes('subtitle');
+
+    if (isExplicitRoleOrHeadline && text.length > 3 && text.length < 100) {
       return { field: 'headline', confidence: 0.92, source: 'AUTO_DETECTED', originalValue: text };
     }
   }
 
-  // 8. Bio / Summary Detection
-  if ((sectionContext === 'hero' || sectionContext === 'about') && tag === 'P' && text.length > 30) {
-    return { field: 'bio', confidence: 0.90, source: 'AUTO_DETECTED', originalValue: text };
+  // 8. Bio / Summary Detection (require bio/about/summary/desc semantics or main hero paragraph)
+  if ((sectionContext === 'hero' || sectionContext === 'about') && tag === 'P') {
+    const isBioContext = 
+      classes.includes('bio') || 
+      classes.includes('about') || 
+      classes.includes('summary') || 
+      classes.includes('desc') || 
+      classes.includes('intro') ||
+      id.includes('bio') ||
+      id.includes('summary') ||
+      id.includes('description');
+
+    if (isBioContext && text.length > 25) {
+      return { field: 'bio', confidence: 0.90, source: 'AUTO_DETECTED', originalValue: text };
+    }
   }
 
   return null;

@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EngineeringPortfolioData",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "headline": { "type": "string" },
+    "tagline": { "type": "string" },
+    "bio": { "type": "string" },
+    "avatarUrl": { "type": "string" },
+    "profileImage": { "type": "string" },
+    "availability": { "type": "string" },
+    "location": { "type": "string" },
+    "email": { "type": "string" },
+    "phone": { "type": "string" },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "responseTime": { "type": "string" }
+      }
+    },
+    "projects": { "type": "array" },
+    "experience": { "type": "array" },
+    "education": { "type": "array" },
+    "skills": { "type": "array" },
+    "certificates": { "type": "array" },
+    "stats": { "type": "array" },
+    "socials": {
+      "type": "object",
+      "properties": {
+        "github": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "twitter": { "type": "string" }
+      }
+    }
+  }
+}

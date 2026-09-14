@@ -99,6 +99,25 @@ export function sanitizeAndValidateProfile(profile: CampusProfile, rawResumeText
       }
     }
 
+    // Deduplicate repeated sentences and trim down to a clean, crisp paragraph
+    if (summary) {
+      const rawSentences = summary.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+      const uniqueSentences: string[] = [];
+      const seen = new Set<string>();
+
+      for (const sent of rawSentences) {
+        const normalized = sent.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (normalized.length > 5 && !seen.has(normalized)) {
+          seen.add(normalized);
+          uniqueSentences.push(sent);
+        }
+      }
+
+      // Keep at most 2-3 concise sentences for a clean, impactful bio paragraph
+      const conciseSentences = uniqueSentences.slice(0, 3);
+      summary = conciseSentences.join(' ').trim();
+    }
+
     sanitized.personal.summary = summary;
   }
 

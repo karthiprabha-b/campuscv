@@ -65,6 +65,7 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
     isEditMode,
     hoveredElement,
     selectedElement,
+    selectedNode,
     isInlineEditing,
     isElementLocked
   } = useEditorContext();
@@ -73,17 +74,35 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
   const [selectedBox, setSelectedBox] = useState<OverlayBox | null>(null);
   const rafRef = useRef<number>(0);
 
+  const activeEl = selectedNode?.el || selectedElement?.el;
+
   const syncRects = useCallback(() => {
-    if (selectedElement?.el) {
-      let activeEl: HTMLElement | null = selectedElement.el;
-      if (!activeEl || !activeEl.ownerDocument?.body?.contains(activeEl)) {
-        activeEl = null;
-      }
-      const r = getLiveRect(activeEl);
+    let targetEl: HTMLElement | null = activeEl || null;
+    if (targetEl && !targetEl.ownerDocument?.body?.contains(targetEl)) {
+      targetEl = null;
+    }
+    
+    // If targetEl lost reference, try resolving by data-node-id in iframe or canvas
+    if (!targetEl && (selectedNode?.nodeId || selectedElement?.id)) {
+      const nid = selectedNode?.nodeId || selectedElement?.id;
+      const iframe = canvasRef.current?.querySelector('iframe');
+      const doc = iframe?.contentDocument || (window as any).__CAMPUSCV_IFRAME_DOC__ || document;
+      targetEl = doc.querySelector(`[data-node-id="${nid}"]`) || doc.getElementById(nid || '');
+    }
+
+    if (targetEl) {
+      const r = getLiveRect(targetEl);
       const newBox = r ? rectToBox(r) : null;
       setSelectedBox(prev => {
         if (!prev && !newBox) return null;
-        if (prev && newBox && Math.abs(prev.top - newBox.top) < 1 && Math.abs(prev.left - newBox.left) < 1 && Math.abs(prev.width - newBox.width) < 1 && Math.abs(prev.height - newBox.height) < 1) {
+        if (
+          prev && 
+          newBox && 
+          Math.abs(prev.top - newBox.top) < 0.5 && 
+          Math.abs(prev.left - newBox.left) < 0.5 && 
+          Math.abs(prev.width - newBox.width) < 0.5 && 
+          Math.abs(prev.height - newBox.height) < 0.5
+        ) {
           return prev;
         }
         return newBox;
@@ -91,36 +110,61 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
     } else {
       setSelectedBox(null);
     }
-  }, [selectedElement]);
+  }, [activeEl, selectedNode?.nodeId, selectedElement?.id, canvasRef]);
 
   useEffect(() => {
-    if (!isEditMode || !selectedElement) {
+    if (!isEditMode || (!selectedElement && !selectedNode)) {
       setSelectedBox(null);
       return;
     }
 
     syncRects();
 
+    // High precision RAF sync loop while selected for seamless layout adjustments
+    let isRunning = true;
+    const loop = () => {
+      syncRects();
+      if (isRunning) {
+        rafRef.current = requestAnimationFrame(loop);
+      }
+    };
+    rafRef.current = requestAnimationFrame(loop);
+
     const handleUpdate = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        syncRects();
-      });
+      syncRects();
     };
 
     window.addEventListener('scroll', handleUpdate, true);
     window.addEventListener('resize', handleUpdate);
+    window.addEventListener('campuscv:layout-shift', handleUpdate);
+    window.addEventListener('transitionend', handleUpdate);
+    window.addEventListener('animationend', handleUpdate);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (canvasRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => syncRects());
+      resizeObserver.observe(canvasRef.current);
+    }
 
     return () => {
+      isRunning = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (resizeObserver) resizeObserver.disconnect();
       window.removeEventListener('scroll', handleUpdate, true);
       window.removeEventListener('resize', handleUpdate);
+      window.removeEventListener('campuscv:layout-shift', handleUpdate);
+      window.removeEventListener('transitionend', handleUpdate);
+      window.removeEventListener('animationend', handleUpdate);
     };
-  }, [isEditMode, selectedElement, syncRects]);
+  }, [isEditMode, selectedElement, selectedNode, syncRects, canvasRef]);
 
   if (!isEditMode) return null;
 
-  const isLocked = selectedElement ? isElementLocked(selectedElement.id) : false;
+  const currentActiveId = selectedNode?.nodeId || selectedElement?.id || '';
+  const isLocked = currentActiveId ? isElementLocked(currentActiveId) : false;
+  const currentLabel = selectedNode 
+    ? (selectedNode.type === 'button' ? 'Button' : selectedNode.type === 'image' ? 'Image' : selectedNode.type === 'container' ? 'Container' : 'Text')
+    : (selectedElement ? formatLabel(selectedElement.label, selectedElement.elementType) : 'Element');
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[100]" aria-hidden="true">
@@ -128,7 +172,7 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
       {SHOW_HOVER_OVERLAY && null}
 
       {/* Selected Ring — Clean 1.5px CampusCV Purple Outline */}
-      {selectedBox && selectedElement && (
+      {selectedBox && (selectedElement || selectedNode) && (
         <div
           style={{
             position: 'fixed',
@@ -174,7 +218,7 @@ export default function EditorOverlay({ canvasRef }: { canvasRef: React.RefObjec
               ? 'Locked'
               : isInlineEditing
               ? '✏ Editing Text...'
-              : formatLabel(selectedElement.label, selectedElement.elementType)}
+              : currentLabel}
           </div>
         </div>
       )}

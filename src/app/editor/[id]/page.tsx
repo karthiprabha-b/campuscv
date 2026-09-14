@@ -337,9 +337,10 @@ function EditorInner({ id }: { id: string }) {
       clearTimeout(historyTimerRef.current);
       historyTimerRef.current = null;
     }
+    const cloned = JSON.parse(JSON.stringify(baseState));
     const lastEntry = historyPast.current[historyPast.current.length - 1];
-    if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(baseState)) {
-      historyPast.current = [...historyPast.current.slice(-49), baseState];
+    if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(cloned)) {
+      historyPast.current = [...historyPast.current.slice(-49), cloned];
       historyFuture.current = [];
       setCanUndo(true);
       setCanRedo(false);
@@ -356,7 +357,20 @@ function EditorInner({ id }: { id: string }) {
     setSaveStatus('dirty');
     setPortfolio(prev => {
       if (prev) {
-        if (options.immediate) {
+        // If template ID changed explicitly via template switcher, reset history stack
+        const prevTpl = (prev.templateId || prev.layoutStyle || '').toLowerCase().trim();
+        const nextTpl = (updated.templateId || updated.layoutStyle || '').toLowerCase().trim();
+        if (options.immediate && prevTpl && nextTpl && prevTpl !== nextTpl) {
+          if (historyTimerRef.current) {
+            clearTimeout(historyTimerRef.current);
+            historyTimerRef.current = null;
+          }
+          pendingHistoryBaseRef.current = null;
+          historyPast.current = [];
+          historyFuture.current = [];
+          setCanUndo(false);
+          setCanRedo(false);
+        } else if (options.immediate) {
           commitToHistory(pendingHistoryBaseRef.current || prev);
         } else {
           if (!pendingHistoryBaseRef.current) {
@@ -488,6 +502,14 @@ function EditorInner({ id }: { id: string }) {
       clearTimeout(historyTimerRef.current);
       historyTimerRef.current = null;
     }
+    if (pendingHistoryBaseRef.current) {
+      const base = pendingHistoryBaseRef.current;
+      pendingHistoryBaseRef.current = null;
+      const lastEntry = historyPast.current[historyPast.current.length - 1];
+      if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(base)) {
+        historyPast.current = [...historyPast.current.slice(-49), base];
+      }
+    }
 
     if (!historyPast.current.length) return;
     setSaveStatus('dirty');
@@ -502,16 +524,42 @@ function EditorInner({ id }: { id: string }) {
     historyFuture.current = [JSON.parse(JSON.stringify(current)), ...historyFuture.current.slice(0, 49)];
     setCanUndo(past.length > 0);
     setCanRedo(true);
-    portfolioRef.current = previous;
+
+    // CRITICAL: Always preserve active template identity and sectionFiles so undo never breaks or switches templates
+    const activeTemplateId = current.templateId || current.layoutStyle;
+    const targetState: PortfolioData = {
+      ...(JSON.parse(JSON.stringify(previous)) as PortfolioData),
+      templateId: activeTemplateId || previous.templateId,
+      templateVersionId: current.templateVersionId || previous.templateVersionId,
+      layoutStyle: current.layoutStyle || previous.layoutStyle,
+      templateType: current.templateType || previous.templateType,
+      sectionFiles: current.sectionFiles || previous.sectionFiles,
+      templateCode: current.templateCode || previous.templateCode,
+      _sectionFilesTemplateId: current._sectionFilesTemplateId || previous._sectionFilesTemplateId,
+      bindings: current.bindings || previous.bindings,
+      schema: current.schema || previous.schema,
+      assetMap: current.assetMap || previous.assetMap,
+      customCSS: current.customCSS || previous.customCSS,
+    };
+
+    portfolioRef.current = targetState;
     pendingHistoryBaseRef.current = null;
     // Deep-clone the target state to guarantee a new reference React will always re-render
-    setPortfolio(JSON.parse(JSON.stringify(previous)) as PortfolioData);
+    setPortfolio(JSON.parse(JSON.stringify(targetState)) as PortfolioData);
   }, []);
 
   const handleRedo = useCallback(() => {
     if (historyTimerRef.current) {
       clearTimeout(historyTimerRef.current);
       historyTimerRef.current = null;
+    }
+    if (pendingHistoryBaseRef.current) {
+      const base = pendingHistoryBaseRef.current;
+      pendingHistoryBaseRef.current = null;
+      const lastEntry = historyPast.current[historyPast.current.length - 1];
+      if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(base)) {
+        historyPast.current = [...historyPast.current.slice(-49), base];
+      }
     }
     if (!historyFuture.current.length) return;
     setSaveStatus('dirty');
@@ -526,10 +574,28 @@ function EditorInner({ id }: { id: string }) {
     historyPast.current = [...historyPast.current.slice(-49), JSON.parse(JSON.stringify(current))];
     setCanUndo(true);
     setCanRedo(future.length > 0);
-    portfolioRef.current = next;
+
+    // CRITICAL: Always preserve active template identity and sectionFiles so redo never breaks or switches templates
+    const activeTemplateId = current.templateId || current.layoutStyle;
+    const targetState: PortfolioData = {
+      ...(JSON.parse(JSON.stringify(next)) as PortfolioData),
+      templateId: activeTemplateId || next.templateId,
+      templateVersionId: current.templateVersionId || next.templateVersionId,
+      layoutStyle: current.layoutStyle || next.layoutStyle,
+      templateType: current.templateType || next.templateType,
+      sectionFiles: current.sectionFiles || next.sectionFiles,
+      templateCode: current.templateCode || next.templateCode,
+      _sectionFilesTemplateId: current._sectionFilesTemplateId || next._sectionFilesTemplateId,
+      bindings: current.bindings || next.bindings,
+      schema: current.schema || next.schema,
+      assetMap: current.assetMap || next.assetMap,
+      customCSS: current.customCSS || next.customCSS,
+    };
+
+    portfolioRef.current = targetState;
     pendingHistoryBaseRef.current = null;
     // Deep-clone the target state to guarantee a new reference React will always re-render
-    setPortfolio(JSON.parse(JSON.stringify(next)) as PortfolioData);
+    setPortfolio(JSON.parse(JSON.stringify(targetState)) as PortfolioData);
   }, []);
 
   // Keyboard Shortcuts (Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y)

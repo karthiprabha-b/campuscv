@@ -76,14 +76,18 @@ export default function UploadTemplateModal({
 
     const manifest = validationResult.manifest;
     const zipSizeMB = selectedFile ? (selectedFile.size / (1024 * 1024)).toFixed(2) + ' MB' : '1.8 MB';
+    const fallbackId = templateName
+      ? templateName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+      : (selectedFile ? selectedFile.name.replace(/\.zip$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '-') : `tpl-${Date.now()}`);
+    const resolvedId = (manifest.id && manifest.id !== 'undefined') ? manifest.id : fallbackId;
 
     const newRecord: TemplateRecord = {
-      id: manifest.id,
-      name: templateName || manifest.name,
-      version: version || manifest.version,
+      id: resolvedId,
+      name: templateName || manifest.name || resolvedId,
+      version: version || manifest.version || '1.0.0',
       author: manifest.author || 'Admin',
-      description: description || manifest.description,
-      category: category || manifest.category,
+      description: description || manifest.description || '',
+      category: category || manifest.category || 'Developer',
       tags: manifest.tags || ['portfolio', 'uploaded'],
       supportsDarkMode: manifest.supportsDarkMode ?? true,
       supportsLightMode: manifest.supportsLightMode ?? true,
@@ -93,7 +97,7 @@ export default function UploadTemplateModal({
       status: 'active',
       downloadCount: 1,
       usersCount: 0,
-      zipFileName: selectedFile ? selectedFile.name : `${manifest.id}.zip`,
+      zipFileName: selectedFile ? selectedFile.name : `${resolvedId}.zip`,
       zipSizeFormatted: zipSizeMB,
       thumbnail: validationResult.thumbnailUrl || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
       customCSS: validationResult.customCSS,
@@ -238,10 +242,21 @@ export default function UploadTemplateModal({
                   onChange={e => setCategory(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-white border border-[#E7E9EE] rounded-xl text-xs text-[#111318] focus:border-purple-600 outline-none cursor-pointer"
                 >
-                  <option value="Designer">Designer</option>
+                  {category && !['Developer & Engineering', 'Developer', 'Designer', 'Student', 'Agriculture', 'Photography', 'Beautician', 'Lawyer', 'Doctor', 'Minimalist', 'Creative', 'Business'].includes(category) && (
+                    <option value={category}>{category}</option>
+                  )}
+                  <option value="Developer & Engineering">Developer &amp; Engineering</option>
                   <option value="Developer">Developer</option>
+                  <option value="Designer">Designer</option>
                   <option value="Student">Student</option>
+                  <option value="Agriculture">Agriculture</option>
+                  <option value="Photography">Photography</option>
+                  <option value="Beautician">Beautician</option>
+                  <option value="Lawyer">Lawyer</option>
+                  <option value="Doctor">Doctor</option>
                   <option value="Minimalist">Minimalist</option>
+                  <option value="Creative">Creative &amp; Agency</option>
+                  <option value="Business">Business &amp; Executive</option>
                 </select>
               </div>
 

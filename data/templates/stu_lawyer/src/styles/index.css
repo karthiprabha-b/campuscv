@@ -2,15 +2,20 @@
 
 :root {
   --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--campuscv-font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  --campuscv-accent: #C89B3C;
+  --campuscv-accent-rgb: 200, 155, 60;
+  --campuscv-accent-dark: #A67D28;
+  --campuscv-accent-light: #D5B350;
+  --primary-foreground: #FFFFFF;
   --bg-main: #FAF8F4;
   --bg-card: #FFFFFF;
   --text-primary: #1A1A1A;
   --text-secondary: #6B7280;
-  --gold-500: #C89B3C;
-  --gold-400: #D5B350;
-  --gold-600: #A67D28;
-  --border-gold: rgba(200, 155, 60, 0.3);
+  --gold-500: var(--campuscv-accent, #C89B3C);
+  --gold-400: var(--campuscv-accent-light, #D5B350);
+  --gold-600: var(--campuscv-accent-dark, #A67D28);
+  --border-gold: rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3);
 }
 
 * {
@@ -42,7 +47,7 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Luxury Utility Classes */
+/* Luxury Utility Classes with dynamic accent binding */
 .bg-luxury-bg {
   background-color: #FAF8F4;
 }
@@ -60,21 +65,21 @@ body {
 }
 
 .text-gold {
-  color: #C89B3C;
+  color: var(--campuscv-accent, #C89B3C);
 }
 
 .bg-gold-gradient {
-  background: linear-gradient(135deg, #A67D28 0%, #C89B3C 50%, #D5B350 100%);
+  background-image: linear-gradient(135deg, var(--campuscv-accent-dark, #A67D28) 0%, var(--campuscv-accent, #C89B3C) 50%, var(--campuscv-accent-light, #D5B350) 100%);
 }
 
 .text-gold-gradient {
-  background: linear-gradient(135deg, #A67D28 0%, #C89B3C 50%, #D5B350 100%);
+  background: linear-gradient(135deg, var(--campuscv-accent-dark, #A67D28) 0%, var(--campuscv-accent, #C89B3C) 50%, var(--campuscv-accent-light, #D5B350) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .shadow-gold-glow {
-  box-shadow: 0 0 25px -5px rgba(200, 155, 60, 0.25);
+  box-shadow: 0 0 25px -5px rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.25);
 }
 
 .shadow-luxury {
@@ -82,11 +87,11 @@ body {
 }
 
 .border-gold-30 {
-  border-color: rgba(200, 155, 60, 0.3);
+  border-color: rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.3);
 }
 
 .border-gold-50 {
-  border-color: rgba(200, 155, 60, 0.5);
+  border-color: rgba(var(--campuscv-accent-rgb, 200, 155, 60), 0.5);
 }
 
 /* Custom Scrollbar */
@@ -99,14 +104,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C89B3C;
+  background: var(--campuscv-accent, #C89B3C);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A67D28;
+  background: var(--campuscv-accent-dark, #A67D28);
 }
 
 ::selection {
-  background: #C89B3C;
+  background: var(--campuscv-accent, #C89B3C);
   color: #FAF8F4;
 }

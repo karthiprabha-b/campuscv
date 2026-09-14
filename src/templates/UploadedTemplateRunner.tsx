@@ -1241,23 +1241,23 @@ function executeUploadedPackage(
   const candidateKeys = Array.from(new Set([
     manifestEntry ? (findInFiles(sectionFiles, manifestEntry)?.key || manifestEntry) : null,
     ...possibleEntries.map(p => findInFiles(sectionFiles, p)?.key).filter(Boolean)
-  ])).filter(Boolean) as string[];
+  ])).filter(Boolean).filter(k => typeof k === 'string' && !k.endsWith('.d.ts')) as string[];
 
   if (candidateKeys.length === 0) {
     const nonHelperKeys = Object.keys(sectionFiles).filter(k => {
       const baseName = k.split('/').pop()?.toLowerCase() || '';
-      return !['schema.ts', 'schema.js', 'schema.json', 'bindings.ts', 'bindings.js', 'metadata.ts', 'metadata.js', 'defaults.ts', 'defaults.js', 'styles.ts', 'styles.js', 'types.ts', 'types.js'].includes(baseName);
+      return !['schema.ts', 'schema.js', 'schema.json', 'bindings.ts', 'bindings.js', 'metadata.ts', 'metadata.js', 'defaults.ts', 'defaults.js', 'styles.ts', 'styles.js', 'types.ts', 'types.js'].includes(baseName) && !k.endsWith('.d.ts');
     });
-    const firstCodeKey = nonHelperKeys.find(k => /\.(tsx|jsx|ts|js)$/i.test(k)) || Object.keys(sectionFiles).find(k => /\.(tsx|jsx|ts|js)$/i.test(k));
+    const firstCodeKey = nonHelperKeys.find(k => /\.(tsx|jsx|ts|js)$/i.test(k) && !k.endsWith('.d.ts')) || Object.keys(sectionFiles).find(k => /\.(tsx|jsx|ts|js)$/i.test(k) && !k.endsWith('.d.ts'));
     if (firstCodeKey) candidateKeys.push(firstCodeKey);
-    else candidateKeys.push('src/Portfolio.jsx');
+    else candidateKeys.push('src/index.jsx');
   }
 
   let finalExports: any = null;
-  let entryKey = candidateKeys[0] || 'src/Portfolio.jsx';
+  let entryKey = candidateKeys[0] || 'src/index.jsx';
 
   for (const candKey of candidateKeys) {
-    if (!findInFiles(sectionFiles, candKey)) continue;
+    if (!findInFiles(sectionFiles, candKey) || candKey.endsWith('.d.ts')) continue;
     try {
       const exp = requireModule(candKey, 'root');
       let comp = extractReactComponent(exp);
@@ -1285,6 +1285,7 @@ function executeUploadedPackage(
       }
     } catch (err: any) {
       console.warn(`[TEMPLATE] Candidate entry '${candKey}' execution notice:`, err?.message);
+      logs.push({ file: candKey, status: 'error', message: `✗ [${candKey}]: ${err?.message || err}` });
     }
   }
 
@@ -1305,7 +1306,8 @@ function executeUploadedPackage(
     return { exports: finalExports, entryKey, logs };
   }
 
-  return { exports: null, entryKey, logs, error: `No executable code found in entry files: [${candidateKeys.join(', ')}]` };
+  const detailedErrMsg = logs.find(l => l.status === 'error')?.message || `No executable code found in entry files: [${candidateKeys.join(', ')}]`;
+  return { exports: null, entryKey, logs, error: detailedErrMsg };
 }
 
 // ----------------------------------------------------------------------
@@ -1380,10 +1382,8 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
     if (isUploaded) {
       setIsLoadingFiles(true);
       loadTemplateFilesAsync(effectivePortfolio).then((resolved) => {
-        if (isCurrent && Object.keys(resolved.sectionFiles).length > 0) {
+        if (isCurrent) {
           setResolvedFiles(resolved);
-          setIsLoadingFiles(false);
-        } else if (isCurrent) {
           setIsLoadingFiles(false);
         }
       }).catch((err) => {
@@ -2083,6 +2083,11 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
               if (isAvatar) {
                 props.onFieldChange('profileImage', blobUrl);
                 props.onFieldChange('avatarUrl', blobUrl);
+                props.onFieldChange('personal.profilePhoto', blobUrl);
+                props.onFieldChange('personal.avatarUrl', blobUrl);
+                props.onFieldChange('profile.photo', blobUrl);
+                props.onFieldChange('profile.avatarUrl', blobUrl);
+                props.onFieldChange('hero.avatarUrl', blobUrl);
                 props.onFieldChange('about.avatarUrl', blobUrl);
               }
             }
@@ -2100,6 +2105,11 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
               if (isAvatar) {
                 props.onFieldChange('profileImage', finalUrl);
                 props.onFieldChange('avatarUrl', finalUrl);
+                props.onFieldChange('personal.profilePhoto', finalUrl);
+                props.onFieldChange('personal.avatarUrl', finalUrl);
+                props.onFieldChange('profile.photo', finalUrl);
+                props.onFieldChange('profile.avatarUrl', finalUrl);
+                props.onFieldChange('hero.avatarUrl', finalUrl);
                 props.onFieldChange('about.avatarUrl', finalUrl);
               }
             }
@@ -2405,9 +2415,49 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
         }
       ` : '';
 
+      const cleanHex = String(accentHex || '#8b5cf6').trim().replace('#', '');
+      let hex = cleanHex;
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const r = parseInt(hex.substring(0, 2), 16) || 139;
+      const g = parseInt(hex.substring(2, 4), 16) || 92;
+      const b = parseInt(hex.substring(4, 6), 16) || 246;
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      const contrastForeground = yiq >= 150 ? '#0B0F19' : '#FFFFFF';
+
+      const dr = Math.max(0, Math.floor(r * 0.8));
+      const dg = Math.max(0, Math.floor(g * 0.8));
+      const db = Math.max(0, Math.floor(b * 0.8));
+      const darkHex = `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
+
+      const lr = Math.min(255, Math.floor(r + (255 - r) * 0.25));
+      const lg = Math.min(255, Math.floor(g + (255 - g) * 0.25));
+      const lb = Math.min(255, Math.floor(b + (255 - b) * 0.25));
+      const lightHex = `#${lr.toString(16).padStart(2, '0')}${lg.toString(16).padStart(2, '0')}${lb.toString(16).padStart(2, '0')}`;
+
       const designCSS = `
-        :root, .uploaded-template-runner, body {
-          ${hasUserAccent ? `--primary: ${accentHex} !important; --accent: ${accentHex} !important; --brand: ${accentHex} !important; --theme-color: ${accentHex} !important; --campuscv-accent: ${accentHex} !important;` : ''}
+        :root, .uploaded-template-runner, body, #template-root, .campuscv-template-root {
+          ${hasUserAccent ? `
+            --primary: ${accentHex} !important;
+            --accent: ${accentHex} !important;
+            --brand: ${accentHex} !important;
+            --brand-gold: ${accentHex} !important;
+            --theme-color: ${accentHex} !important;
+            --accent-color: ${accentHex} !important;
+            --campuscv-primary-color: ${accentHex} !important;
+            --campuscv-accent: ${accentHex} !important;
+            --campuscv-accent-rgb: ${r}, ${g}, ${b} !important;
+            --campuscv-accent-dark: ${darkHex} !important;
+            --campuscv-accent-light: ${lightHex} !important;
+            --primary-accent: ${accentHex} !important;
+            --primary-foreground: ${contrastForeground} !important;
+            --color-cyan-500: ${accentHex} !important;
+            --cyber-bright-cyan: ${accentHex} !important;
+            --cyber-neon-cyan: ${accentHex} !important;
+            --gold-500: ${accentHex} !important;
+            --gold-400: ${lightHex} !important;
+            --gold-600: ${darkHex} !important;
+            --border-gold: rgba(${r}, ${g}, ${b}, 0.3) !important;
+          ` : ''}
         }
         ${fontCSS}
         ${fontSizeCSS}

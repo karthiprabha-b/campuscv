@@ -60,7 +60,56 @@ class AdminTemplateDatabase {
   public getTemplateById(id: string): AdminTemplateRecord | undefined {
     if (!id) return undefined;
     const cleanId = id.trim().toLowerCase();
-    return this.templates.find(t => t.id.toLowerCase() === cleanId);
+
+    // 1. Direct match
+    const direct = this.templates.find(t => t.id.toLowerCase() === cleanId);
+    if (direct) return direct;
+
+    // 2. Normalized match (strip spaces, hyphens, underscores)
+    const norm = (s: string) => (s || '').toLowerCase().replace(/[\s_-]+/g, '');
+    const cleanNorm = norm(cleanId);
+    const fuzzy = this.templates.find(t => norm(t.id) === cleanNorm);
+    if (fuzzy) return fuzzy;
+
+    // 3. Known aliases map
+    const aliases: Record<string, string> = {
+      'stu lawyer': 'stu_lawyer',
+      'stu-lawyer': 'stu_lawyer',
+      'stu_lawyer': 'stu_lawyer',
+      'executive lawyer': 'stu_lawyer',
+      'executive lawyer portfolio': 'stu_lawyer',
+      'executive-lawyer-portfolio': 'stu_lawyer',
+      'doctor': 'Doctor',
+      'doctor-portfolio': 'Doctor',
+      'designer': 'Designer portfolio',
+      'designer-portfolio': 'Designer portfolio',
+      'slash': 'slash-model',
+      'slash model': 'slash-model',
+      'static': 'Static Panel',
+      'static-panel': 'Static Panel',
+      'agri': 'Agri Student',
+      'agri-student': 'Agri Student',
+      'agri student': 'Agri Student',
+      'beautician': 'Beautician',
+      'beautician-portfolio': 'Beautician',
+      'photography': 'photography',
+      'photography-portfolio': 'photography',
+      'engineering': 'Engineering',
+      'engineering-portfolio': 'Engineering',
+      'engineering portfolio': 'Engineering',
+      'systems architect': 'Engineering'
+    };
+    const targetAlias = aliases[cleanId] || aliases[cleanId.replace(/[\s_]+/g, '-')];
+    if (targetAlias) {
+      const aliasMatch = this.templates.find(t => t.id.toLowerCase() === targetAlias.toLowerCase() || norm(t.id) === norm(targetAlias));
+      if (aliasMatch) return aliasMatch;
+    }
+
+    // 4. Name match
+    const nameMatch = this.templates.find(t => norm(t.name) === cleanNorm || (t.name && t.name.toLowerCase().includes(cleanId)));
+    if (nameMatch) return nameMatch;
+
+    return undefined;
   }
 
   /**

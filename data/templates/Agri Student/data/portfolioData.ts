@@ -1,0 +1,568 @@
+export interface Project {
+  id: string;
+  title: string;
+  category: 'AgriTech & IoT' | 'Crop & Soil Science' | 'Remote Sensing & GIS' | 'Sustainable Farming';
+  tagline: string;
+  summary: string;
+  image: string;
+  metrics: { label: string; value: string }[];
+  tags: string[];
+  features: string[];
+  results: string;
+  technologies: string[];
+  liveUrl?: string;
+  githubUrl?: string;
+  paperUrl?: string;
+}
+
+export interface EducationItem {
+  degree: string;
+  major: string;
+  institution: string;
+  location: string;
+  period: string;
+  grade: string;
+  honors: string[];
+  thesis: {
+    title: string;
+    advisor: string;
+    description: string;
+  };
+  keyCoursework: string[];
+  iconType: string;
+}
+
+export interface ExperienceItem {
+  id: string;
+  role: string;
+  organization: string;
+  location: string;
+  type: 'Research' | 'Field Work' | 'Industry Internship';
+  period: string;
+  description: string;
+  achievements: string[];
+  technologies: string[];
+  statsBadge?: string;
+}
+
+export interface SkillCategory {
+  category: string;
+  description: string;
+  icon: string;
+  skills: {
+    name: string;
+    level: number;
+    highlight?: string;
+  }[];
+}
+
+export interface CertificateItem {
+  id: string;
+  title: string;
+  issuer: string;
+  issueDate: string;
+  expiryDate?: string;
+  credentialId: string;
+  skillsCovered: string[];
+  badgeColor: string;
+  verificationUrl?: string;
+}
+
+export const studentProfile = {
+  name: "Aarav Sharma",
+  title: "Agronomist & Precision AgriTech Specialist",
+  tagline: "Bridging Modern Robotics, Satellite Remote Sensing & Soil Microbiome Science for Sustainable Food Systems",
+  currentDegree: "B.Sc. (Hons.) Agricultural Sciences & Smart Farming",
+  university: "College of Agriculture & Bio-Sciences",
+  location: "New Delhi / California Agritech Lab",
+  email: "aarav.agriscience@gmail.com",
+  phone: "+1 (555) 382-7492",
+  gpa: "3.94 / 4.0",
+  graduationYear: "2026",
+  socialLinks: {
+    linkedin: "https://linkedin.com/in/aarav-agritech",
+    github: "https://github.com/aarav-agritech",
+    researchgate: "https://researchgate.net/profile/Aarav-Sharma-Agri",
+    scholar: "https://scholar.google.com/citations?user=agri_aarav",
+    twitter: "https://twitter.com/aarav_agri",
+  },
+  stats: [
+    { label: "GPA Academic Score", value: "3.94", subtext: "Top 2% of Class (Dean's List)" },
+    { label: "Field Trials Executed", value: "320+", subtext: "Across 4 Agro-Climatic Zones" },
+    { label: "AgriTech & Research Projects", value: "14+", subtext: "IoT, Drone, AI & Soil Science" },
+    { label: "Drone Scouting Hours", value: "185 hrs", subtext: "Multispectral & RGB Mapping" },
+  ],
+  aboutSummary: `I am a dedicated Agricultural Science scholar and Precision Farming innovator specializing in sustainable agronomy, multispectral remote sensing, and IoT-driven precision fertigation. My research focuses on leveraging edge AI, LoRaWAN soil sensing, and microbial bio-stimulants to optimize crop yield while cutting chemical runoff by up to 35%. 
+
+With a blend of hands-on soil diagnostics in the field and computational agronomy in GIS & Python, I strive to empower modern agricultural ecosystems with data-backed, climate-resilient solutions.`,
+  corePillars: [
+    {
+      title: "Precision Agronomy & VRT",
+      description: "Variable rate application of fertilizers and moisture mapping using high-res multispectral drone imagery and NDVI indexing.",
+      icon: "Cpu",
+    },
+    {
+      title: "Soil Biology & Plant Health",
+      description: "Soil microbiome sequencing, pH/EC electrochemistry, NPK optical spectrophotometry, and organic regenerative farming practices.",
+      icon: "Sprout",
+    },
+    {
+      title: "IoT & Smart Greenhouses",
+      description: "Automated climate control, hydroponic nutrient film technique (NFT), and low-power LoRaWAN sensor telemetry for real-time crop scouting.",
+      icon: "Radio",
+    },
+    {
+      title: "Climate-Smart Agriculture",
+      description: "Drought-tolerant crop phenotyping, micro-irrigation management, and carbon sequestration soil profiling.",
+      icon: "ShieldCheck",
+    },
+  ],
+};
+
+export const educationData: EducationItem[] = [
+  {
+    degree: "Bachelor of Science (Honors)",
+    major: "Agricultural Sciences & Precision Farming",
+    institution: "National Agricultural University & Institute of Agritech",
+    location: "Campus of Bio-Agronomy",
+    period: "2022 - 2026 (Final Year)",
+    grade: "Cumulative GPA: 3.94 / 4.00 (Rank #1)",
+    honors: [
+      "Dean's Distinguished Honor List (All Semesters)",
+      "National Agri-Innovator Young Scholar Award 2025",
+      "ICAR Undergraduate Research Fellowship Grant recipient",
+    ],
+    thesis: {
+      title: "Deep-Learning Edge Vision & LoRa-Based Variable Rate Fertigation for High-Density Maize Canopies",
+      advisor: "Prof. Dr. Elena Vance, Head of Department of Precision Agronomy",
+      description: "Engineered an autonomous edge camera system paired with soil matrix potential sensors, reducing water consumption by 34.2% and nitrogen volatilization by 28.5% across 12-hectare field replications.",
+    },
+    keyCoursework: [
+      "Precision Agriculture & GIS Mapping",
+      "Crop Physiology & Nutrition",
+      "Soil Physics, Chemistry & Microbiology",
+      "Plant Pathology & Integrated Pest Management",
+      "Agri-Robotics & Embedded Telemetry",
+      "Biostatistics & Agricultural Experimental Design",
+      "Hydroponics, Aeroponics & Controlled Environment Ag",
+      "Agricultural Remote Sensing & Photogrammetry",
+    ],
+    iconType: "GraduationCap",
+  },
+  {
+    degree: "Higher Secondary Certificate (High School)",
+    major: "Biological Sciences & Environmental Studies",
+    institution: "St. Xavier's Science Academy",
+    location: "City Campus",
+    period: "2020 - 2022",
+    grade: "96.4% Aggregate (Distinction with Merit)",
+    honors: [
+      "State Science Olympiad Gold Medalist (Plant Ecology)",
+      "Best Environmental Research Project Award",
+    ],
+    thesis: {
+      title: "Comparative Study of Organic Bio-Fertilizers on Seed Germination Vigour",
+      advisor: "Dr. K. Raghavan",
+      description: "Formulated vermicompost tea enriched with Azotobacter to accelerate legume nodulation.",
+    },
+    keyCoursework: [
+      "Plant Biology & Genetics",
+      "Organic & Inorganic Chemistry",
+      "Physics & Fluid Dynamics",
+      "Mathematics & Statistical Methods",
+    ],
+    iconType: "Award",
+  },
+];
+
+export const experienceData: ExperienceItem[] = [
+  {
+    id: "exp-1",
+    role: "Precision Agronomy & Drone Scouting Intern",
+    organization: "TerraAgro Precision Systems & Research Farms",
+    location: "California / AgTech Center",
+    type: "Industry Internship",
+    period: "May 2025 - August 2025",
+    description: "Spearheaded multispectral drone mapping over 1,200+ acres of almond orchards and corn fields. Processed NDVI and NDRE vegetative indices to generate prescription maps for variable rate nitrogen spraying.",
+    achievements: [
+      "Identified early-stage fungal blight infection 8 days before visual symptoms appeared, saving an estimated $42,000 in crop loss.",
+      "Calibrated RTK GPS-guided autonomous drone flight paths with sub-2cm ground sampling distance (GSD).",
+      "Trained 15 field agronomists on interpreting thermal radiometric water-stress maps.",
+    ],
+    technologies: ["DJI Matrice 300 RTK", "MicaSense RedEdge-P", "Pix4Dfields", "QGIS", "Agisoft Metashape"],
+    statsBadge: "1,200+ Acres Mapped",
+  },
+  {
+    id: "exp-2",
+    role: "Undergraduate Research Assistant (Soil & Crop Health)",
+    organization: "National Institute of Soil Microbiology & Agronomy",
+    location: "University Research Farm",
+    type: "Research",
+    period: "Jan 2024 - Present",
+    description: "Conducting spectrophotometric assays and DNA extraction for soil microbiome diversity under different conservation tillage and biochar amendment regimes.",
+    achievements: [
+      "Co-authored research paper published in Journal of Sustainable Agriculture on mycorrhizal fungi colonization in saline soils.",
+      "Managed 48 randomized complete block design (RCBD) micro-plot field experiments across 3 cropping seasons.",
+      "Automated sensor logging for soil volumetric water content (VWC) and electrical conductivity (EC).",
+    ],
+    technologies: ["Soil Spectroscopy", "PCR & Gel Electrophoresis", "R (Biostatistics)", "LoRaWAN Sensors", "TDR Soil Probes"],
+    statsBadge: "3 Published Papers/Preprints",
+  },
+  {
+    id: "exp-3",
+    role: "Smart Greenhouse & Hydroponics Lead",
+    organization: "Campus Agri-Innovation Incubator",
+    location: "Innovation Hub",
+    type: "Field Work",
+    period: "Aug 2023 - Dec 2024",
+    description: "Designed and deployed a closed-loop recirculating Nutrient Film Technique (NFT) hydroponic system for high-value strawberries and leafy greens with automated pH/EC dosing.",
+    achievements: [
+      "Maintained optimal nutrient solution equilibrium (EC 1.8-2.2 mS/cm, pH 5.8-6.2) with 99.4% uptime.",
+      "Achieved 42% faster crop turnover compared to conventional greenhouse benching.",
+      "Presented prototype at Global Smart Agri Expo, securing $8,000 student innovation grant.",
+    ],
+    technologies: ["NFT Hydroponics", "Arduino & ESP32", "Automated Peristaltic Dosing", "PAR Light Sensors", "Python Dashboard"],
+    statsBadge: "42% Faster Turnover",
+  },
+];
+
+export const projectsData: Project[] = [
+  {
+    id: "proj-1",
+    title: "AeroAgri: Multispectral Drone Crop Health & Nitrogen Prescription Engine",
+    category: "Remote Sensing & GIS",
+    tagline: "Autonomous drone flight analytics & variable rate fertilizer mapping",
+    summary: "An integrated aerial scouting pipeline that transforms raw 5-band multispectral imagery into calibrated NDVI, NDRE, and SAVI vegetation indices, automatically generating ISO-XML prescription files for modern tractor rate controllers.",
+    image: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Fertilizer Cost", value: "-28.4%" },
+      { label: "Mapping Resolution", value: "1.8 cm/px" },
+      { label: "Turnaround Time", value: "< 45 mins" },
+      { label: "Acreage Tested", value: "850+ Acres" },
+    ],
+    tags: ["Multispectral", "NDVI Mapping", "QGIS", "Python", "Precision Ag", "Variable Rate"],
+    features: [
+      "Automated radiometric calibration against sun-sensor irradiance readings.",
+      "Zonal statistics clustering algorithms to detect nitrogen deficiency pockets.",
+      "Direct export to Shapefile and ISO 11783 TaskController format for modern tractor controllers.",
+      "Real-time vegetation health heatmap overlay with interactive GPS geotags.",
+    ],
+    results: "Validated across 6 field trials, yielding a 14.6% increase in protein content in wheat and a 28.4% reduction in excess nitrogen application.",
+    technologies: ["Python", "OpenCV", "QGIS", "Rasterio", "Pix4D Engine", "DJI SDK"],
+    githubUrl: "https://github.com/aarav-agritech/aero-agri-pipeline",
+    paperUrl: "https://doi.org/10.1016/j.compag.2025.04.012",
+  },
+  {
+    id: "proj-2",
+    title: "AgriPulse: Solar LoRaWAN Soil Matrix & Microclimate Mesh",
+    category: "AgriTech & IoT",
+    tagline: "Long-range subterranean telemetry for predictive irrigation",
+    summary: "Designed and fabricated an ultra-low-power subterranean sensor probe network operating over LoRaWAN, measuring soil volumetric water content at multiple depths alongside soil temperature and bulk electrical conductivity.",
+    image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Water Savings", value: "37.5%" },
+      { label: "Transmission Range", value: "4.8 km" },
+      { label: "Battery Life", value: "3+ Years (Solar)" },
+      { label: "Sensors Deployed", value: "42 Nodes" },
+    ],
+    tags: ["LoRaWAN", "ESP32", "Soil Physics", "Cloud Telemetry", "MQTT", "Micro-Irrigation"],
+    features: [
+      "Deep sleep power optimization consuming < 15µA in standby mode.",
+      "Predictive evapotranspiration (ET0) modeling based on Penman-Monteith equation.",
+      "Automated solenoid valve triggering based on soil matric potential thresholds.",
+      "Real-time mobile PWA alert system for frost and root-zone water stress conditions.",
+    ],
+    results: "Saved over 1.2 million liters of irrigation water in a single cultivation season while maintaining optimal canopy leaf water potential.",
+    technologies: ["C++ / Arduino", "LoRaWAN ChirpStack", "Grafana", "Node.js", "TDR Probes", "Eagle PCB"],
+    githubUrl: "https://github.com/aarav-agritech/agripulse-lora-mesh",
+  },
+  {
+    id: "proj-3",
+    title: "BioShield: AI-Driven Plant Pathogen & Pest Diagnostic App",
+    category: "AgriTech & IoT",
+    tagline: "Offline-first mobile edge inference for crop diseases",
+    summary: "A lightweight computer vision system optimized for edge inference on smartphones, capable of identifying 64 common crop diseases and foliar pest damages with 97.2% diagnostic accuracy.",
+    image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Accuracy", value: "97.2%" },
+      { label: "Inference Speed", value: "42 ms" },
+      { label: "Target Diseases", value: "64 Classes" },
+      { label: "Model Size", value: "8.4 MB (TFLite)" },
+    ],
+    tags: ["MobileNetV4", "Edge AI", "Computer Vision", "Plant Pathology", "Offline-First"],
+    features: [
+      "Custom transfer learning on 85,000+ curated field disease photographs.",
+      "Integrated chemical & organic IPM (Integrated Pest Management) remedy guides.",
+      "Multi-lingual voice guidance in regional farmer dialects.",
+      "Confidence heatmaps with Grad-CAM to highlight infected foliar regions.",
+    ],
+    results: "Piloted with 300+ local smallholder farmers, reducing pesticide misapplication by 44% and accelerating correct treatment turnaround.",
+    technologies: ["TensorFlow Lite", "PyTorch", "React Native", "FastAPI", "ONNX"],
+    githubUrl: "https://github.com/aarav-agritech/bioshield-plant-ai",
+    liveUrl: "https://bioshield-agri.demo.app",
+  },
+  {
+    id: "proj-4",
+    title: "RhizoBio: Biochar & Mycorrhizal Soil Regeneration Trial",
+    category: "Crop & Soil Science",
+    tagline: "Comparative field trial on carbon sequestration & microbial biomass",
+    summary: "A multi-season experimental trial evaluating pyrolysis-engineered hardwood biochar co-inoculated with Arbuscular Mycorrhizal Fungi (AMF) in degraded alkaline soils.",
+    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Soil Organic Carbon", value: "+41.8%" },
+      { label: "Phosphorus Uptake", value: "+33.5%" },
+      { label: "Cation Exchange (CEC)", value: "+26.0%" },
+      { label: "Trial Duration", value: "18 Months" },
+    ],
+    tags: ["Soil Microbiology", "Biochar", "Carbon Sequestration", "Regenerative Ag", "RCBD Trial"],
+    features: [
+      "Comprehensive wet chemistry and spectrometer analysis of soil macro & micro nutrients.",
+      "Phospholipid Fatty Acid (PLFA) analysis for active fungal-to-bacterial biomass ratios.",
+      "Measurement of greenhouse gas emissions (CO2 and N2O fluxes) using closed chamber method.",
+      "Economic cost-benefit modeling for small to medium scale organic farms.",
+    ],
+    results: "Demonstrated a 21.4% grain yield increase without additional chemical phosphate fertilizers in marginal soil conditions.",
+    technologies: ["Spectrophotometry", "PLFA Profiling", "R / ANOVA Analysis", "Qubit Gas Analyzer"],
+    paperUrl: "https://researchgate.net/publication/rhizobio-trial-2025",
+  },
+  {
+    id: "proj-5",
+    title: "HydroFlow: Vertical Aeroponic Tower with Closed-Loop Nutrient Dosing",
+    category: "Sustainable Farming",
+    tagline: "High-density ultra-efficient urban agriculture module",
+    summary: "Built a modular aeroponic tower featuring high-pressure ultrasonic atomization (50-micron droplet size) and automated sensor monitoring for real-time ionic nutrient compensation.",
+    image: "https://images.unsplash.com/photo-1558449028-b53a39d100fc?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Water Efficiency", value: "95% vs Field" },
+      { label: "Growth Speed", value: "3.2x Faster" },
+      { label: "Footprint", value: "0.8 m²" },
+      { label: "Yield per Tower", value: "64 Plants" },
+    ],
+    tags: ["Aeroponics", "Hydroponics", "Vertical Farming", "IoT Automation", "Circular Economy"],
+    features: [
+      "High-pressure misting cycle (15s on / 5m off) optimized to root oxygenation rhythms.",
+      "Custom peristaltic smart pump regulator maintaining pH 5.8-6.2 and EC 1.8-2.2 mS/cm.",
+      "Integrated UV-C sterilization for pathogen-free recirculation water loops.",
+      "Mobile telemetry app showing live root zone humidity, pH, EC, and LED PAR lighting spectrum.",
+    ],
+    results: "Successfully cultivated gourmet leafy greens and strawberries with zero synthetic pesticides and 95% less water footprint.",
+    technologies: ["Fusion 360", "ESP32", "Next.js Dashboard", "MQTT", "Industrial Peristaltics"],
+    githubUrl: "https://github.com/aarav-agritech/hydroflow-tower",
+  },
+  {
+    id: "proj-6",
+    title: "TerraGIS: Regional Drought Vulnerability & Groundwater Mapping",
+    category: "Remote Sensing & GIS",
+    tagline: "Satellite imagery processing for agricultural watershed management",
+    summary: "Synthesized Sentinel-2 and Landsat-8/9 satellite data over a 10-year span to construct a predictive spatial model for aquifer depletion, crop water stress indexes, and optimal farm pond siting.",
+    image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { label: "Study Area", value: "4,200 km²" },
+      { label: "Temporal Depth", value: "10 Years" },
+      { label: "Prediction R²", value: "0.91" },
+      { label: "Policy Impact", value: "3 Districts" },
+    ],
+    tags: ["Google Earth Engine", "GIS", "Hydrology", "Satellite Data", "Spatial Modeling"],
+    features: [
+      "Automated cloud masking and surface reflectance time-series analysis.",
+      "Hydrological flow accumulation mapping for micro-catchment water harvesting.",
+      "Interactive map layers depicting soil moisture anomalies vs historical 30-year baselines.",
+      "Open-source GIS plugin released for agricultural extension officers.",
+    ],
+    results: "Adopted by the district agriculture office to prioritize 45 rainwater harvesting structures in high-vulnerability agricultural zones.",
+    technologies: ["Google Earth Engine", "ArcGIS Pro", "Python Geospatial", "Geopandas", "Rasterio"],
+    githubUrl: "https://github.com/aarav-agritech/terragis-watershed-analytics",
+  },
+];
+
+export const skillCategories: SkillCategory[] = [
+  {
+    category: "Agronomy & Crop Science",
+    description: "Foundational principles of plant physiology, field diagnosis, and biological soil health.",
+    icon: "Wheat",
+    skills: [
+      { name: "Field Crop Scouting & Phenotyping", level: 95, highlight: "Maize, Wheat, Rice, Soybean, Cotton" },
+      { name: "Soil Physics & Nutrient Profiling (NPK/EC/pH)", level: 92, highlight: "Lab & field spectrophotometry" },
+      { name: "Integrated Pest Management (IPM)", level: 90, highlight: "Biological controls & threshold modeling" },
+      { name: "Plant Pathology & Symptom Diagnostics", level: 88, highlight: "Foliar, root & vascular disease ID" },
+      { name: "Controlled Environment Ag (Hydroponics/NFT)", level: 92, highlight: "Automated nutrient balance" },
+      { name: "Regenerative Agriculture & Biochar", level: 85, highlight: "Carbon sequestration trials" },
+    ],
+  },
+  {
+    category: "Agri-Tech, Drones & Hardware",
+    description: "Autonomous robotics, remote sensing, and low-power field telemetry.",
+    icon: "Cpu",
+    skills: [
+      { name: "Multispectral Drone Piloting & RTK", level: 94, highlight: "DJI Matrice / MicaSense RedEdge" },
+      { name: "NDVI, NDRE & Thermal Crop Mapping", level: 92, highlight: "Pix4Dfields & Agisoft Metashape" },
+      { name: "LoRaWAN Subterranean Sensor Networks", level: 88, highlight: "ChirpStack & 868/915 MHz RF" },
+      { name: "Agri-IoT Prototyping (ESP32 / Arduino / STM32)", level: 86, highlight: "Custom PCB & Solar Energy" },
+      { name: "Variable Rate Technology (VRT) Prescriptions", level: 90, highlight: "ISO-XML & Shapefile generation" },
+      { name: "Smart Irrigation & Solenoid Telemetry", level: 88, highlight: "Penman-Monteith ET0 modeling" },
+    ],
+  },
+  {
+    category: "GIS, Data Science & Software",
+    description: "Computational agronomy, spatial data analysis, and predictive modeling.",
+    icon: "Binary",
+    skills: [
+      { name: "QGIS & ArcGIS Pro Spatial Analysis", level: 92, highlight: "Hydrology, Raster calculation, Vector maps" },
+      { name: "Google Earth Engine (GEE)", level: 86, highlight: "Sentinel-2 & Landsat time series" },
+      { name: "Python for Geospatial & Agri-Data", level: 90, highlight: "Rasterio, GeoPandas, NumPy, OpenCV" },
+      { name: "R & Biostatistics for Experimental Ag", level: 85, highlight: "RCBD, Split-Plot ANOVA, Tukey HSD" },
+      { name: "Computer Vision & Edge AI (PyTorch/TFLite)", level: 82, highlight: "Foliar disease classification" },
+      { name: "Web & PWA Telemetry Dashboards", level: 84, highlight: "Next.js, TypeScript, REST APIs" },
+    ],
+  },
+  {
+    category: "Laboratory & Diagnostic Methods",
+    description: "Analytical chemistry, molecular microbiology, and laboratory protocols.",
+    icon: "FlaskConical",
+    skills: [
+      { name: "UV-Vis Spectrophotometry", level: 90, highlight: "Nitrate & Phosphate colorimetric assays" },
+      { name: "DNA Extraction & PCR Electrophoresis", level: 84, highlight: "Fungal & bacterial plant pathogens" },
+      { name: "Leaf Area Index (LAI) & SPAD Metering", level: 92, highlight: "Chlorophyll content quantification" },
+      { name: "Soil Texture by Hydrometer Method", level: 94, highlight: "Sand, silt, clay fractionation" },
+      { name: "Tensiometer & Pressure Chamber Osmometry", level: 88, highlight: "Leaf water potential (LWP)" },
+    ],
+  },
+];
+
+export const certificatesData: CertificateItem[] = [
+  {
+    id: "cert-1",
+    title: "Certified Commercial Remote Drone Pilot (DGCA / FAA Part 107)",
+    issuer: "Federal Aviation Administration / DGCA Aviation Authority",
+    issueDate: "March 2024",
+    expiryDate: "March 2028",
+    credentialId: "UAS-AGRI-99428-PLT",
+    skillsCovered: ["Multispectral Mapping", "Night Ops", "Airspace Regulation", "Payload Safety"],
+    badgeColor: "#10b981",
+    verificationUrl: "https://faa.gov/uas/commercial_operator/verify",
+  },
+  {
+    id: "cert-2",
+    title: "Precision Agriculture & Variable Rate Technology Specialist",
+    issuer: "International Society of Precision Agriculture (ISPA)",
+    issueDate: "November 2024",
+    credentialId: "ISPA-CERT-2024-8114",
+    skillsCovered: ["Prescription Maps", "ISOBUS Standards", "Yield Monitor Calibration", "Soil Zoning"],
+    badgeColor: "#3b82f6",
+    verificationUrl: "https://ispag.org/credentials",
+  },
+  {
+    id: "cert-3",
+    title: "Sustainable Agricultural Land Management & Soil Health",
+    issuer: "Food and Agriculture Organization (FAO) & AgLearn",
+    issueDate: "August 2024",
+    credentialId: "FAO-SLM-84920-ECO",
+    skillsCovered: ["Carbon Sequestration", "Regenerative Tillage", "Watershed Protection", "Agroforestry"],
+    badgeColor: "#16a34a",
+    verificationUrl: "https://fao.org/elearning/certificate",
+  },
+  {
+    id: "cert-4",
+    title: "Advanced Geospatial Analysis & Remote Sensing with QGIS & GEE",
+    issuer: "Geospatial AgTech Institute",
+    issueDate: "January 2025",
+    credentialId: "GEO-AG-2025-4192",
+    skillsCovered: ["Raster Math", "NDVI/EVI Algorithms", "Satellite Time Series", "Digital Elevation (DEM)"],
+    badgeColor: "#8b5cf6",
+    verificationUrl: "https://geoag.institute/verify",
+  },
+  {
+    id: "cert-5",
+    title: "Integrated Pest Management (IPM) & Biosecurity Practitioner",
+    issuer: "National Board of Plant Protection & Biosecurity",
+    issueDate: "May 2024",
+    credentialId: "IPM-BIO-2024-6721",
+    skillsCovered: ["Economic Injury Thresholds", "Beneficial Insects", "Fungicide Resistance", "Pheromone Trapping"],
+    badgeColor: "#f59e0b",
+    verificationUrl: "https://plantprotection.org/verify",
+  },
+  {
+    id: "cert-6",
+    title: "Hydroponic Crop Production & Fertigation Engineering",
+    issuer: "Controlled Environment Agriculture Association (CEAA)",
+    issueDate: "October 2024",
+    credentialId: "CEAA-HYD-55102",
+    skillsCovered: ["NFT Systems", "Dutch Bucket Dosing", "PAR Lighting", "Water Sanitization"],
+    badgeColor: "#06b6d4",
+    verificationUrl: "https://ceaa.org/verify",
+  },
+];
+
+export interface CropPreset {
+  name: string;
+  season: string;
+  recommendedN: number; // kg/ha
+  recommendedP: number; // kg/ha
+  recommendedK: number; // kg/ha
+  baseWaterReq: number; // mm per season
+  idealPhRange: string;
+  criticalStages: string[];
+}
+
+export const cropPresets: Record<string, CropPreset> = {
+  maize: {
+    name: "Maize (Corn)",
+    season: "Kharif / Spring",
+    recommendedN: 120,
+    recommendedP: 60,
+    recommendedK: 40,
+    baseWaterReq: 550,
+    idealPhRange: "6.0 - 7.5",
+    criticalStages: ["Knee-high (V6)", "Tasseling (VT)", "Silking (R1)", "Grain filling (R3)"],
+  },
+  wheat: {
+    name: "Wheat",
+    season: "Rabi / Winter",
+    recommendedN: 100,
+    recommendedP: 50,
+    recommendedK: 40,
+    baseWaterReq: 450,
+    idealPhRange: "6.2 - 7.2",
+    criticalStages: ["Crown Root Initiation (CRI)", "Tillering", "Jointing", "Flowering / Milking"],
+  },
+  rice: {
+    name: "Paddy Rice",
+    season: "Kharif / Wet",
+    recommendedN: 150,
+    recommendedP: 60,
+    recommendedK: 60,
+    baseWaterReq: 1200,
+    idealPhRange: "5.5 - 6.8",
+    criticalStages: ["Transplanting", "Tillering", "Panicle Initiation", "Heading / Milking"],
+  },
+  cotton: {
+    name: "Cotton",
+    season: "Kharif",
+    recommendedN: 120,
+    recommendedP: 60,
+    recommendedK: 60,
+    baseWaterReq: 700,
+    idealPhRange: "6.5 - 8.0",
+    criticalStages: ["Square formation", "Flowering", "Boll development"],
+  },
+  soybean: {
+    name: "Soybean (Legume)",
+    season: "Kharif / Summer",
+    recommendedN: 30, // low N due to Rhizobium fixation
+    recommendedP: 80,
+    recommendedK: 40,
+    baseWaterReq: 500,
+    idealPhRange: "6.0 - 7.0",
+    criticalStages: ["Flower initiation (R1)", "Pod development (R3)", "Seed enlargement (R5)"],
+  },
+  tomato: {
+    name: "Tomato (Horticulture)",
+    season: "All seasons / Greenhouse",
+    recommendedN: 140,
+    recommendedP: 100,
+    recommendedK: 120,
+    baseWaterReq: 600,
+    idealPhRange: "6.0 - 6.8",
+    criticalStages: ["Establishment", "First Cluster Bloom", "Fruit Bulking", "Harvest Peak"],
+  },
+};

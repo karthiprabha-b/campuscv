@@ -203,8 +203,7 @@ const BACKUP_DEF = {
 };
 
 export function normalizeData(raw = {}) {
-  const unwrapped = (raw && typeof raw === 'object' && (raw.data || raw.portfolio)) ? (raw.data || raw.portfolio) : raw;
-  const data = (unwrapped && typeof unwrapped === 'object' && !Array.isArray(unwrapped)) ? unwrapped : {};
+  const data = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
   const def = (FALLBACK_DEF && typeof FALLBACK_DEF === 'object' && FALLBACK_DEF.hero) ? FALLBACK_DEF : BACKUP_DEF;
 
   // Safe object extractors
@@ -225,7 +224,9 @@ export function normalizeData(raw = {}) {
     "Alexander Vance";
 
   const title =
+    data?.role ||
     data?.title ||
+    rawHero?.role ||
     rawHero?.title ||
     rawPersonalInfo?.title ||
     rawBasics?.headline ||
@@ -233,15 +234,21 @@ export function normalizeData(raw = {}) {
     def?.title ||
     "Executive Legal Counsel";
 
+  const customHeadline = rawHero?.headline || data?.headline || data?.role || rawHero?.title;
+
   // 2. Hero
   const hero = {
-    smallLabel: rawHero?.smallLabel || data?.smallLabel || def?.hero?.smallLabel || "WELCOME TO MY EXECUTIVE PORTFOLIO",
-    headline: rawHero?.headline || data?.headline || def?.hero?.headline || "Strategic Legal Counsel.",
-    highlightText: rawHero?.highlightText || data?.highlightText || def?.hero?.highlightText || "Committed to Excellence.",
+    smallLabel: rawHero?.smallLabel || data?.smallLabel || "WELCOME TO MY EXECUTIVE PORTFOLIO",
+    headline: customHeadline || def?.hero?.headline || "Strategic Legal Counsel.",
+    highlightText: rawHero?.highlightText || data?.highlightText || (customHeadline ? "" : (def?.hero?.highlightText || "Committed to Excellence.")),
     intro:
       rawHero?.intro ||
       rawHero?.introductionText ||
+      rawHero?.description ||
+      data?.aboutMe ||
       data?.bio ||
+      rawAbout?.description ||
+      rawAbout?.bio ||
       data?.summary ||
       rawPersonalInfo?.summary ||
       rawBasics?.summary ||
@@ -250,20 +257,22 @@ export function normalizeData(raw = {}) {
     summary:
       rawHero?.summary ||
       data?.summaryQuote ||
-      def?.hero?.summary ||
-      "Over 8+ years of expertise in corporate jurisprudence and strategy.",
+      (data?.aboutMe || data?.bio ? "" : (def?.hero?.summary || "Over 8+ years of expertise in corporate jurisprudence and strategy.")),
     name: name,
     title: title,
     avatarUrl:
       rawHero?.avatarUrl ||
+      rawHero?.profileImage ||
       data?.avatarUrl ||
+      data?.profileImage ||
       rawAbout?.avatarUrl ||
+      rawAbout?.profileImage ||
       rawPersonalInfo?.photoUrl ||
       rawBasics?.picture ||
       def?.hero?.avatarUrl ||
       "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1000",
-    badgeYears: rawHero?.badgeYears || def?.hero?.badgeYears || "8+",
-    badgeLabel: rawHero?.badgeLabel || def?.hero?.badgeLabel || "Years Legal Excellence",
+    badgeYears: rawHero?.badgeYears || (Array.isArray(data?.experience) && data.experience.length > 0 ? `${data.experience.length}+` : def?.hero?.badgeYears) || "8+",
+    badgeLabel: rawHero?.badgeLabel || def?.hero?.badgeLabel || "Years Professional Excellence",
     badgeSatisfaction: rawHero?.badgeSatisfaction || def?.hero?.badgeSatisfaction || "99.4%",
     socials: normalizeSocials(rawHero?.socials || data?.socials || data?.socialLinks || def?.hero?.socials),
   };
@@ -289,22 +298,27 @@ export function normalizeData(raw = {}) {
     story:
       rawAbout?.story ||
       rawAbout?.bio ||
+      rawAbout?.description ||
+      data?.aboutMe ||
       data?.bio ||
       data?.summary ||
       def?.about?.story ||
       BACKUP_DEF.about.story,
-    mission: rawAbout?.mission || data?.mission || def?.about?.mission || BACKUP_DEF.about.mission,
+    mission: rawAbout?.mission || data?.mission || (data?.aboutMe || data?.bio ? `To deliver high-impact results, uphold excellence, and advance innovations as a ${title}.` : (def?.about?.mission || BACKUP_DEF.about.mission)),
     values:
       Array.isArray(rawAbout?.values) && rawAbout.values.length > 0
         ? rawAbout.values
         : Array.isArray(data?.values) && data.values.length > 0
         ? data.values
-        : def?.about?.values || BACKUP_DEF.about.values,
+        : (Array.isArray(data?.skills) && data.skills.length > 0
+            ? data.skills.slice(0, 4).map((s) => (typeof s === 'string' ? s : s?.name || s?.title || String(s)))
+            : (def?.about?.values || BACKUP_DEF.about.values)),
     educationShort:
       rawAbout?.educationShort ||
       data?.educationShort ||
-      def?.about?.educationShort ||
-      BACKUP_DEF.about.educationShort,
+      (Array.isArray(data?.education) && data.education[0]
+        ? `${data.education[0].degree || ''} | ${data.education[0].institution || data.education[0].school || ''}`.trim()
+        : (def?.about?.educationShort || BACKUP_DEF.about.educationShort)),
     location:
       rawAbout?.location ||
       data?.location ||
@@ -316,20 +330,22 @@ export function normalizeData(raw = {}) {
     availability:
       rawAbout?.availability ||
       data?.availability ||
-      def?.about?.availability ||
-      BACKUP_DEF.about.availability,
+      data?.personal?.availability ||
+      "Available for Opportunities",
     languages:
       Array.isArray(rawAbout?.languages) && rawAbout.languages.length > 0
         ? rawAbout.languages
         : Array.isArray(data?.languages) && data.languages.length > 0
         ? data.languages.map((l) => (typeof l === 'string' ? l : l?.name || l?.language || String(l)))
-        : def?.about?.languages || BACKUP_DEF.about.languages,
+        : ["English (Professional)"],
     expertise:
       Array.isArray(rawAbout?.expertise) && rawAbout.expertise.length > 0
         ? rawAbout.expertise
         : Array.isArray(data?.expertise) && data.expertise.length > 0
         ? data.expertise
-        : def?.about?.expertise || BACKUP_DEF.about.expertise,
+        : (Array.isArray(data?.skills) && data.skills.length > 0
+            ? data.skills.slice(0, 5).map((s) => (typeof s === 'string' ? s : s?.name || s?.title || String(s)))
+            : (def?.about?.expertise || BACKUP_DEF.about.expertise)),
   };
 
   // 5. Skills
@@ -366,10 +382,12 @@ export function normalizeData(raw = {}) {
     "+1 (212) 555-0198";
 
   return {
+    ...data,
     name,
     title,
     hero,
     metrics,
+    achievements: metrics,
     about,
     skills,
     projects,
@@ -419,6 +437,7 @@ function normalizeSkills(rawSkills, defSkills) {
   const def = defSkills || BACKUP_DEF.skills;
   if (!rawSkills || !Array.isArray(rawSkills) || rawSkills.length === 0) return def;
 
+  // If skills are already pre-grouped with category and skills array
   if (rawSkills[0]?.category && Array.isArray(rawSkills[0]?.skills)) {
     return rawSkills.filter(Boolean).map((cat) => ({
       category: cat?.category || "Core Practice",
@@ -426,33 +445,29 @@ function normalizeSkills(rawSkills, defSkills) {
     }));
   }
 
-  if (typeof rawSkills[0] === 'string') {
-    const list = rawSkills;
-    const cat1 = list.slice(0, 4).map((s) => ({ name: String(s), level: 95 }));
-    const cat2 = list.slice(4, 8).map((s) => ({ name: String(s), level: 92 }));
-    const cat3 = list.slice(8, 12).map((s) => ({ name: String(s), level: 90 }));
+  // Extract all skills from user data (strings or objects)
+  const allSkills = rawSkills
+    .filter(Boolean)
+    .map((s) => (typeof s === 'string' ? { name: String(s), level: 95 } : { name: s?.name || s?.title || s?.skill || String(s), level: s?.level || 90 }))
+    .filter(s => s.name && s.name.trim().length > 0);
 
-    return [
-      { category: "Legal & Regulatory", skills: cat1.length ? cat1 : def[0].skills },
-      { category: "Consulting & Strategy", skills: cat2.length ? cat2 : def[1].skills },
-      { category: "Tools & Governance", skills: cat3.length ? cat3 : def[2].skills },
-    ];
-  }
+  if (allSkills.length === 0) return def;
 
-  if (typeof rawSkills[0] === 'object') {
-    const list = rawSkills.filter(Boolean).map((s) => ({ name: s?.name || s?.title || "Skill", level: s?.level || 90 }));
-    const cat1 = list.slice(0, 4);
-    const cat2 = list.slice(4, 8);
-    const cat3 = list.slice(8, 12);
+  const numCats = allSkills.length >= 3 ? 3 : (allSkills.length === 2 ? 2 : 1);
+  const catNames = ["Legal & Regulatory", "Consulting & Strategy", "Tools & Governance"];
 
-    return [
-      { category: "Legal & Regulatory", skills: cat1.length ? cat1 : def[0].skills },
-      { category: "Consulting & Strategy", skills: cat2.length ? cat2 : def[1].skills },
-      { category: "Tools & Governance", skills: cat3.length ? cat3 : def[2].skills },
-    ];
-  }
+  const cats = Array.from({ length: numCats }, (_, i) => ({
+    category: catNames[i] || `Expertise Area ${i + 1}`,
+    skills: []
+  }));
 
-  return def;
+  // Distribute all skills into balanced columns so NO skills are dropped
+  allSkills.forEach((skill, idx) => {
+    const targetCat = idx % numCats;
+    cats[targetCat].skills.push(skill);
+  });
+
+  return cats;
 }
 
 function normalizeProjects(rawProjects, defProjects) {

@@ -65,9 +65,10 @@ export function resolveInstalledTemplateSync(templateId: string, portfolio?: any
     }
   }
 
-  // 1. Check embedded portfolio sectionFiles (if exact match)
+  // 1. Check embedded portfolio sectionFiles (if exact match and complete)
   const embeddedId = portfolio?._sectionFilesTemplateId || portfolio?.sectionFilesTemplateId || portfolio?.manifest?.id || portfolio?.manifest?.template?.id || portfolio?.templateId;
-  if (portfolio?.sectionFiles && Object.keys(portfolio.sectionFiles).length > 0 && (!embeddedId || embeddedId === normId)) {
+  const hasRealCode = portfolio?.sectionFiles && Object.keys(portfolio.sectionFiles).some(k => (k.includes('src/') || k.endsWith('.jsx') || k.endsWith('.tsx')) && !k.endsWith('.d.ts'));
+  if (portfolio?.sectionFiles && Object.keys(portfolio.sectionFiles).length >= 10 && hasRealCode && (!embeddedId || embeddedId === normId)) {
     const discovered = discoverTemplateCSS(portfolio.sectionFiles, 'tpl', portfolio.assetMap, normId);
     const rec: InstalledTemplateRecord = {
       id: normId,

@@ -1,0 +1,14 @@
+{
+  "id": "agri-student",
+  "name": "Agronomy & Precision AgriTech Portfolio",
+  "version": "1.0.0",
+  "category": "Agriculture & AgriTech",
+  "author": "CampusCV",
+  "description": "High-impact, modern agriculture student and agronomist portfolio showcasing plant science research, drone scouting, IoT soil telemetry, and sustainable field innovations.",
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png",
+  "entry": "src/index.jsx",
+  "config": "campuscv.json",
+  "bindings": "bindings.json",
+  "schema": "schema.json"
+}

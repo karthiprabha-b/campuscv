@@ -1,0 +1,11 @@
+{
+  "id": "beautician-portfolio",
+  "name": "Beautician & Aesthetic Artist Portfolio",
+  "description": "High-end luxury portfolio template tailored for master aestheticians, bridal artists, skincare clinicians, and beauty studios.",
+  "category": "Beauty & Wellness",
+  "version": "1.0.0",
+  "entry": "src/index.jsx",
+  "tags": ["beautician", "makeup", "aesthetician", "bridal", "skincare", "luxury", "salon", "wellness"],
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png"
+}

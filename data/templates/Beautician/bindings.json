@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "name": "beautician-portfolio",
+  "bindings": {
+    "hero.name": "fullName",
+    "hero.role": "title",
+    "hero.headline": "headline",
+    "hero.description": "summary",
+    "hero.coverImage": "profileImage",
+    "hero.badge": "custom.heroBadge",
+    "about.headline": "aboutSummary",
+    "about.image": "avatarUrl",
+    "about.story": "summary",
+    "contact.email": "contact.email",
+    "contact.phone": "contact.phone",
+    "contact.location": "contact.location",
+    "experience.items": "experience",
+    "education.items": "education",
+    "projects.items": "projects",
+    "skills.categories": "skills",
+    "certificates.items": "certificates"
+  },
+  "sections": [
+    { "id": "hero", "name": "Hero", "required": true },
+    { "id": "about", "name": "About Master Aesthetician", "required": true },
+    { "id": "education", "name": "Education & Accreditations", "required": true },
+    { "id": "experience", "name": "Professional Experience", "required": true },
+    { "id": "projects", "name": "Transformations & Portfolio", "required": true },
+    { "id": "skills", "name": "Technical Repertoire", "required": true },
+    { "id": "certificates", "name": "Certifications & Honors", "required": false },
+    { "id": "contact", "name": "Contact & Studio Location", "required": true }
+  ]
+}

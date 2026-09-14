@@ -6,24 +6,49 @@ import SocialIcons from './SocialIcons';
 import { ArrowUp } from 'lucide-react';
 
 interface FooterProps {
+  data?: any;
   onNavigate: (sectionId: string) => void;
 }
 
-export default function Footer({ onNavigate }: FooterProps) {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+export default function Footer({ data, onNavigate }: FooterProps) {
+  const scrollToTop = (e?: React.MouseEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.body) document.body.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        const topEl = document.getElementById('hero') || document.querySelector('header') || document.getElementById('template-root') || document.body;
+        if (topEl && typeof topEl.scrollIntoView === 'function') {
+          topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    } catch (err) {
+      try { window.scrollTo(0, 0); } catch (_) {}
+    }
   };
 
-  const navLinks = [
-    { id: 'hero', label: 'Home' },
-    { id: 'about', label: 'About' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'education', label: 'Education' },
-    { id: 'projects', label: 'Works' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'certificates', label: 'Certificates' },
-    { id: 'contact', label: 'Contact' },
-  ];
+  const dynamicSections = Array.isArray(data?.sections) && data.sections.length > 0
+    ? data.sections
+    : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : ['Hero', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Certificates', 'Contact']);
+
+  const navLinks = dynamicSections
+    .filter((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const lower = sName.toLowerCase().trim();
+      return lower && lower !== 'header' && lower !== 'footer' && lower !== 'sidebar' && lower !== 'navbar';
+    })
+    .map((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
+      let id = sName.toLowerCase().replace(/\s+/g, '-');
+      if (id === 'home' || id === 'intro') id = 'hero';
+      if (id === 'works' || id === 'portfolio') id = 'projects';
+      if (id === 'certifications') id = 'certificates';
+      return { id, label: cleanName === 'Hero' ? 'Home' : cleanName };
+    });
 
   return (
     <footer
@@ -67,7 +92,7 @@ export default function Footer({ onNavigate }: FooterProps) {
 
           {/* Quick links */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', maxWidth: '480px' }}>
-            {navLinks.map((item) => (
+            {navLinks.map((item: { id: string; label: string }) => (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}

@@ -1,0 +1,12 @@
+{
+  "id": "Engineering",
+  "name": "Engineering & Systems Architect Portfolio",
+  "description": "High-performance portfolio template with cyber stadium aesthetic tailored for senior software engineers, distributed systems architects, and DevOps leaders.",
+  "category": "Developer & Engineering",
+  "version": "1.0.0",
+  "entry": "src/index.jsx",
+  "aliases": ["engineering", "engineering-portfolio", "Engineering Portfolio", "systems-architect"],
+  "tags": ["engineering", "software-engineer", "systems-architect", "cloud", "devops", "distributed-systems", "full-stack", "kubernetes"],
+  "thumbnail": "thumbnail.png",
+  "preview": "preview.png"
+}

@@ -71,16 +71,44 @@ const TEMPLATE_ALIASES: Record<string, string> = {
   'card portfolio': 'card',
   'card-portfolio': 'card',
   'lawyer': 'stu_lawyer',
+  'stu lawyer': 'stu_lawyer',
   'stu_lawyer': 'stu_lawyer',
   'stu-lawyer': 'stu_lawyer',
   'executive-lawyer-portfolio': 'stu_lawyer',
   'executive lawyer': 'stu_lawyer',
+  'executive lawyer portfolio': 'stu_lawyer',
+  'executive legal & executive': 'stu_lawyer',
+  'executive-legal': 'stu_lawyer',
+  'executive legal': 'stu_lawyer',
+  'photography': 'photography-portfolio',
+  'photography portfolio': 'photography-portfolio',
+  'photography-portfolio': 'photography-portfolio',
+  'photography_portfolio': 'photography-portfolio',
+  'photographer': 'photography-portfolio',
+  'photo': 'photography-portfolio',
+  'photo portfolio': 'photography-portfolio',
+  'photo-portfolio': 'photography-portfolio',
+  'agri-student': 'agri-student',
+  'agri student': 'agri-student',
+  'agri_student': 'agri-student',
+  'agronomy': 'agri-student',
+  'beautician': 'beautician-portfolio',
+  'beautician portfolio': 'beautician-portfolio',
+  'beautician-portfolio': 'beautician-portfolio',
+  'beautician_portfolio': 'beautician-portfolio',
+  'beauty': 'beautician-portfolio',
+  'beauty portfolio': 'beautician-portfolio',
+  'makeup-artist': 'beautician-portfolio',
+  'aesthetician': 'beautician-portfolio',
 };
 
 export function getCanonicalTemplateId(rawId?: string): string {
   if (!rawId) return '';
   const clean = rawId.trim().toLowerCase();
-  return TEMPLATE_ALIASES[clean] || rawId;
+  const normalized = clean.replace(/[\s_-]+/g, '-');
+  const underscores = clean.replace(/[\s-]+/g, '_');
+  const spaces = clean.replace(/[-_]+/g, ' ');
+  return TEMPLATE_ALIASES[clean] || TEMPLATE_ALIASES[normalized] || TEMPLATE_ALIASES[underscores] || TEMPLATE_ALIASES[spaces] || rawId;
 }
 
 export function getPortfolioTemplateId(portfolio: any): string {
@@ -145,11 +173,11 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
   // 2. Check adminTemplateDb / catalog
   try {
     const adminTmpl = adminTemplateDb.getTemplateById(templateId);
-    if (adminTmpl && adminTmpl.id === templateId && adminTmpl.sectionFiles && Object.keys(adminTmpl.sectionFiles).length > 0) {
+    if (adminTmpl && adminTmpl.sectionFiles && Object.keys(adminTmpl.sectionFiles).length > 0) {
       if (!versionId || adminTmpl.currentVersionId === versionId || adminTmpl.version === versionId) {
         const discovered = discoverTemplateCSS(adminTmpl.sectionFiles, 'tpl', adminTmpl.assetMap, templateId);
         return {
-          templateId,
+          templateId: adminTmpl.id || templateId,
           isUploaded: true,
           sectionFiles: adminTmpl.sectionFiles,
           customCSS: discovered.combinedCSS || adminTmpl.customCSS || '',
@@ -179,9 +207,11 @@ export function resolveTemplateFilesSync(portfolio: any): ResolvedTemplateFiles 
   // 4. Check embedded files on portfolio JSON as fallback only for custom templates
   const embeddedTemplateId = portfolio?._sectionFilesTemplateId || portfolio?.sectionFilesTemplateId || portfolio?.manifest?.id || portfolio?.manifest?.template?.id;
   const embeddedId = portfolio?._sectionFilesTemplateId || portfolio?.sectionFilesTemplateId || portfolio?.manifest?.id || portfolio?.manifest?.template?.id || portfolio?.templateId;
+  const hasRealCode = portfolio?.sectionFiles && Object.keys(portfolio.sectionFiles).some(k => (k.includes('src/') || k.endsWith('.jsx') || k.endsWith('.tsx')) && !k.endsWith('.d.ts'));
   if (
     portfolio?.sectionFiles &&
-    Object.keys(portfolio.sectionFiles).length > 0 &&
+    Object.keys(portfolio.sectionFiles).length >= 10 &&
+    hasRealCode &&
     (!embeddedId || embeddedId === templateId)
   ) {
     const discovered = discoverTemplateCSS(portfolio.sectionFiles, 'tpl', portfolio.assetMap, templateId);
@@ -243,6 +273,86 @@ export async function loadTemplateFilesAsync(portfolio: any): Promise<ResolvedTe
     }
   } catch (err) {}
 
+  // 1.5 Try fetching static template zip directly from public directory (works even if API / Node fs is disconnected)
+  if (typeof window !== 'undefined') {
+    try {
+      const JSZip = (await import('jszip')).default;
+      const cleanTmpl = templateId.toLowerCase().trim();
+      const zipUrls = [
+        `/templates/${encodeURIComponent(cleanTmpl)}.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl.replace(/_/g, '-'))}.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl.replace(/-/g, '_'))}.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl)}-template.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl)}-portfolio.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl.replace(/-portfolio$/, ''))}.zip`,
+        `/templates/${encodeURIComponent(cleanTmpl.replace(/_portfolio$/, ''))}.zip`,
+      ];
+
+      for (const zipUrl of Array.from(new Set(zipUrls))) {
+        try {
+          const zipRes = await fetch(zipUrl);
+          if (zipRes.ok) {
+            const arrayBuf = await zipRes.arrayBuffer();
+            if (arrayBuf.byteLength > 100) {
+              const zip = await JSZip.loadAsync(arrayBuf);
+              const extracted: Record<string, string> = {};
+
+              const promises: Promise<void>[] = [];
+              zip.forEach((relPath, file) => {
+                if (!file.dir && !relPath.startsWith('__MACOSX') && !relPath.includes('/.DS_Store')) {
+                  const normPath = relPath.replace(/\\/g, '/');
+                  if (/\.(png|jpg|jpeg|webp|gif|svg|ico)$/i.test(normPath)) {
+                    promises.push(
+                      file.async('base64').then((b64) => {
+                        const ext = normPath.split('.').pop()?.toLowerCase() || 'png';
+                        const mime = ext === 'svg' ? 'image/svg+xml' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
+                        extracted[normPath] = `data:${mime};base64,${b64}`;
+                      })
+                    );
+                  } else {
+                    promises.push(
+                      file.async('text').then((txt) => {
+                        extracted[normPath] = txt;
+                      })
+                    );
+                  }
+                }
+              });
+
+              await Promise.all(promises);
+
+              // Normalize single top-folder wrapper
+              const topDirs = new Set(Object.keys(extracted).map(k => k.split('/')[0]).filter(Boolean));
+              if (topDirs.size === 1 && Object.keys(extracted).every(k => k.includes('/'))) {
+                const prefix = Array.from(topDirs)[0] + '/';
+                const stripped: Record<string, string> = {};
+                Object.entries(extracted).forEach(([k, v]) => {
+                  if (k.startsWith(prefix)) stripped[k.slice(prefix.length)] = v;
+                  stripped[k] = v;
+                });
+                Object.assign(extracted, stripped);
+              }
+
+              if (Object.keys(extracted).length > 0) {
+                console.log(`[CLIENT ZIP TEMPLATE LOAD] Successfully unzipped ${Object.keys(extracted).length} files from ${zipUrl}`);
+                const discovered = discoverTemplateCSS(extracted, 'tpl', undefined, templateId);
+                templateStorage.saveTemplateAsync({ id: templateId, sectionFiles: extracted }).catch(() => {});
+                return {
+                  templateId,
+                  isUploaded: true,
+                  sectionFiles: extracted,
+                  customCSS: discovered.combinedCSS || '',
+                  templateCode: extracted['src/template.jsx'] || extracted['template.jsx'] || extracted['src/index.jsx'] || '',
+                  source: 'storage'
+                };
+              }
+            }
+          }
+        } catch (zErr) {}
+      }
+    } catch (e) {}
+  }
+
   // 2. Fall back to sync resolver if API call unavailable
   const syncResolved = resolveTemplateFilesSync(portfolio);
   if (Object.keys(syncResolved.sectionFiles).length > 0) {
@@ -252,10 +362,10 @@ export async function loadTemplateFilesAsync(portfolio: any): Promise<ResolvedTe
   // 3. Try loading from IndexedDB storage
   try {
     const cached = await templateStorage.getTemplateAsync(templateId);
-    if (cached && cached.id === templateId && cached.sectionFiles && Object.keys(cached.sectionFiles).length > 0) {
+    if (cached && cached.sectionFiles && Object.keys(cached.sectionFiles).length > 0) {
       const discovered = discoverTemplateCSS(cached.sectionFiles, 'tpl', cached.assetMap, templateId);
       return {
-        templateId,
+        templateId: cached.id || templateId,
         isUploaded: true,
         sectionFiles: cached.sectionFiles,
         customCSS: discovered.combinedCSS || cached.customCSS || '',

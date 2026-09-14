@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+  --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-fira: 'Fira Code', monospace;
+  --cyber-950: #030712;
+  --cyber-900: #0f172a;
+  --cyber-800: #1e293b;
+  --cyber-700: #334155;
+  --cyber-bright-cyan: #38bdf8;
+  --cyber-neon-cyan: #06b6d4;
+  --cyber-neon-violet: #a855f7;
+  --cyber-electric-purple: #8b5cf6;
+  --cyber-600-val: #0891b2;
+  --cyber-700-val: #0e7490;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-outfit);
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #030712; }
+::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Cyber Theme Backgrounds & Surfaces (High-Contrast & GPU-Accelerated)
+   ───────────────────────────────────────────────────────────────────────────── */
+.bg-cyber-950 { background-color: #030712 !important; }
+.bg-cyber-900 { background-color: #0f172a !important; }
+.bg-cyber-800 { background-color: #1e293b !important; }
+.bg-cyber-700 { background-color: #334155 !important; }
+.bg-cyber-600 { background-color: #0891b2 !important; }
+.bg-cyber-500 { background-color: #06b6d4 !important; }
+.bg-cyber-400 { background-color: #22d3ee !important; }
+.bg-cyber-300 { background-color: #67e8f9 !important; }
+.bg-cyber-200 { background-color: #a5f3fc !important; }
+.bg-cyber-100 { background-color: #cffafe !important; }
+.bg-cyber-50  { background-color: #ecfeff !important; }
+.bg-cyber-lightBg { background-color: #f8fafc !important; }
+
+/* Neon / Accent Backgrounds */
+.bg-cyber-neonCyan  { background-color: #06b6d4 !important; }
+.bg-cyber-neonViolet { background-color: #a855f7 !important; }
+.bg-cyber-brightCyan { background-color: #38bdf8 !important; }
+.bg-cyber-electricPurple { background-color: #8b5cf6 !important; }
+
+/* Transparent/Opacity variants — used in components as Tailwind-like classes */
+.bg-cyber-neonCyan\/15 { background-color: rgba(6, 182, 212, 0.15) !important; }
+.bg-cyber-neonCyan\/20 { background-color: rgba(6, 182, 212, 0.20) !important; }
+.bg-cyber-neonViolet\/20 { background-color: rgba(168, 85, 247, 0.20) !important; }
+.bg-cyber-brightCyan\/30 { background-color: rgba(56, 189, 248, 0.30) !important; }
+
+/* Hover state backgrounds */
+.hover\:bg-cyber-50:hover  { background-color: #ecfeff !important; }
+.hover\:bg-cyber-100:hover { background-color: #cffafe !important; }
+.hover\:bg-cyber-200:hover { background-color: #a5f3fc !important; }
+.hover\:bg-cyber-900:hover { background-color: #0f172a !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Cyber Theme Gradients
+   ───────────────────────────────────────────────────────────────────────────── */
+.bg-gradient-cyber-hero {
+  background: radial-gradient(circle at 80% 20%, #4338ca 0%, #1e1b4b 45%, #030712 100%) !important;
+}
+
+.bg-gradient-cyan-pill {
+  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #6366f1 100%) !important;
+}
+
+.bg-gradient-violet-pill {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #6366f1 100%) !important;
+}
+
+.bg-gradient-indigo-card {
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%) !important;
+}
+
+.bg-gradient-cyan-card {
+  background: linear-gradient(160deg, #0e7490 0%, #06b6d4 50%, #38bdf8 100%) !important;
+}
+
+.bg-gradient-violet-card {
+  background: linear-gradient(160deg, #581c87 0%, #7e22ce 50%, #a855f7 100%) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Cyber Theme Text & Typography Colors (High Contrast Guaranteed)
+   ───────────────────────────────────────────────────────────────────────────── */
+.text-cyber-brightCyan    { color: #38bdf8 !important; }
+.text-cyber-neonCyan      { color: #06b6d4 !important; }
+.text-cyber-neonViolet    { color: #c084fc !important; }
+.text-cyber-electricPurple { color: #a855f7 !important; }
+.text-cyber-400 { color: #22d3ee !important; }
+.text-cyber-300 { color: #67e8f9 !important; }
+.text-cyber-200 { color: #a5f3fc !important; }
+.text-cyber-100 { color: #cffafe !important; }
+.text-cyber-600 { color: #0891b2 !important; }
+.text-cyber-700 { color: #0e7490 !important; }
+.text-cyber-800 { color: #155e75 !important; }
+.text-cyber-900 { color: #164e63 !important; }
+.text-cyber-950 { color: #082f49 !important; }
+
+/* Hover text variants */
+.hover\:text-cyber-900:hover { color: #164e63 !important; }
+.hover\:text-cyber-600:hover { color: #0891b2 !important; }
+.group:hover .group-hover\:text-cyber-600 { color: #0891b2 !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Borders & Accents
+   ───────────────────────────────────────────────────────────────────────────── */
+.border-cyber-400 { border-color: #22d3ee !important; }
+.border-cyber-600 { border-color: #0891b2 !important; }
+.border-cyber-700 { border-color: rgba(51, 65, 85, 0.8) !important; }
+.border-cyber-800 { border-color: rgba(30, 41, 59, 0.9) !important; }
+.border-cyber-900 { border-color: rgba(15, 23, 42, 0.95) !important; }
+
+.hover\:border-cyber-400:hover { border-color: #22d3ee !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Shadows & Glows (Optimized for 60fps Rendering)
+   ───────────────────────────────────────────────────────────────────────────── */
+.shadow-cyan-glow {
+  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.4) !important;
+}
+
+.shadow-violet-glow {
+  box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.4) !important;
+}
+
+.shadow-soft-elevation {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.shadow-deep-float {
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Hover shadow upgrades */
+.hover\:shadow-soft-elevation:hover {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
+}
+.hover\:shadow-deep-float:hover {
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   High-Performance GPU-Accelerated Micro-Animations
+   ───────────────────────────────────────────────────────────────────────────── */
+@keyframes floatSlow {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50%       { transform: translate3d(0, -12px, 0); }
+}
+
+@keyframes floatReverse {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50%       { transform: translate3d(0, 12px, 0); }
+}
+
+.animate-float-slow {
+  will-change: transform;
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  will-change: transform;
+  animation: floatReverse 7s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Organic Wave Divider Overlays
+   ───────────────────────────────────────────────────────────────────────────── */
+.wave-top-curve {
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+}
+
+@media (min-width: 768px) {
+  .wave-top-curve {
+    border-top-left-radius: 80px;
+    border-top-right-radius: 80px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .wave-top-curve {
+    border-top-left-radius: 120px;
+    border-top-right-radius: 120px;
+  }
+}
+
+.wave-bottom-curve {
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+}
+
+@media (min-width: 768px) {
+  .wave-bottom-curve {
+    border-bottom-left-radius: 80px;
+    border-bottom-right-radius: 80px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .wave-bottom-curve {
+    border-bottom-left-radius: 120px;
+    border-bottom-right-radius: 120px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Group Hover Utility Overrides (for interactive card transitions)
+   ───────────────────────────────────────────────────────────────────────────── */
+.group:hover .group-hover\:bg-gradient-cyan-pill {
+  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #6366f1 100%) !important;
+}
+.group:hover .group-hover\:text-cyber-950 {
+  color: #030712 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Accent Color Variable Passthrough (for CampusCV editor color picker)
+   ───────────────────────────────────────────────────────────────────────────── */
+.campuscv-template-root {
+  --accent-color: var(--campuscv-accent, #06b6d4);
+}

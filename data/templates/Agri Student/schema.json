@@ -1,0 +1,29 @@
+{
+  "id": "agri-student",
+  "name": "Agronomy & Precision AgriTech Portfolio",
+  "version": "1.0.0",
+  "schemaVersion": "1.0",
+  "sections": [
+    "hero",
+    "about",
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "certificates",
+    "contact"
+  ],
+  "defaultData": {
+    "name": "Aarav Sharma",
+    "role": "Agronomist & Precision AgriTech Specialist",
+    "title": "Agronomist & Precision AgriTech Specialist",
+    "headline": "Bridging Modern Robotics, Satellite Remote Sensing & Soil Microbiome Science for Sustainable Food Systems",
+    "bio": "Agricultural Science scholar and Precision Farming innovator specializing in sustainable agronomy, multispectral remote sensing, and IoT-driven precision fertigation.",
+    "location": "New Delhi / California Agritech Lab",
+    "email": "aarav.agriscience@gmail.com",
+    "phone": "+1 (555) 382-7492",
+    "university": "College of Agriculture & Bio-Sciences",
+    "degree": "B.Sc. (Hons.) Agricultural Sciences & Smart Farming",
+    "graduationYear": "2026"
+  }
+}

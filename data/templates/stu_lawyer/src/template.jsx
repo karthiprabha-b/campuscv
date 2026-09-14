@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -14,94 +14,193 @@ import Testimonials from './sections/Testimonials';
 import Contact from './sections/Contact';
 
 import { normalizeData } from './utils/normalizeData';
+import { getThemeColors } from './utils/themeColors';
 import './styles/index.css';
 
 export default function Template(props = {}) {
-  // Support incoming props from CampusCV editor
-  const rawPropsData = props?.data || props?.portfolio || props || {};
-  const [liveData, setLiveData] = useState(() => normalizeData(rawPropsData));
+  // Support incoming props directly & synchronously from CampusCV editor
+  const rawPropsData = props?.data || props?.portfolio || props?.profile || props?.cv || props?.resume || (props?.name || props?.hero || props?.about || props?.experience ? props : {}) || {};
+  const rawData = typeof rawPropsData === 'object' && rawPropsData !== null ? rawPropsData : {};
+  const data = useMemo(() => normalizeData(rawData), [rawData]);
 
-  // Sync when props change
-  useEffect(() => {
-    setLiveData(normalizeData(props?.data || props?.portfolio || props || {}));
-  }, [props?.data, props?.portfolio, props]);
+  const rawAccent = data?.userSelectedAccent ||
+    data?.theme?.primaryColor || 
+    data?.theme?.accentColor || 
+    data?.themeColor || 
+    data?.accentColor || 
+    data?.primaryColor || 
+    rawData?.userSelectedAccent ||
+    rawData?.theme?.primaryColor ||
+    rawData?.themeColor ||
+    rawData?.accentColor ||
+    data?.theme?.color ||
+    data?.color || 
+    '#C89B3C';
 
-  // Real-time listener for CampusCV editor iframe postMessage
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  const themeColors = useMemo(() => getThemeColors(rawAccent), [rawAccent]);
 
-    const handleMessage = (event) => {
-      try {
-        const payload = event.data;
-        if (!payload || typeof payload !== 'object') return;
+  const fontFamily = data?.typography?.fontFamily || data?.fontPack || '';
+  const fontSize = data?.typography?.fontSize || data?.baseFontSize || '';
 
-        if (
-          payload.type === 'CAMPUSCV_SET_DATA' ||
-          payload.type === 'SET_PORTFOLIO_DATA' ||
-          payload.type === 'UPDATE_DATA' ||
-          payload.type === 'CAMPUSCV_UPDATE_DATA' ||
-          payload.type === 'campuscv_update'
-        ) {
-          const incoming = payload.data || payload.portfolio || payload.payload;
-          if (incoming && typeof incoming === 'object') {
-            setLiveData(normalizeData(incoming));
-          }
-        } else if (payload.type === 'UPDATE_FIELD' && payload.field) {
-          setLiveData((prev) => {
-            const copy = { ...prev };
-            const parts = payload.field.split('.');
-            if (parts.length === 1) {
-              copy[parts[0]] = payload.value;
-            } else if (parts.length === 2) {
-              copy[parts[0]] = { ...copy[parts[0]], [parts[1]]: payload.value };
-            }
-            return normalizeData(copy);
-          });
-        }
-      } catch (err) {
-        console.warn('CampusCV postMessage listener notice:', err);
-      }
+  const dynamicStyles = {
+    '--campuscv-accent': themeColors.accent,
+    '--campuscv-accent-rgb': themeColors.accentRgb,
+    '--campuscv-accent-dark': themeColors.accentDark,
+    '--campuscv-accent-light': themeColors.accentLight,
+    '--cv-accent': themeColors.accent,
+    '--primary': themeColors.accent,
+    '--accent': themeColors.accent,
+    '--brand': themeColors.accent,
+    '--brand-gold': themeColors.accent,
+    '--gold-500': themeColors.accent,
+    '--gold-400': themeColors.accentLight,
+    '--gold-600': themeColors.accentDark,
+    '--border-gold': `rgba(${themeColors.accentRgb}, 0.3)`,
+    '--primary-foreground': themeColors.contrastForeground,
+    ...(fontFamily ? {
+      '--campuscv-font-family': `${fontFamily}, sans-serif`,
+      '--font-sans': `${fontFamily}, sans-serif`
+    } : {}),
+    ...(fontSize ? {
+      '--campuscv-base-font-size': `${fontSize}px`
+    } : {}),
+    ...(data?.styleOverrides?.['template:root'] || {})
+  };
+
+  const isSectionVisible = (sectionName) => {
+    const key = String(sectionName).toLowerCase().trim();
+    
+    // Check aliases
+    const aliasMap = {
+      hero: ['hero', 'intro', 'home'],
+      navbar: ['navbar', 'header', 'nav'],
+      about: ['about', 'bio'],
+      skills: ['skills', 'tech', 'stack', 'capabilities'],
+      projects: ['projects', 'portfolio', 'work', 'casestudies'],
+      services: ['services', 'specialties', 'offerings', 'practice'],
+      experience: ['experience', 'timeline', 'work', 'history'],
+      education: ['education', 'academics'],
+      achievements: ['achievements', 'metrics', 'awards', 'certificates', 'certifications'],
+      testimonials: ['testimonials', 'reviews', 'testimonial', 'endorsements'],
+      contact: ['contact'],
+      footer: ['footer']
     };
 
-    window.addEventListener('message', handleMessage);
+    const keysToCheck = aliasMap[key] || [key];
 
-    // Announce template ready to CampusCV parent frame
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'CAMPUSCV_TEMPLATE_READY', templateId: 'executive-lawyer-portfolio' }, '*');
+    for (const k of keysToCheck) {
+      if (data?.deletedNodes?.[`section:${k}:root:section:0`] === true || data?.deletedNodes?.[k] === true) {
+        return false;
       }
-    } catch (_) {}
+      if (data?.hiddenNodes?.[`section:${k}:root:section:0`] === true || data?.hiddenNodes?.[k] === true) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${k}`) || data.hiddenFields.includes(k))) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenSections) && (data.hiddenSections.includes(k) || data.hiddenSections.includes(`sections.${k}`))) {
+        return false;
+      }
+      if (data?.styleOverrides?.[k]?.display === 'none' || data?.styleOverrides?.[`section:${k}:root:section:0`]?.display === 'none') {
+        return false;
+      }
+      if (data[`${k}.visible`] !== undefined && !data[`${k}.visible`]) return false;
+      if (data[`${k}Visible`] !== undefined && !data[`${k}Visible`]) return false;
+    }
 
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, []);
+    if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
+    if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
-  const data = liveData;
+    return true;
+  };
+
+  const sectionComponentMap = {
+    hero: <Hero key="hero" data={data} />,
+    achievements: <Achievements key="achievements" data={data} />,
+    about: <About key="about" data={data} />,
+    skills: <Skills key="skills" data={data} />,
+    projects: <Projects key="projects" data={data} />,
+    services: <Services key="services" data={data} />,
+    experience: <Experience key="experience" data={data} />,
+    education: <Education key="education" data={data} />,
+    testimonials: <Testimonials key="testimonials" data={data} />,
+    contact: <Contact key="contact" data={data} />
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'achievements',
+    'about',
+    'skills',
+    'projects',
+    'services',
+    'experience',
+    'education',
+    'testimonials',
+    'contact'
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certificates' || id === 'awards' || id === 'certifications' || id === 'metrics') id = 'achievements';
+    if (id === 'timeline' || id === 'work' || id === 'history') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio' || id === 'casestudies') id = 'projects';
+    if (id === 'tech' || id === 'stack' || id === 'capabilities') id = 'skills';
+    if (id === 'specialties' || id === 'offerings' || id === 'practice') id = 'services';
+    if (id === 'reviews' || id === 'endorsements') id = 'testimonials';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  // Calculate visible sections for Navbar and Footer to dynamically reflect layer ordering & visibility
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
-    <div className="campuscv-executive-template min-h-screen bg-[#FAF8F4] text-[#1A1A1A] font-sans antialiased">
+    <div 
+      id="template-root"
+      className="campuscv-executive-template campuscv-template-root min-h-screen bg-[#FAF8F4] text-[#1A1A1A] font-sans antialiased"
+      style={dynamicStyles}
+      data-campuscv-template="executive-lawyer-portfolio"
+      data-template-id="stu_lawyer"
+    >
       {/* 1. Navbar */}
-      <Navbar data={data} />
+      {isSectionVisible('navbar') && <Navbar data={data} visibleSections={visibleSectionList} />}
 
       {/* 2. Core Portfolio Sections */}
       <main>
-        <Hero data={data} />
-        <Achievements data={data} />
-        <About data={data} />
-        <Skills data={data} />
-        <Projects data={data} />
-        <Services data={data} />
-        <Experience data={data} />
-        <Education data={data} />
-        <Testimonials data={data} />
-        <Contact data={data} />
+        {mainSectionIds.map((secId) => {
+          if (!isSectionVisible(secId)) return null;
+          return sectionComponentMap[secId] || null;
+        })}
       </main>
 
       {/* 3. Footer */}
-      <Footer data={data} />
+      {isSectionVisible('footer') && <Footer data={data} visibleSections={visibleSectionList} />}
     </div>
   );
 }
 
-export { Template as Portfolio };
+export { Template, Template as Portfolio };
+

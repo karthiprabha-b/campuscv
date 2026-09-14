@@ -93,13 +93,25 @@ export default function Template(props) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const directVal = data[`${sectionName}.visible`];
-    if (directVal !== undefined) return Boolean(directVal);
-    if (data[sectionName] && typeof data[sectionName] === 'object' && data[sectionName].visible !== undefined) {
-      return Boolean(data[sectionName].visible);
+    const key = String(sectionName).toLowerCase();
+    
+    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
+      return false;
     }
-    if (data[`${sectionName}Visible`] !== undefined) {
-      return Boolean(data[`${sectionName}Visible`]);
+    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
+      return false;
+    }
+    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
+      return false;
+    }
+
+    const directVal = data[`${key}.visible`];
+    if (directVal !== undefined) return Boolean(directVal);
+    if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) {
+      return Boolean(data[key].visible);
+    }
+    if (data[`${key}Visible`] !== undefined) {
+      return Boolean(data[`${key}Visible`]);
     }
     return true;
   };
@@ -112,26 +124,123 @@ export default function Template(props) {
   const hasCertifications = isSectionVisible('certifications') && certifications.length > 0;
   const hasContact = isSectionVisible('contact');
 
-  // Dynamic Navigation Links matching exact required sequence
-  const navLinks = [
-    { label: "About", href: "#about", show: hasAbout },
-    { label: "Education", href: "#education", show: hasEducation },
-    { label: "Experience", href: "#experience", show: hasExperience },
-    { label: "Projects", href: "#projects", show: hasProjects },
-    { label: "Tech Stack", href: "#skills", show: hasSkills },
-    { label: "Certifications", href: "#certifications", show: hasCertifications },
-    { label: "Contact", href: "#contact", show: hasContact }
-  ].filter(link => link.show);
+  const sectionComponentMap = {
+    hero: isSectionVisible('hero') ? (
+      <Hero 
+        key="hero"
+        data={data}
+        hero={hero} 
+        name={name}
+        education={education}
+        skills={skills}
+      />
+    ) : null,
+    about: hasAbout ? <About key="about" data={data} about={about} avatarUrl={avatarUrl} name={name} /> : null,
+    education: hasEducation ? <Education key="education" data={data} education={education} /> : null,
+    experience: hasExperience ? <Experience key="experience" data={data} experience={experience} /> : null,
+    projects: hasProjects ? <Projects key="projects" data={data} projects={projects} /> : null,
+    skills: hasSkills ? <Skills key="skills" data={data} skills={skills} /> : null,
+    certifications: hasCertifications ? <Certifications key="certifications" data={data} certifications={certifications} /> : null,
+    contact: hasContact ? (
+      <Contact 
+        key="contact"
+        data={data}
+        name={name}
+        email={data.profile?.email || data.email || data.ownerEmail || data.basics?.email || (typeof data.contact === 'object' ? data.contact?.email : null) || ''}
+        location={data.profile?.location || data.location || data.basics?.location?.city || (typeof data.contact === 'object' ? data.contact?.location : null) || ''}
+        socials={data.profile?.socialLinks || data.socials || data.socialLinks || data.social || data.basics?.profiles || []}
+        socialLinks={data.profile?.socialLinks || data.socials || data.socialLinks || data.social || data.basics?.profiles || []}
+      />
+    ) : null
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certifications',
+    'contact'
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certificates' || id === 'awards') id = 'certifications';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech') id = 'skills';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] !== undefined && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  const dynamicSections = mainSectionIds;
+
+  const navLinks = dynamicSections
+    .filter(sec => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
+    })
+    .map(sec => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
+      const id = sName.toLowerCase().replace(/\s+/g, '-');
+      const href = id === 'home' || id === 'hero' ? '#hero' : `#${id}`;
+      return {
+        label: cleanName === 'Hero' ? 'Home' : cleanName === 'Skills' ? 'Tech Stack' : cleanName,
+        href
+      };
+    });
+
+  const scrollToTop = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.body) document.body.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        const topEl = document.getElementById('hero') || document.querySelector('header') || document.getElementById('template-root') || document.body;
+        if (topEl && typeof topEl.scrollIntoView === 'function') {
+          topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    } catch (err) {
+      try { window.scrollTo(0, 0); } catch (_) {}
+    }
+  };
 
   return (
-    <div className="portfolio-root light" data-theme="light" style={dynamicStyles}>
+    <div className="portfolio-root campuscv-template-root light" data-theme="light" style={dynamicStyles} data-campuscv-template="cs-portfolio">
       {/* Background Accent Grid */}
       <div className="bg-grid"></div>
 
       {/* Navigation Bar */}
       <header className="navbar">
         <div className="container navbar-inner">
-          <a href="#" className="logo">
+          <a href="#hero" className="logo">
             <div className="logo-badge">{nameInitials}</div>
             <span className="logo-text">{name || "Portfolio"}</span>
           </a>
@@ -182,46 +291,28 @@ export default function Template(props) {
         </div>
       )}
 
-      {/* 1. Hero Section */}
-      {isSectionVisible('hero') && (
-        <Hero 
-          data={data}
-          hero={hero} 
-          name={name}
-          education={education}
-          skills={skills}
-        />
-      )}
+      {/* Main Ordered Flow */}
+      <main>
+        {mainSectionIds.map((secId) => {
+          return sectionComponentMap[secId] || null;
+        })}
+      </main>
 
-      {/* 2. About Section */}
-      {hasAbout && <About data={data} about={about} avatarUrl={avatarUrl} name={name} />}
-
-      {/* 3. Education Section */}
-      {hasEducation && <Education data={data} education={education} />}
-
-      {/* 4. Experience Section */}
-      {hasExperience && <Experience data={data} experience={experience} />}
-
-      {/* 5. Projects Section */}
-      {hasProjects && <Projects data={data} projects={projects} />}
-
-      {/* 6. Skills Section */}
-      {hasSkills && <Skills data={data} skills={skills} />}
-
-      {/* 7. Certifications Section */}
-      {hasCertifications && <Certifications data={data} certifications={certifications} />}
-
-      {/* 8. Contact Section */}
-      {hasContact && (
-        <Contact 
-          data={data}
-          name={name}
-          email={data.profile?.email || data.email || data.ownerEmail || data.basics?.email || (typeof data.contact === 'object' ? data.contact?.email : null) || ''}
-          location={data.profile?.location || data.location || data.basics?.location?.city || (typeof data.contact === 'object' ? data.contact?.location : null) || ''}
-          socials={data.profile?.socialLinks || data.socials || data.socialLinks || data.social || data.basics?.profiles || []}
-          socialLinks={data.profile?.socialLinks || data.socials || data.socialLinks || data.social || data.basics?.profiles || []}
-        />
-      )}
+      {/* Footer */}
+      <footer className="footer" style={{ borderTop: '1px solid var(--border)', padding: '2.5rem 0', background: 'var(--card-bg, #ffffff)' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <div>
+            © {new Date().getFullYear()} {name || 'Portfolio'}. All rights reserved.
+          </div>
+          <button
+            type="button"
+            onClick={scrollToTop}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.4rem 0.8rem', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+          >
+            <span>Back to top ↑</span>
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -58,6 +58,13 @@ export default function Template(props = {}) {
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
+    // If explicit collection array is empty, hide section
+    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
+    if (Array.isArray(collection) && collection.length === 0) {
+      if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
+      return false;
+    }
+
     return true;
   };
 
@@ -108,44 +115,83 @@ export default function Template(props = {}) {
     ...(data?.styleOverrides?.['template:root'] || {})
   };
 
+  const sectionComponentMap = {
+    hero: <HeroSection key="hero" data={data} />,
+    subhero: <SubHeroBanner key="subhero" data={data} />,
+    about: <AboutSection key="about" data={data} />,
+    education: <EducationSection key="education" data={data} />,
+    experience: <ExperienceSection key="experience" data={data} />,
+    projects: <ProjectsSection key="projects" data={data} onSelectProject={handleOpenProject} />,
+    skills: <SkillsSection key="skills" data={data} />,
+    certificates: <CertificatesSection key="certificates" data={data} onSelectCert={handleOpenCert} />,
+    certifications: <CertificatesSection key="certifications" data={data} onSelectCert={handleOpenCert} />,
+    contact: <ContactSection key="contact" data={data} />
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'subhero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certificates',
+    'contact'
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certifications') id = 'certificates';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech') id = 'skills';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
   return (
     <div 
-      className="slash-model-template-root min-h-screen bg-[#E5E5E5] text-black transition-colors"
+      className="slash-model-template-root campuscv-template-root min-h-screen bg-[#E5E5E5] text-black transition-colors"
       style={dynamicRootStyles}
       data-template-id="slash-model"
+      data-campuscv-template="slash-model"
     >
       {/* Sticky Navigation */}
-      <Navbar data={data} />
+      {isSectionVisible('navbar') && <Navbar data={data} />}
 
-      {/* Hero Section with Diagonal Slash */}
-      {isSectionVisible('hero') && <HeroSection data={data} />}
-
-      {/* Sub-Hero IT Berries Banner */}
-      {isSectionVisible('subhero') && <SubHeroBanner data={data} />}
-
-      {/* About Me Section */}
-      {isSectionVisible('about') && <AboutSection data={data} />}
-
-      {/* Education Section */}
-      {isSectionVisible('education') && <EducationSection data={data} />}
-
-      {/* Experience Section Timeline */}
-      {isSectionVisible('experience') && <ExperienceSection data={data} />}
-
-      {/* Projects Section with Filters */}
-      {isSectionVisible('projects') && <ProjectsSection data={data} onSelectProject={handleOpenProject} />}
-
-      {/* Skills Section */}
-      {isSectionVisible('skills') && <SkillsSection data={data} />}
-
-      {/* Certificates Section */}
-      {isSectionVisible('certificates') && <CertificatesSection data={data} onSelectCert={handleOpenCert} />}
-
-      {/* Contact Section */}
-      {isSectionVisible('contact') && <ContactSection data={data} />}
+      {/* Main Flow */}
+      <main>
+        {mainSectionIds.map((secId) => {
+          if (!isSectionVisible(secId)) return null;
+          return sectionComponentMap[secId] || null;
+        })}
+      </main>
 
       {/* Footer */}
-      <Footer data={data} />
+      {isSectionVisible('footer') && <Footer data={data} />}
 
       {/* Universal Case Study / Certificate Modal */}
       <Modal

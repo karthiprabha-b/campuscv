@@ -43,14 +43,26 @@ export default function Navbar({ data = {} }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'About me', href: '#about', id: 'about' },
-    { name: 'Education', href: '#education', id: 'education' },
-    { name: 'Experience', href: '#experience', id: 'experience' },
-    { name: 'Portfolio', href: '#portfolio', id: 'portfolio' },
-    { name: 'Skills', href: '#skills', id: 'skills' },
-    { name: 'Certificates', href: '#certificates', id: 'certificates' },
-  ];
+  const dynamicSections = Array.isArray(data?.sections) && data.sections.length > 0
+    ? data.sections
+    : ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
+
+  const navLinks = dynamicSections
+    .filter((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
+    })
+    .map((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
+      const id = sName.toLowerCase().replace(/\s+/g, '-');
+      const href = id === 'home' || id === 'hero' ? '#hero' : `#${id}`;
+      return {
+        name: cleanName === 'Hero' ? 'Home' : cleanName === 'About' ? 'About me' : cleanName === 'Projects' ? 'Portfolio' : cleanName,
+        href,
+        id: id === 'home' ? 'hero' : id === 'projects' ? 'portfolio' : id
+      };
+    });
 
   return (
     <header 

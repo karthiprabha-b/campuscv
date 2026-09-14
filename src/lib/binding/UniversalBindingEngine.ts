@@ -114,6 +114,10 @@ export class UniversalBindingEngine {
         continue;
       }
 
+      if (el.closest('.terminal-window, .terminal-body, .terminal-header, .terminal-dots, pre, code, kbd, samp, [class*="terminal"], [class*="syntax"], [class*="code-"], [data-no-bind="true"]')) {
+        continue;
+      }
+
       const nodeId = el.getAttribute('data-node-id') || el.id || '';
       const editKey = el.getAttribute('data-edit-key') || el.getAttribute('data-field') || el.getAttribute('data-editable') || '';
       const hasUserContentOverride = Boolean(

@@ -52,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = React.memo(({ data, onOpenResume, o
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3.5 backdrop-blur-xl bg-black/50 border-b border-white/10 transition-colors pointer-events-auto">
+    <header className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3.5 backdrop-blur-xl bg-black/50 border-b border-white/10 transition-colors pointer-events-auto">
       {/* Brand & Availability */}
       <div className="flex items-center gap-4">
         <button
@@ -70,9 +70,6 @@ export const Navbar: React.FC<NavbarProps> = React.memo(({ data, onOpenResume, o
                 Pro
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 hidden sm:block truncate max-w-[200px] md:max-w-xs">
-              {title}
-            </p>
           </div>
         </button>
 

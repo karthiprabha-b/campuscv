@@ -64,9 +64,20 @@ export default function Footer({ data = {} }) {
 
   const initials = doctorName ? doctorName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'DR';
 
-  const scrollToTop = () => {
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.body) document.body.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        const topEl = document.getElementById('hero') || document.querySelector('header') || document.getElementById('template-root') || document.body;
+        if (topEl && typeof topEl.scrollIntoView === 'function') {
+          topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    } catch (err) {
+      try { window.scrollTo(0, 0); } catch (_) {}
     }
   };
 

@@ -5,6 +5,7 @@ import { portfolioData } from '@/data/portfolioData';
 import { Moon, Sun, Menu, X, ArrowUpRight } from 'lucide-react';
 
 interface HeaderProps {
+  data?: any;
   activeSection: string;
   onNavigate: (sectionId: string) => void;
   isMobileMenuOpen: boolean;
@@ -12,6 +13,7 @@ interface HeaderProps {
 }
 
 export default function Header({
+  data,
   activeSection,
   onNavigate,
   isMobileMenuOpen,
@@ -47,21 +49,32 @@ export default function Header({
     localStorage.setItem('theme', nextTheme);
   };
 
-  const navItems = [
-    { id: 'hero', label: 'Home' },
-    { id: 'about', label: 'About' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'education', label: 'Education' },
-    { id: 'projects', label: 'Works' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'certificates', label: 'Certificates' },
-    { id: 'contact', label: 'Contact' },
-  ];
+  const dynamicSections = Array.isArray(data?.sections) && data.sections.length > 0
+    ? data.sections
+    : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : ['Hero', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Certificates', 'Contact']);
+
+  const navItems = dynamicSections
+    .filter((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const lower = sName.toLowerCase().trim();
+      return lower && lower !== 'header' && lower !== 'footer' && lower !== 'sidebar' && lower !== 'navbar';
+    })
+    .map((sec: any) => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
+      let id = sName.toLowerCase().replace(/\s+/g, '-');
+      if (id === 'home' || id === 'intro') id = 'hero';
+      if (id === 'works' || id === 'portfolio') id = 'projects';
+      if (id === 'certifications') id = 'certificates';
+      return { id, label: cleanName === 'Hero' ? 'Home' : cleanName };
+    });
 
   return (
     <header
       style={{
-        position: 'fixed',
+        position: 'sticky',
         top: 0,
         left: 0,
         right: 0,

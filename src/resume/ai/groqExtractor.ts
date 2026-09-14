@@ -24,7 +24,7 @@ CRITICAL EXTRACTION RULES:
 2. If GPA is not stated, leave "cgpa": "". NEVER invent or assume a GPA.
 3. Keep projects and work experience strictly separate. Projects belong in "projects", not "experience".
 4. Extract skills as concise individual skill names (e.g., "Python", "Next.js", "PostgreSQL"), NOT long sentences or phrases.
-5. In "personal", extract the candidate's exact full name and their headline/tagline.
+5. In "personal", extract the candidate's exact full name and their headline/tagline. In "summary", provide a crisp, punchy, professional summary of STRICTLY a small paragraph (1 to 2 short sentences, 25–40 words max). Focus directly on their core domain, major skills, and career goal. NEVER output huge, vague, repetitive, or rambling walls of text.
 6. In "education", extract institution, degree, and field of study / specialization.
 7. Return ONLY a valid JSON object matching the requested schema. No markdown formatting, no commentary.
 
@@ -38,7 +38,7 @@ SCHEMA DEFINITION:
     "city": "string",
     "state": "string",
     "country": "string",
-    "summary": "string"
+    "summary": "string (concise 1-2 sentence professional bio/summary, 25-40 words max)"
   },
   "experience": [
     {

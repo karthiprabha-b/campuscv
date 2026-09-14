@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Type, Image as ImageIcon, Square, List, Layers,
-  Link as LinkIcon, Trash2, Plus, ArrowUp, ArrowDown, ArrowLeft,
+  Link as LinkIcon, Trash2, Plus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight,
   Camera, Sliders, Copy, MousePointer, X,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   AlertTriangle, Database, HelpCircle, Info,
@@ -546,6 +546,20 @@ function parseToHex(color: string | undefined | null, fallback: string = '#00000
   return { hex: fallback, isTransparent: false };
 }
 
+function parseTranslate(transformStr?: string): { x: number; y: number } {
+  if (!transformStr) return { x: 0, y: 0 };
+  const match = transformStr.match(/translate\(\s*(-?\d+)px\s*,\s*(-?\d+)px\s*\)/i);
+  if (match) {
+    return { x: parseInt(match[1], 10) || 0, y: parseInt(match[2], 10) || 0 };
+  }
+  const matchX = transformStr.match(/translateX\(\s*(-?\d+)px\s*\)/i);
+  const matchY = transformStr.match(/translateY\(\s*(-?\d+)px\s*\)/i);
+  return {
+    x: matchX ? parseInt(matchX[1], 10) || 0 : 0,
+    y: matchY ? parseInt(matchY[1], 10) || 0 : 0,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Text Element Inspector
 // ─────────────────────────────────────────────────────────────────────────────
@@ -557,17 +571,37 @@ function TextElementInspector({ portfolio, onPortfolioChange, onRequestConfirm }
 
   const currentText = el.el?.textContent?.trim() ?? '';
   const isButton = ['button', 'link'].includes(el.elementType);
+  const targetNodeId = el.id || (el.el ? el.el.getAttribute('data-node-id') : null) || el.fieldPath;
+
+  const existingStyle = (portfolio as any)?.styleOverrides?.[targetNodeId] || {};
+  const currentTextAlign = existingStyle.textAlign || (el.el ? window.getComputedStyle(el.el).textAlign : 'left') || 'left';
+  const currentTextColor = existingStyle.color || parseToHex(el.el ? window.getComputedStyle(el.el).color : '#0F172A', '#0F172A').hex;
+  const currentTrans = parseTranslate(existingStyle.transform);
 
   const applyStyle = (property: string, value: string) => {
     if (el.el) (el.el.style as any)[property] = value;
+    if (onFieldChange && targetNodeId) {
+      onFieldChange(`styleOverrides.${targetNodeId}.${property}`, value);
+    }
+  };
+
+  const applyMove = (nextX: number, nextY: number) => {
+    if (nextX === 0 && nextY === 0) {
+      applyStyle('transform', '');
+    } else {
+      applyStyle('transform', `translate(${nextX}px, ${nextY}px)`);
+      if (el.el && window.getComputedStyle(el.el).display === 'inline') {
+        applyStyle('display', 'inline-block');
+      }
+    }
   };
 
   const handleDelete = () => {
-    const targetNodeId = el.id || (el.el ? el.el.getAttribute('data-node-id') : null);
     const performDelete = () => {
       if (el.el) el.el.style.display = 'none';
       if (targetNodeId && onFieldChange) {
         onFieldChange(`deletedNodes.${targetNodeId}`, true);
+        onFieldChange(`styleOverrides.${targetNodeId}.display`, 'none');
       }
       setSelectedElement(null);
     };
@@ -584,11 +618,12 @@ function TextElementInspector({ portfolio, onPortfolioChange, onRequestConfirm }
       <div>
         <p className={sectionHdr}><Type className="w-3.5 h-3.5 text-violet-500" />Text Content</p>
         <div className="space-y-2">
-          <label className={labelCls}>Content</label>
+          <label className={labelCls}>Content (Expandable)</label>
           <textarea
-            rows={3}
+            rows={4}
             defaultValue={currentText}
-            className={`${inputCls} resize-none`}
+            className={`${inputCls} resize-y min-h-[90px] max-h-[350px] font-medium`}
+            style={{ minHeight: '90px' }}
             onChange={(e) => {
               if (onFieldChange) onFieldChange(el.fieldPath, e.target.value);
               if (el.el) el.el.textContent = e.target.value;
@@ -598,6 +633,211 @@ function TextElementInspector({ portfolio, onPortfolioChange, onRequestConfirm }
               if (el.el) el.el.textContent = e.target.value;
             }}
           />
+        </div>
+      </div>
+
+      {/* 4-Way Text Alignment Controls */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className={labelCls}>Text Alignment</label>
+          <span className="text-[10px] font-mono text-violet-600 font-bold capitalize">
+            {currentTextAlign}
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5 bg-zinc-50 p-1 rounded-xl border border-zinc-200">
+          {[
+            { id: 'left', label: 'Left', icon: <AlignLeft className="w-4 h-4" /> },
+            { id: 'center', label: 'Center', icon: <AlignCenter className="w-4 h-4" /> },
+            { id: 'right', label: 'Right', icon: <AlignRight className="w-4 h-4" /> },
+            { id: 'justify', label: 'Justify', icon: <AlignJustify className="w-4 h-4" /> }
+          ].map(align => {
+            const isActive = currentTextAlign === align.id;
+            return (
+              <button
+                key={align.id}
+                type="button"
+                onClick={() => applyStyle('textAlign', align.id)}
+                title={`Align ${align.label}`}
+                className={`py-2 flex flex-col items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-violet-600 text-white shadow-xs'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-white'
+                }`}
+              >
+                {align.icon}
+                <span className="text-[9px] leading-none">{align.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Move & Position Nudge */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className={labelCls}>Move & Position Nudge</label>
+          {(currentTrans.x !== 0 || currentTrans.y !== 0) && (
+            <button
+              type="button"
+              onClick={() => applyMove(0, 0)}
+              className="text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+            >
+              Reset Position
+            </button>
+          )}
+        </div>
+
+        {/* 4-Directional Arrow D-Pad Controls */}
+        <div className="flex items-center justify-center p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl">
+          <div className="grid grid-cols-3 gap-1.5 w-36">
+            <div />
+            <button
+              type="button"
+              onClick={() => applyMove(currentTrans.x, currentTrans.y - 4)}
+              className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Move Up (-4px)"
+            >
+              <ArrowUp className="w-4 h-4 text-zinc-600" />
+            </button>
+            <div />
+
+            <button
+              type="button"
+              onClick={() => applyMove(currentTrans.x - 4, currentTrans.y)}
+              className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Move Left (-4px)"
+            >
+              <ArrowLeft className="w-4 h-4 text-zinc-600" />
+            </button>
+            <div className="flex items-center justify-center text-[10px] font-mono font-bold text-violet-600 select-none">
+              {currentTrans.x === 0 && currentTrans.y === 0 ? '0,0' : `${currentTrans.x},${currentTrans.y}`}
+            </div>
+            <button
+              type="button"
+              onClick={() => applyMove(currentTrans.x + 4, currentTrans.y)}
+              className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Move Right (+4px)"
+            >
+              <ArrowRight className="w-4 h-4 text-zinc-600" />
+            </button>
+
+            <div />
+            <button
+              type="button"
+              onClick={() => applyMove(currentTrans.x, currentTrans.y + 4)}
+              className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Move Down (+4px)"
+            >
+              <ArrowDown className="w-4 h-4 text-zinc-600" />
+            </button>
+            <div />
+          </div>
+        </div>
+      </div>
+
+      {/* Spacing & Padding */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className={labelCls}>Spacing & Padding</label>
+          {(existingStyle.paddingTop || existingStyle.paddingBottom || existingStyle.paddingLeft || existingStyle.paddingRight || existingStyle.padding) && (
+            <button
+              type="button"
+              onClick={() => {
+                applyStyle('paddingTop', '');
+                applyStyle('paddingBottom', '');
+                applyStyle('paddingLeft', '');
+                applyStyle('paddingRight', '');
+                applyStyle('padding', '');
+              }}
+              className="text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Quick Presets */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { label: '0px', val: 0 },
+            { label: '8px', val: 8 },
+            { label: '16px', val: 16 },
+            { label: '24px', val: 24 }
+          ].map(p => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => {
+                applyStyle('paddingTop', `${p.val}px`);
+                applyStyle('paddingBottom', `${p.val}px`);
+                applyStyle('paddingLeft', `${p.val}px`);
+                applyStyle('paddingRight', `${p.val}px`);
+              }}
+              className="py-1.5 px-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-[10px] font-bold text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer text-center"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Text Color Controls */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className={labelCls}>Text Color</label>
+          {existingStyle.color && (
+            <button
+              type="button"
+              onClick={() => applyStyle('color', '')}
+              className="text-[10px] font-bold text-zinc-500 hover:text-red-500 transition-colors"
+            >
+              Reset to Default
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={parseToHex(existingStyle.color || currentTextColor, '#0F172A').hex}
+            onChange={(e) => applyStyle('color', e.target.value)}
+            className="w-8 h-8 rounded-lg cursor-pointer border border-zinc-200 p-0.5 shrink-0"
+          />
+          <input
+            type="text"
+            value={existingStyle.color || ''}
+            onChange={(e) => applyStyle('color', e.target.value)}
+            placeholder="Default / #HEX"
+            className={inputCls + " font-mono text-[11px] uppercase"}
+          />
+        </div>
+
+        {/* Quick Palette Swatches */}
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {[
+            { hex: '#0F172A', name: 'Dark Slate' },
+            { hex: '#475569', name: 'Muted Slate' },
+            { hex: '#2563EB', name: 'Blue' },
+            { hex: '#7C3AED', name: 'Violet' },
+            { hex: '#059669', name: 'Emerald' },
+            { hex: '#DC2626', name: 'Red' },
+            { hex: '#D97706', name: 'Amber' },
+            { hex: '#E11D48', name: 'Rose' },
+            { hex: '#FFFFFF', name: 'White' },
+          ].map(c => (
+            <button
+              key={c.hex}
+              type="button"
+              onClick={() => applyStyle('color', c.hex)}
+              title={c.name}
+              className={`w-6 h-6 rounded-full border border-zinc-300 shadow-2xs hover:scale-110 transition-transform ${
+                existingStyle.color?.toLowerCase() === c.hex.toLowerCase()
+                  ? 'ring-2 ring-violet-500 ring-offset-1'
+                  : ''
+              }`}
+              style={{ backgroundColor: c.hex }}
+            />
+          ))}
         </div>
       </div>
 
@@ -1399,6 +1639,18 @@ function UniversalNodeInspector() {
   const currentBorderStyle = styleOverride.borderStyle || 'solid';
   const currentBorderColor = parseToHex(styleOverride.borderColor || '#E5E0D8', '#E5E0D8').hex;
   const currentPadding = styleOverride.padding || 'auto';
+  const currentTrans = parseTranslate(styleOverride.transform);
+
+  const handleMove = (nextX: number, nextY: number) => {
+    if (nextX === 0 && nextY === 0) {
+      handleStyleChange('transform', '');
+    } else {
+      handleStyleChange('transform', `translate(${nextX}px, ${nextY}px)`);
+      if (selectedNode.el && window.getComputedStyle(selectedNode.el).display === 'inline') {
+        handleStyleChange('display', 'inline-block');
+      }
+    }
+  };
 
   return (
     <div className="p-4 space-y-5 text-xs text-zinc-800 select-none">
@@ -1566,7 +1818,7 @@ function UniversalNodeInspector() {
       {isText && (
         <div className="space-y-4">
           <div className="space-y-1">
-            <label className={labelCls}>Text Content</label>
+            <label className={labelCls}>Text Content (Expandable)</label>
             <textarea
               rows={4}
               value={localText}
@@ -1574,9 +1826,215 @@ function UniversalNodeInspector() {
                 setLocalText(e.target.value);
                 handleTextCommit(e.target.value);
               }}
-              className={inputCls + " resize-none font-medium text-xs"}
+              className={inputCls + " resize-y min-h-[90px] max-h-[350px] font-medium text-xs"}
+              style={{ minHeight: '90px' }}
               placeholder="Enter text..."
             />
+          </div>
+
+          {/* 4-Way Text Alignment Controls */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className={labelCls}>Text Alignment</label>
+              <span className="text-[10px] font-mono text-violet-600 font-bold capitalize">
+                {currentTextAlign}
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5 bg-zinc-50 p-1 rounded-xl border border-zinc-200">
+              {[
+                { id: 'left', label: 'Left', icon: <AlignLeft className="w-4 h-4" /> },
+                { id: 'center', label: 'Center', icon: <AlignCenter className="w-4 h-4" /> },
+                { id: 'right', label: 'Right', icon: <AlignRight className="w-4 h-4" /> },
+                { id: 'justify', label: 'Justify', icon: <AlignJustify className="w-4 h-4" /> }
+              ].map(align => {
+                const isActive = currentTextAlign === align.id;
+                return (
+                  <button
+                    key={align.id}
+                    type="button"
+                    onClick={() => handleStyleChange('textAlign', align.id)}
+                    title={`Align ${align.label}`}
+                    className={`py-2 flex flex-col items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-violet-600 text-white shadow-xs'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-white'
+                    }`}
+                  >
+                    {align.icon}
+                    <span className="text-[9px] leading-none">{align.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Move & Position Nudge */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className={labelCls}>Move & Position Nudge</label>
+              {(currentTrans.x !== 0 || currentTrans.y !== 0) && (
+                <button
+                  type="button"
+                  onClick={() => handleMove(0, 0)}
+                  className="text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                >
+                  Reset Position
+                </button>
+              )}
+            </div>
+
+            {/* 4-Directional Arrow D-Pad Controls */}
+            <div className="flex items-center justify-center p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl">
+              <div className="grid grid-cols-3 gap-1.5 w-36">
+                <div />
+                <button
+                  type="button"
+                  onClick={() => handleMove(currentTrans.x, currentTrans.y - 4)}
+                  className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Move Up (-4px)"
+                >
+                  <ArrowUp className="w-4 h-4 text-zinc-600" />
+                </button>
+                <div />
+
+                <button
+                  type="button"
+                  onClick={() => handleMove(currentTrans.x - 4, currentTrans.y)}
+                  className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Move Left (-4px)"
+                >
+                  <ArrowLeft className="w-4 h-4 text-zinc-600" />
+                </button>
+                <div className="flex items-center justify-center text-[10px] font-mono font-bold text-violet-600 select-none">
+                  {currentTrans.x === 0 && currentTrans.y === 0 ? '0,0' : `${currentTrans.x},${currentTrans.y}`}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleMove(currentTrans.x + 4, currentTrans.y)}
+                  className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Move Right (+4px)"
+                >
+                  <ArrowRight className="w-4 h-4 text-zinc-600" />
+                </button>
+
+                <div />
+                <button
+                  type="button"
+                  onClick={() => handleMove(currentTrans.x, currentTrans.y + 4)}
+                  className="p-2 bg-white hover:bg-violet-50 hover:border-violet-300 border border-zinc-200 rounded-lg flex items-center justify-center text-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Move Down (+4px)"
+                >
+                  <ArrowDown className="w-4 h-4 text-zinc-600" />
+                </button>
+                <div />
+              </div>
+            </div>
+          </div>
+
+          {/* Spacing & Padding */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className={labelCls}>Spacing & Padding</label>
+              {(styleOverride.paddingTop || styleOverride.paddingBottom || styleOverride.paddingLeft || styleOverride.paddingRight || styleOverride.padding) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleStyleChange('paddingTop', '');
+                    handleStyleChange('paddingBottom', '');
+                    handleStyleChange('paddingLeft', '');
+                    handleStyleChange('paddingRight', '');
+                    handleStyleChange('padding', '');
+                  }}
+                  className="text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            {/* Quick Presets */}
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { label: '0px', val: 0 },
+                { label: '8px', val: 8 },
+                { label: '16px', val: 16 },
+                { label: '24px', val: 24 }
+              ].map(p => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => {
+                    handleStyleChange('paddingTop', `${p.val}px`);
+                    handleStyleChange('paddingBottom', `${p.val}px`);
+                    handleStyleChange('paddingLeft', `${p.val}px`);
+                    handleStyleChange('paddingRight', `${p.val}px`);
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-[10px] font-bold text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer text-center"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Text Color Controls */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelCls}>Text Color</label>
+              {styleOverride.color && (
+                <button
+                  type="button"
+                  onClick={() => handleStyleChange('color', '')}
+                  className="text-[10px] font-bold text-zinc-500 hover:text-red-500 transition-colors cursor-pointer"
+                >
+                  Reset to Default
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={currentColorHex}
+                onChange={(e) => handleStyleChange('color', e.target.value)}
+                className="w-8 h-8 rounded-lg cursor-pointer border border-zinc-200 p-0.5 shrink-0"
+              />
+              <input
+                type="text"
+                value={styleOverride.color || currentColorHex.toUpperCase()}
+                onChange={(e) => handleStyleChange('color', e.target.value)}
+                placeholder="Default / #HEX"
+                className={inputCls + " font-mono text-[11px] uppercase"}
+              />
+            </div>
+
+            {/* Quick Palette Swatches */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[
+                { hex: '#0F172A', name: 'Dark Slate' },
+                { hex: '#475569', name: 'Muted Slate' },
+                { hex: '#2563EB', name: 'Blue' },
+                { hex: '#7C3AED', name: 'Violet' },
+                { hex: '#059669', name: 'Emerald' },
+                { hex: '#DC2626', name: 'Red' },
+                { hex: '#D97706', name: 'Amber' },
+                { hex: '#E11D48', name: 'Rose' },
+                { hex: '#FFFFFF', name: 'White' },
+              ].map(c => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => handleStyleChange('color', c.hex)}
+                  title={c.name}
+                  className={`w-6 h-6 rounded-full border border-zinc-300 shadow-2xs hover:scale-110 transition-transform cursor-pointer ${
+                    (styleOverride.color || currentColorHex).toLowerCase() === c.hex.toLowerCase()
+                      ? 'ring-2 ring-violet-500 ring-offset-1'
+                      : ''
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

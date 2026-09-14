@@ -19,16 +19,26 @@ export default function Header({ data = {} }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
-  const navLinks = [
-    { label: 'Home', href: '#hero', id: 'hero' },
-    { label: 'About', href: '#about', id: 'about' },
-    { label: 'Education', href: '#education', id: 'education' },
-    { label: 'Experience', href: '#experience', id: 'experience' },
-    { label: 'Projects', href: '#projects', id: 'projects' },
-    { label: 'Skills', href: '#skills', id: 'skills' },
-    { label: 'Certifications', href: '#certifications', id: 'certifications' },
-    { label: 'Contact', href: '#contact', id: 'contact' }
-  ];
+  const dynamicSections = Array.isArray(data?.sections) && data.sections.length > 0
+    ? data.sections
+    : ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certifications', 'Contact'];
+
+  const navLinks = dynamicSections
+    .filter(sec => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
+    })
+    .map(sec => {
+      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
+      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
+      const id = sName.toLowerCase().replace(/\s+/g, '-');
+      const href = id === 'home' || id === 'hero' ? '#hero' : `#${id}`;
+      return {
+        label: cleanName === 'Hero' ? 'Home' : cleanName,
+        href,
+        id: id === 'home' ? 'hero' : id
+      };
+    });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,7 +61,7 @@ export default function Header({ data = {} }) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navLinks]);
 
   return (
     <header
@@ -62,22 +72,22 @@ export default function Header({ data = {} }) {
       }`}
     >
       {/* Top Announcement Strip */}
-      <div className="bg-slate-900 text-white text-[11px] sm:text-xs py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-medium text-slate-300 truncate max-w-[300px] sm:max-w-none" data-cv="hero.availability">
+      <div className="bg-slate-900 text-white text-[11px] sm:text-xs py-1.5 px-3 sm:px-6 lg:px-8 border-b border-slate-800/60">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="font-medium text-slate-300 truncate" data-cv="hero.availability">
               {availability}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <a
               href={`tel:${phone.replace(/[^0-9+]/g, '')}`}
-              className="flex items-center gap-1.5 hover:text-sky-300 transition-colors font-medium text-slate-200"
+              className="flex items-center gap-1.5 hover:text-sky-300 transition-colors font-medium text-slate-200 shrink-0"
               data-cv="contact.phone"
             >
-              <Phone className="w-3 h-3 text-sky-400" />
-              <span>{phone}</span>
+              <Phone className="w-3 h-3 text-sky-400 shrink-0" />
+              <span className="whitespace-nowrap">{phone}</span>
             </a>
           </div>
         </div>

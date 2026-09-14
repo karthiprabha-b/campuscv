@@ -14,6 +14,23 @@ export default function Footer(props = {}) {
     return null;
   }
 
+  const scrollToTop = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        if (document.body) document.body.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        const topEl = document.getElementById('hero') || document.querySelector('header') || document.getElementById('template-root') || document.body;
+        if (topEl && typeof topEl.scrollIntoView === 'function') {
+          topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    } catch (err) {
+      try { window.scrollTo(0, 0); } catch (_) {}
+    }
+  };
+
   return (
     <footer data-node-id="section:footer:root:section:0" data-cv-section="footer" className="border-t border-[#E5E0D8] py-8 sm:py-12 bg-[#FAF8F5]">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-xs text-[#666666] font-semibold text-center sm:text-left">
@@ -30,14 +47,15 @@ export default function Footer(props = {}) {
           )}
         </div>
 
-        <a
-          href="#hero"
+        <button
+          type="button"
+          onClick={scrollToTop}
           data-node-id="button:footer:root:backtotop:0"
-          className="flex items-center gap-2 text-[#111111] hover:text-[var(--campuscv-accent,var(--cv-accent,#FF4500))] transition-colors shrink-0"
+          className="flex items-center gap-2 text-[#111111] hover:text-[var(--campuscv-accent,var(--cv-accent,#FF4500))] transition-colors shrink-0 bg-transparent border-0 cursor-pointer text-xs font-semibold"
         >
           <span data-node-id="text:footer:root:backtotop:0">Back to top</span>
           <ChevronUp className="w-4 h-4" />
-        </a>
+        </button>
       </div>
     </footer>
   );

@@ -188,9 +188,9 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
         setIframeBody(rootEl);
       }
       const bundledTag = doc.getElementById('template-bundled-css') as HTMLStyleElement | null;
-      if (bundledTag && (!bundledTag.textContent || bundledTag.textContent.trim() === '/* Isolated Template Bundled CSS */')) {
+      if (bundledTag) {
         const discoveredCSS = discoverTemplateCSS(sectionFiles, 'tpl', undefined, templateId || 'uploaded');
-        if (discoveredCSS.combinedCSS) {
+        if (discoveredCSS.combinedCSS && bundledTag.textContent !== discoveredCSS.combinedCSS) {
           bundledTag.textContent = discoveredCSS.combinedCSS;
         }
       }
@@ -575,7 +575,7 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
     // Safety check in case contentDocument ready state changes
     const timer = setTimeout(initIframe, 50);
     return () => clearTimeout(timer);
-  }, [isPublished, logicalViewportWidth]);
+  }, [isPublished, logicalViewportWidth, runnerProps.templateId, runnerProps.data?.templateId, runnerProps.data?.layoutStyle]);
 
   // Dynamic live theme color sync across editor and published iframe (Phase 16)
   useEffect(() => {
@@ -595,17 +595,49 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
       themeStyleTag.id = 'campuscv-theme-style';
       doc.head?.appendChild(themeStyleTag);
     }
+    const cleanHex = String(activeThemeColor).trim().replace('#', '');
+    let hex = cleanHex;
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16) || 124;
+    const g = parseInt(hex.substring(2, 4), 16) || 58;
+    const b = parseInt(hex.substring(4, 6), 16) || 237;
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    const contrastForeground = yiq >= 150 ? '#0B0F19' : '#FFFFFF';
+
+    // Compute dark and light shades for templates that use them
+    const dr = Math.max(0, Math.floor(r * 0.8));
+    const dg = Math.max(0, Math.floor(g * 0.8));
+    const db = Math.max(0, Math.floor(b * 0.8));
+    const darkHex = `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
+
+    const lr = Math.min(255, Math.floor(r + (255 - r) * 0.25));
+    const lg = Math.min(255, Math.floor(g + (255 - g) * 0.25));
+    const lb = Math.min(255, Math.floor(b + (255 - b) * 0.25));
+    const lightHex = `#${lr.toString(16).padStart(2, '0')}${lg.toString(16).padStart(2, '0')}${lb.toString(16).padStart(2, '0')}`;
+
     themeStyleTag.textContent = `
-      :root, html, body, #iframe-root {
-        --campuscv-primary-color: ${activeThemeColor};
-        --primary: ${activeThemeColor};
-        --theme-color: ${activeThemeColor};
-        --accent-color: ${activeThemeColor};
+      :root, html, body, #iframe-root, .uploaded-template-runner, .campuscv-template-root, #template-root {
+        --campuscv-primary-color: ${activeThemeColor} !important;
+        --campuscv-accent: ${activeThemeColor} !important;
+        --campuscv-accent-rgb: ${r}, ${g}, ${b} !important;
+        --campuscv-accent-dark: ${darkHex} !important;
+        --campuscv-accent-light: ${lightHex} !important;
+        --primary: ${activeThemeColor} !important;
+        --primary-accent: ${activeThemeColor} !important;
+        --primary-foreground: ${contrastForeground} !important;
+        --accent: ${activeThemeColor} !important;
+        --theme-color: ${activeThemeColor} !important;
+        --accent-color: ${activeThemeColor} !important;
+        --brand: ${activeThemeColor} !important;
+        --brand-gold: ${activeThemeColor} !important;
+        --cyber-bright-cyan: ${activeThemeColor} !important;
+        --cyber-neon-cyan: ${activeThemeColor} !important;
+        --color-cyan-500: ${activeThemeColor} !important;
+        --gold-500: ${activeThemeColor} !important;
+        --gold-400: ${lightHex} !important;
+        --gold-600: ${darkHex} !important;
+        --border-gold: rgba(${r}, ${g}, ${b}, 0.3) !important;
       }
-      .bg-primary { background-color: var(--campuscv-primary-color) !important; }
-      .text-primary { color: var(--campuscv-primary-color) !important; }
-      .border-primary { border-color: var(--campuscv-primary-color) !important; }
-      .accent-primary { accent-color: var(--campuscv-primary-color) !important; }
     `;
   }, [
     (runnerProps.data as any)?.theme?.primaryColor,

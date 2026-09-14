@@ -81,10 +81,72 @@ export default function Template(props = {}) {
 
     if (data[`${key}.visible`] !== undefined) return Boolean(data[`${key}.visible`]);
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
+    if (data[`${key}Visible`] !== undefined) return Boolean(data[`${key}Visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
+
+    // If explicit collection array is empty, hide section
+    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
+    if (Array.isArray(collection) && collection.length === 0) {
+      if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
+      return false;
+    }
 
     return true;
   };
+
+  const sectionComponentMap = {
+    hero: <Hero key="hero" data={data} />,
+    about: <About key="about" data={data} />,
+    education: <Education key="education" data={data} />,
+    experience: <Experience key="experience" data={data} />,
+    projects: <Projects key="projects" data={data} />,
+    skills: <Skills key="skills" data={data} />,
+    certifications: <Certifications key="certifications" data={data} />,
+    contact: <Contact key="contact" data={data} />
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certifications',
+    'contact'
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certificates' || id === 'awards') id = 'certifications';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech') id = 'skills';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
 
   return (
     <div
@@ -93,37 +155,18 @@ export default function Template(props = {}) {
       className="campuscv-template-root min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-sky-600 selection:text-white"
     >
       {/* 1. Header Navigation */}
-      <Header data={data} />
+      {isSectionVisible('header') && <Header data={data} />}
 
       {/* Main Streamlined Sections Flow */}
       <main className="flex-grow">
-        {/* 1. Hero & Intro */}
-        {isSectionVisible('hero') && <Hero data={data} />}
-        
-        {/* 2. About Me */}
-        {isSectionVisible('about') && <About data={data} />}
-        
-        {/* 3. Education */}
-        {isSectionVisible('education') && <Education data={data} />}
-        
-        {/* 4. Experience */}
-        {isSectionVisible('experience') && <Experience data={data} />}
-        
-        {/* 5. Projects */}
-        {isSectionVisible('projects') && <Projects data={data} />}
-        
-        {/* 6. Skills & Tech */}
-        {isSectionVisible('skills') && <Skills data={data} />}
-        
-        {/* 7. Certifications & Licensure */}
-        {isSectionVisible('certifications') && <Certifications data={data} />}
-        
-        {/* 8. Contact */}
-        {isSectionVisible('contact') && <Contact data={data} />}
+        {mainSectionIds.map((secId) => {
+          if (!isSectionVisible(secId)) return null;
+          return sectionComponentMap[secId] || null;
+        })}
       </main>
 
-      {/* 10. Footer */}
-      <Footer data={data} />
+      {/* Footer */}
+      {isSectionVisible('footer') && <Footer data={data} />}
     </div>
   );
 }

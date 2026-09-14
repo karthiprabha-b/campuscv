@@ -59,57 +59,82 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/analytics?portfolioId=xxx — get view stats
+// GET /api/analytics?portfolioId=xxx&username=yyy — get view stats
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const portfolioId = searchParams.get('portfolioId');
-    if (!portfolioId) {
-      return NextResponse.json({ error: 'portfolioId required' }, { status: 400 });
+    const username = searchParams.get('username');
+    if (!portfolioId && !username) {
+      return NextResponse.json({ error: 'portfolioId or username required' }, { status: 400 });
     }
 
     const db = getDb();
 
+    // Match either portfolio_id or username
+    const queryWhere = portfolioId && username
+      ? '(portfolio_id = ? OR (username IS NOT NULL AND username = ?))'
+      : portfolioId
+      ? 'portfolio_id = ?'
+      : '(username IS NOT NULL AND username = ?)';
+    const queryParams = portfolioId && username ? [portfolioId, username] : [portfolioId || username];
+
     const totalViews = (db.prepare(
-      'SELECT COUNT(*) as count FROM portfolio_views WHERE portfolio_id = ?'
-    ).get(portfolioId) as any)?.count ?? 0;
+      `SELECT COUNT(*) as count FROM portfolio_views WHERE ${queryWhere}`
+    ).get(...queryParams) as any)?.count ?? 0;
 
     const uniqueVisitors = (db.prepare(
-      'SELECT COUNT(DISTINCT visitor_ip) as count FROM portfolio_views WHERE portfolio_id = ?'
-    ).get(portfolioId) as any)?.count ?? 0;
+      `SELECT COUNT(DISTINCT visitor_ip) as count FROM portfolio_views WHERE ${queryWhere}`
+    ).get(...queryParams) as any)?.count ?? 0;
 
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
     const todayViews = (db.prepare(
-      'SELECT COUNT(*) as count FROM portfolio_views WHERE portfolio_id = ? AND viewed_at >= ?'
-    ).get(portfolioId, todayStart.getTime()) as any)?.count ?? 0;
+      `SELECT COUNT(*) as count FROM portfolio_views WHERE ${queryWhere} AND viewed_at >= ?`
+    ).get(...queryParams, todayStart.getTime()) as any)?.count ?? 0;
 
-    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7); weekStart.setHours(0,0,0,0);
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6); weekStart.setHours(0,0,0,0);
     const weekViews = (db.prepare(
-      'SELECT COUNT(*) as count FROM portfolio_views WHERE portfolio_id = ? AND viewed_at >= ?'
-    ).get(portfolioId, weekStart.getTime()) as any)?.count ?? 0;
+      `SELECT COUNT(*) as count FROM portfolio_views WHERE ${queryWhere} AND viewed_at >= ?`
+    ).get(...queryParams, weekStart.getTime()) as any)?.count ?? 0;
 
     const deviceBreakdown = db.prepare(
-      'SELECT device, COUNT(*) as count FROM portfolio_views WHERE portfolio_id = ? GROUP BY device'
-    ).all(portfolioId) as any[];
+      `SELECT device, COUNT(*) as count FROM portfolio_views WHERE ${queryWhere} GROUP BY device`
+    ).all(...queryParams) as any[];
 
     const topReferrers = db.prepare(
-      'SELECT referrer, COUNT(*) as count FROM portfolio_views WHERE portfolio_id = ? GROUP BY referrer ORDER BY count DESC LIMIT 5'
-    ).all(portfolioId) as any[];
+      `SELECT referrer, COUNT(*) as count FROM portfolio_views WHERE ${queryWhere} GROUP BY referrer ORDER BY count DESC LIMIT 5`
+    ).all(...queryParams) as any[];
 
-    // Last 7 days daily breakdown
-    const dailyViews = db.prepare(`
+    // Last 7 days daily breakdown with zero-filling
+    const rawDaily = db.prepare(`
       SELECT
         date(viewed_at / 1000, 'unixepoch') as date,
         COUNT(*) as count
       FROM portfolio_views
-      WHERE portfolio_id = ? AND viewed_at >= ?
+      WHERE ${queryWhere} AND viewed_at >= ?
       GROUP BY date ORDER BY date ASC
-    `).all(portfolioId, weekStart.getTime()) as any[];
+    `).all(...queryParams, weekStart.getTime()) as any[];
+
+    // Build complete 7-day array
+    const dateMap = new Map<string, number>();
+    rawDaily.forEach((r: any) => dateMap.set(r.date, r.count));
+
+    const dailyViews: { date: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      dailyViews.push({
+        date: dateStr,
+        count: dateMap.get(dateStr) || 0,
+      });
+    }
 
     db.close();
 
     return NextResponse.json({
-      portfolioId,
+      portfolioId: portfolioId || '',
+      username: username || '',
       totalViews,
       uniqueVisitors,
       todayViews,

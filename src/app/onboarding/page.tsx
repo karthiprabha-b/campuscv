@@ -23,7 +23,9 @@ import {
   Github,
   Linkedin,
   X,
-  Sparkles
+  Sparkles,
+  Lock,
+  Loader2
 } from 'lucide-react';
 
 import CampusCvLogo from '../../components/common/CampusCvLogo';
@@ -33,7 +35,7 @@ import ResumeAuditDebug from '../../components/resume/ResumeAuditDebug';
 
 import { CampusProfile, createEmptyCanonicalProfile } from '../../types/canonicalProfile';
 import { saveCanonicalProfile, savePortfolio, getPortfolios } from '../../lib/portfolioStore';
-import { mockAuth } from '../../utils/mockDb';
+import { mockAuth, getUserPlanTier, checkTemplateAccess, getPlanTemplateLimit } from '../../utils/mockDb';
 import { supabase } from '../../lib/supabase/client';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 
@@ -69,6 +71,34 @@ export default function OnboardingPage() {
   const [profile, setProfile] = useState<CampusProfile>(() => createEmptyCanonicalProfile());
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [availableTemplates, setAvailableTemplates] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
+
+  const generateWithAI = async (
+    type: 'bio' | 'experience_bullet' | 'project_description',
+    context: Record<string, string>,
+    key: string,
+    onSuccess: (text: string) => void
+  ) => {
+    setAiLoading(l => ({ ...l, [key]: true }));
+    try {
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, context })
+      });
+      const data = await res.json();
+      if (data.success && data.text) {
+        onSuccess(data.text);
+      } else if (data.error) {
+        console.error('AI Generation error:', data.error);
+      }
+    } catch (err) {
+      console.error('Failed to generate with AI:', err);
+    } finally {
+      setAiLoading(l => ({ ...l, [key]: false }));
+    }
+  };
 
   useEffect(() => {
     // 1. Sync and load canonical active templates
@@ -76,9 +106,12 @@ export default function OnboardingPage() {
       const list = activeList.filter(t => (t.status || 'active') === 'active');
       setAvailableTemplates(list);
       if (list.length > 0) {
+        const localUser = mockAuth.getCurrentUser();
+        const accessible = list.filter(t => checkTemplateAccess(localUser, t, 0).isAccessible);
+        const defaultChoice = accessible.length > 0 ? accessible[0].id : list[0].id;
         setSelectedTemplateId(prev => {
           const exists = list.some(t => t.id === prev);
-          return exists ? prev : list[0].id;
+          return exists ? prev : defaultChoice;
         });
       }
     });
@@ -113,6 +146,7 @@ export default function OnboardingPage() {
 
       // Check active subscription requirement
       const localUser = mockAuth.getCurrentUser();
+      setCurrentUser(localUser);
       const isUnpaidOrExpired = !localUser || !localUser.isPro || localUser.planType === 'expired' || (localUser.subscriptionExpires && new Date(localUser.subscriptionExpires).getTime() < Date.now());
       if (isUnpaidOrExpired) {
         alert("Subscription Required: Please choose and purchase a plan to create your portfolio.");
@@ -788,6 +822,7 @@ export default function OnboardingPage() {
                         </div>
 
                         <button
+                          type="button"
                           onClick={startManualOnboarding}
                           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-sm transition-all cursor-pointer"
                         >
@@ -860,7 +895,28 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider font-bricolage">Short Bio / About Me</label>
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider font-bricolage">Short Bio / About Me</label>
+                            <button
+                              type="button"
+                              onClick={() => generateWithAI(
+                                'bio',
+                                {
+                                  name: profile.personal.fullName || '',
+                                  title: profile.personal.headline || profile.career?.specialization || '',
+                                  field: profile.career?.specialization || '',
+                                  existing: profile.personal.summary || ''
+                                },
+                                'bio',
+                                text => setProfile(p => ({ ...p, personal: { ...p.personal, summary: text } }))
+                              )}
+                              disabled={aiLoading['bio']}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-800 disabled:opacity-50 transition-colors cursor-pointer"
+                            >
+                              {aiLoading['bio'] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                              <span>{aiLoading['bio'] ? 'Generating...' : 'Generate with AI'}</span>
+                            </button>
+                          </div>
                           <textarea
                             rows={3}
                             placeholder="A concise summary highlighting your passion, experience, and what drives your work..."
@@ -892,16 +948,17 @@ export default function OnboardingPage() {
 
                       <div className="space-y-4">
                         {profile.education?.map((edu, idx) => (
-                          <div key={edu.id || idx} className="rounded-2xl p-4 sm:p-5 border border-slate-200 bg-slate-50/60 space-y-3 relative">
+                          <div key={edu.id || idx} className="rounded-2xl p-5 border border-slate-200 bg-slate-50/60 space-y-4 relative">
                             <button
+                              type="button"
                               onClick={() => setProfile(p => ({ ...p, education: p.education?.filter((_, i) => i !== idx) }))}
-                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Institution / University</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pr-8">
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Institution / University</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. PRIST University"
@@ -910,11 +967,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, education: p.education?.map((item, i) => i === idx ? { ...item, institution: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Degree</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Degree</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. B.Tech"
@@ -923,11 +980,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, education: p.education?.map((item, i) => i === idx ? { ...item, degree: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Field of Study</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Field of Study</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Artificial Intelligence & Data Science"
@@ -936,12 +993,12 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, education: p.education?.map((item, i) => i === idx ? { ...item, specialization: v, department: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                  <label className="text-[11px] font-bold text-slate-600 uppercase">Start Year</label>
+                              <div className="grid grid-cols-2 gap-2.5">
+                                <div className="space-y-1.5">
+                                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Start Year</label>
                                   <input
                                     type="text"
                                     placeholder="2022"
@@ -950,11 +1007,11 @@ export default function OnboardingPage() {
                                       const v = e.target.value;
                                       setProfile(p => ({ ...p, education: p.education?.map((item, i) => i === idx ? { ...item, startYear: v } : item) }));
                                     }}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                   />
                                 </div>
-                                <div className="space-y-1">
-                                  <label className="text-[11px] font-bold text-slate-600 uppercase">End Year</label>
+                                <div className="space-y-1.5">
+                                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">End Year</label>
                                   <input
                                     type="text"
                                     placeholder="2026"
@@ -963,7 +1020,7 @@ export default function OnboardingPage() {
                                       const v = e.target.value;
                                       setProfile(p => ({ ...p, education: p.education?.map((item, i) => i === idx ? { ...item, endYear: v } : item) }));
                                     }}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                   />
                                 </div>
                               </div>
@@ -972,8 +1029,9 @@ export default function OnboardingPage() {
                         ))}
 
                         <button
+                          type="button"
                           onClick={() => setProfile(p => ({ ...p, education: [...(p.education || []), { id: `edu-${Date.now()}`, institution: '', degree: '', department: '', specialization: '', startYear: '', endYear: '', description: '' }] }))}
-                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
                         >
                           <Plus className="w-4 h-4" /> Add Education
                         </button>
@@ -1000,16 +1058,17 @@ export default function OnboardingPage() {
 
                       <div className="space-y-4">
                         {profile.experience?.map((exp, idx) => (
-                          <div key={exp.id || idx} className="rounded-2xl p-4 sm:p-5 border border-slate-200 bg-slate-50/60 space-y-3 relative">
+                          <div key={exp.id || idx} className="rounded-2xl p-5 border border-slate-200 bg-slate-50/60 space-y-4 relative">
                             <button
+                              type="button"
                               onClick={() => setProfile(p => ({ ...p, experience: p.experience?.filter((_, i) => i !== idx) }))}
-                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Role / Job Title</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pr-8">
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Role / Job Title</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. AI Web Developer"
@@ -1018,11 +1077,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, experience: p.experience?.map((item, i) => i === idx ? { ...item, role: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Company / Organization</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Company / Organization</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Infowaves"
@@ -1031,11 +1090,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, experience: p.experience?.map((item, i) => i === idx ? { ...item, company: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Duration (Dates)</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Duration (Dates)</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Aug 2025 - Dec 2025"
@@ -1044,11 +1103,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, experience: p.experience?.map((item, i) => i === idx ? { ...item, startDate: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Location</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Location</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Thanjavur / Remote"
@@ -1057,29 +1116,54 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, experience: p.experience?.map((item, i) => i === idx ? { ...item, location: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-[11px] font-bold text-slate-600 uppercase">Description / Key Achievements</label>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Description / Key Achievements</label>
+                                <button
+                                  type="button"
+                                  onClick={() => generateWithAI(
+                                    'experience_bullet',
+                                    {
+                                      role: exp.role || '',
+                                      company: exp.company || '',
+                                      field: profile.career?.specialization || '',
+                                      existing: exp.description || ''
+                                    },
+                                    `exp-${idx}`,
+                                    text => setProfile(p => ({
+                                      ...p,
+                                      experience: p.experience?.map((item, i) => i === idx ? { ...item, description: text } : item)
+                                    }))
+                                  )}
+                                  disabled={aiLoading[`exp-${idx}`]}
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-800 disabled:opacity-50 transition-colors cursor-pointer"
+                                >
+                                  {aiLoading[`exp-${idx}`] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                  <span>{aiLoading[`exp-${idx}`] ? 'Generating...' : 'Enhance with AI'}</span>
+                                </button>
+                              </div>
                               <textarea
-                                rows={2}
-                                placeholder="Built web applications, integrated WhatsApp APIs, optimized database queries..."
+                                rows={3}
+                                placeholder="Built web applications, integrated APIs, optimized database queries..."
                                 value={exp.description || exp.achievements?.join('\n') || ''}
                                 onChange={e => {
                                   const v = e.target.value;
                                   setProfile(p => ({ ...p, experience: p.experience?.map((item, i) => i === idx ? { ...item, description: v } : item) }));
                                 }}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none resize-none"
+                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400 resize-none"
                               />
                             </div>
                           </div>
                         ))}
 
                         <button
+                          type="button"
                           onClick={() => setProfile(p => ({ ...p, experience: [...(p.experience || []), { id: `exp-${Date.now()}`, company: '', role: '', employmentType: 'Full-time', startDate: '', endDate: '', current: false, location: '', description: '', achievements: [] }] }))}
-                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
                         >
                           <Plus className="w-4 h-4" /> Add Experience
                         </button>
@@ -1106,16 +1190,17 @@ export default function OnboardingPage() {
 
                       <div className="space-y-4">
                         {profile.projects?.map((proj, idx) => (
-                          <div key={proj.id || idx} className="rounded-2xl p-4 sm:p-5 border border-slate-200 bg-slate-50/60 space-y-3 relative">
+                          <div key={proj.id || idx} className="rounded-2xl p-5 border border-slate-200 bg-slate-50/60 space-y-4 relative">
                             <button
+                              type="button"
                               onClick={() => setProfile(p => ({ ...p, projects: p.projects?.filter((_, i) => i !== idx) }))}
-                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">Project Name</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pr-8">
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Project Name</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Leads Automated Lead Management"
@@ -1124,11 +1209,11 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, projects: p.projects?.map((item, i) => i === idx ? { ...item, name: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-slate-600 uppercase">GitHub or Live URL</label>
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">GitHub or Live URL</label>
                                 <input
                                   type="url"
                                   placeholder="https://github.com/username/project"
@@ -1137,12 +1222,12 @@ export default function OnboardingPage() {
                                     const v = e.target.value;
                                     setProfile(p => ({ ...p, projects: p.projects?.map((item, i) => i === idx ? { ...item, githubUrl: v, liveUrl: v } : item) }));
                                   }}
-                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                 />
                               </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-[11px] font-bold text-slate-600 uppercase">Technologies Used</label>
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Technologies Used</label>
                               <input
                                 type="text"
                                 placeholder="e.g. Python, React, Next.js, PostgreSQL"
@@ -1151,28 +1236,53 @@ export default function OnboardingPage() {
                                   const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
                                   setProfile(p => ({ ...p, projects: p.projects?.map((item, i) => i === idx ? { ...item, technologies: arr } : item) }));
                                 }}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                               />
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-[11px] font-bold text-slate-600 uppercase">Description</label>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-bricolage">Description</label>
+                                <button
+                                  type="button"
+                                  onClick={() => generateWithAI(
+                                    'project_description',
+                                    {
+                                      title: proj.name || '',
+                                      technologies: proj.technologies?.join(', ') || '',
+                                      field: profile.career?.specialization || '',
+                                      existing: proj.description || ''
+                                    },
+                                    `proj-${idx}`,
+                                    text => setProfile(p => ({
+                                      ...p,
+                                      projects: p.projects?.map((item, i) => i === idx ? { ...item, description: text } : item)
+                                    }))
+                                  )}
+                                  disabled={aiLoading[`proj-${idx}`]}
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-800 disabled:opacity-50 transition-colors cursor-pointer"
+                                >
+                                  {aiLoading[`proj-${idx}`] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                  <span>{aiLoading[`proj-${idx}`] ? 'Generating...' : 'Enhance with AI'}</span>
+                                </button>
+                              </div>
                               <textarea
-                                rows={2}
+                                rows={3}
                                 placeholder="Describe what you engineered, the problem it solves, and its impact..."
                                 value={proj.description}
                                 onChange={e => {
                                   const v = e.target.value;
                                   setProfile(p => ({ ...p, projects: p.projects?.map((item, i) => i === idx ? { ...item, description: v } : item) }));
                                 }}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none resize-none"
+                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400 resize-none"
                               />
                             </div>
                           </div>
                         ))}
 
                         <button
+                          type="button"
                           onClick={() => setProfile(p => ({ ...p, projects: [...(p.projects || []), { id: `proj-${Date.now()}`, name: '', description: '', technologies: [], githubUrl: '', liveUrl: '', projectUrl: '', image: '', achievements: [], metrics: [] }] }))}
-                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
                         >
                           <Plus className="w-4 h-4" /> Add Project
                         </button>
@@ -1217,9 +1327,10 @@ export default function OnboardingPage() {
                                 setSkillInput('');
                               }
                             }}
-                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-purple-600 outline-none"
+                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                           />
                           <button
+                            type="button"
                             onClick={() => {
                               if (skillInput.trim()) {
                                 const trimmed = skillInput.trim();
@@ -1232,7 +1343,7 @@ export default function OnboardingPage() {
                                 setSkillInput('');
                               }
                             }}
-                            className="px-5 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-700 transition-all shrink-0 cursor-pointer"
+                            className="px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-700 transition-all shrink-0 cursor-pointer"
                           >
                             Add
                           </button>
@@ -1247,8 +1358,9 @@ export default function OnboardingPage() {
                               >
                                 {s.name}
                                 <button
+                                  type="button"
                                   onClick={() => setProfile(p => ({ ...p, skills: p.skills?.filter((_, i) => i !== idx) }))}
-                                  className="text-purple-400 hover:text-purple-700 ml-1"
+                                  className="text-purple-400 hover:text-purple-700 ml-1 cursor-pointer"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -1286,7 +1398,7 @@ export default function OnboardingPage() {
                               { key: 'github', icon: Github, label: 'GitHub', ph: 'https://github.com/username' },
                               { key: 'twitter', icon: Share2, label: 'Twitter / X', ph: 'https://twitter.com/username' },
                             ].map(({ key, icon: Icon, ph }) => (
-                              <div key={key} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus-within:border-purple-600 transition-all">
+                              <div key={key} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
                                 <Icon className="w-4 h-4 text-slate-400 shrink-0" />
                                 <input
                                   type="url"
@@ -1303,14 +1415,15 @@ export default function OnboardingPage() {
                         <div className="space-y-3">
                           <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider font-bricolage">Certifications</h3>
                           {profile.certifications?.map((cert, idx) => (
-                            <div key={cert.id || idx} className="rounded-2xl p-4 border border-slate-200 bg-slate-50/60 space-y-2.5 relative">
+                            <div key={cert.id || idx} className="rounded-2xl p-4 sm:p-5 border border-slate-200 bg-slate-50/60 space-y-3 relative">
                               <button
+                                type="button"
                                 onClick={() => setProfile(p => ({ ...p, certifications: p.certifications?.filter((_, i) => i !== idx) }))}
-                                className="absolute top-3 right-3 p-1 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                               >
                                 <X className="w-4 h-4" />
                               </button>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pr-6">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-6">
                                 {[
                                   { ph: 'Certificate Name', key: 'name', val: cert.name },
                                   { ph: 'Issuing Organization', key: 'organization', val: cert.organization },
@@ -1326,15 +1439,16 @@ export default function OnboardingPage() {
                                       const v = e.target.value;
                                       setProfile(p => ({ ...p, certifications: p.certifications?.map((item, i) => i === idx ? { ...item, [key]: v } : item) }));
                                     }}
-                                    className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:border-purple-600 outline-none"
+                                    className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none transition-all placeholder:text-slate-400"
                                   />
                                 ))}
                               </div>
                             </div>
                           ))}
                           <button
+                            type="button"
                             onClick={() => setProfile(p => ({ ...p, certifications: [...(p.certifications || []), { id: `cert-${Date.now()}`, name: '', organization: '', issueDate: '', credentialId: '', credentialUrl: '' }] }))}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 transition-all cursor-pointer"
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-slate-300 bg-white text-slate-700 font-bold text-xs hover:border-purple-400 hover:text-purple-700 transition-all cursor-pointer"
                           >
                             <Plus className="w-4 h-4" /> Add Certification
                           </button>
@@ -1360,40 +1474,117 @@ export default function OnboardingPage() {
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {availableTemplates.map(tmpl => {
-                          const isSelected = selectedTemplateId === tmpl.id;
-                          return (
-                            <button
-                              key={tmpl.id}
-                              onClick={() => setSelectedTemplateId(tmpl.id)}
-                              className={`rounded-2xl text-left overflow-hidden border transition-all duration-200 flex flex-col cursor-pointer ${
-                                isSelected
-                                  ? 'border-2 border-purple-600 ring-4 ring-purple-100 bg-purple-50/20'
-                                  : 'border-slate-200 bg-white hover:border-slate-300'
-                              }`}
-                            >
-                              <div className="aspect-[4/3] w-full relative flex items-center justify-center bg-slate-100 p-4">
-                                <div className="text-center">
-                                  <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-2">
-                                    <FolderGit2 className="w-5 h-5" />
-                                  </div>
-                                  <span className="text-[11px] font-bold text-slate-600">{tmpl.name}</span>
-                                </div>
-                                {isSelected && (
-                                  <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center">
-                                    <Check className="w-3.5 h-3.5 text-white" />
-                                  </div>
-                                )}
+                      {/* Plan status banner & template grid */}
+                      {(() => {
+                        const localUser = currentUser || mockAuth.getCurrentUser();
+                        const userTier = getUserPlanTier(localUser);
+                        const quota = getPlanTemplateLimit(localUser);
+                        const accessibleTemplates = availableTemplates.filter(tmpl => checkTemplateAccess(localUser, tmpl, 0).isAccessible);
+                        const lockedTemplates = availableTemplates.filter(tmpl => !checkTemplateAccess(localUser, tmpl, 0).isAccessible);
+                        const sortedTemplates = [...accessibleTemplates, ...lockedTemplates];
+
+                        return (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-50/70 border border-purple-100/80">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-purple-900 capitalize font-bricolage">
+                                  {userTier} Plan Active
+                                </span>
+                                <span className="text-xs text-purple-700">
+                                  • {accessibleTemplates.length} accessible {accessibleTemplates.length === 1 ? 'template' : 'templates'}
+                                </span>
                               </div>
-                              <div className="p-4 space-y-1 bg-white">
-                                <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">{tmpl.category}</span>
-                                <p className="text-xs text-slate-500 leading-snug line-clamp-2">{tmpl.description || 'Clean and responsive layout.'}</p>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                              <span className="text-[11px] font-semibold text-purple-600 bg-white px-2.5 py-0.5 rounded-full border border-purple-200 shadow-xs">
+                                Allowed Quota: {quota}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-h-[440px] overflow-y-auto pr-1">
+                              {sortedTemplates.map(tmpl => {
+                                const access = checkTemplateAccess(localUser, tmpl, 0);
+                                const isLocked = !access.isAccessible;
+                                const isSelected = selectedTemplateId === tmpl.id;
+
+                                return (
+                                  <button
+                                    key={tmpl.id}
+                                    type="button"
+                                    onClick={() => {
+                                      if (!isLocked) {
+                                        setSelectedTemplateId(tmpl.id);
+                                      }
+                                    }}
+                                    className={`rounded-2xl text-left overflow-hidden border transition-all duration-200 flex flex-col relative group ${
+                                      isSelected
+                                        ? 'border-2 border-purple-600 ring-4 ring-purple-100 bg-purple-50/20 cursor-pointer shadow-md'
+                                        : isLocked
+                                        ? 'border-slate-200 bg-slate-50/80 opacity-70 cursor-not-allowed'
+                                        : 'border-slate-200 bg-white hover:border-purple-300 hover:-translate-y-0.5 shadow-sm cursor-pointer'
+                                    }`}
+                                  >
+                                    <div className="aspect-[16/10] w-full relative flex items-center justify-center bg-slate-100 overflow-hidden">
+                                      {tmpl.thumbnail ? (
+                                        <img
+                                          src={tmpl.thumbnail}
+                                          alt={tmpl.name}
+                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 p-3">
+                                          <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-1.5">
+                                            <FolderGit2 className="w-5 h-5" />
+                                          </div>
+                                          <span className="text-[11px] font-semibold text-slate-500 text-center line-clamp-1">{tmpl.name}</span>
+                                        </div>
+                                      )}
+
+                                      {/* Selected check badge */}
+                                      {isSelected && (
+                                        <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center shadow-md shadow-purple-600/30 z-10">
+                                          <Check className="w-3.5 h-3.5 text-white" />
+                                        </div>
+                                      )}
+
+                                      {/* Locked overlay & badge */}
+                                      {isLocked && (
+                                        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1.5 p-2 z-10">
+                                          <div className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white">
+                                            <Lock className="w-3.5 h-3.5" />
+                                          </div>
+                                          <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-2 py-0.5 rounded-md">
+                                            {access.requiredTier} Plan
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="p-3 bg-white space-y-0.5 flex-1 flex flex-col justify-between">
+                                      <div>
+                                        <div className="flex items-center justify-between gap-1">
+                                          <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider truncate">
+                                            {tmpl.category || 'Portfolio'}
+                                          </span>
+                                          {isLocked && (
+                                            <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded uppercase shrink-0">
+                                              Locked
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                                          {tmpl.name}
+                                        </p>
+                                      </div>
+                                      <p className="text-[11px] text-slate-500 leading-snug line-clamp-1 mt-1">
+                                        {tmpl.description || 'Clean and responsive layout.'}
+                                      </p>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 

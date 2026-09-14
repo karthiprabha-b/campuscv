@@ -890,15 +890,6 @@ export default function CanvasOverlayEngine({ canvasRef, children }: CanvasOverl
     >
       {/* Layer 1 — the template, completely untouched */}
       {children}
-
-      {/* Layer 2 — Floating Toolbar (renders above template via z-index) */}
-      {isEditMode && !isInlineEditing && selectedElement && (
-        <FloatingToolbar
-          selectedElement={selectedElement}
-          onTriggerImageReplace={(el) => triggerImageReplace(el ?? selectedElement.el!)}
-          onStartInlineEdit={(el) => startInlineEdit(el ?? selectedElement.el!)}
-        />
-      )}
     </div>
   );
 }

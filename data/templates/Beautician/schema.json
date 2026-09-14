@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BeauticianPortfolioData",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "headline": { "type": "string" },
+    "bio": { "type": "string" },
+    "avatarUrl": { "type": "string" },
+    "profileImage": { "type": "string" },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" }
+      }
+    },
+    "projects": { "type": "array" },
+    "experience": { "type": "array" },
+    "education": { "type": "array" },
+    "skills": { "type": "array" },
+    "certificates": { "type": "array" },
+    "stats": { "type": "array" }
+  }
+}

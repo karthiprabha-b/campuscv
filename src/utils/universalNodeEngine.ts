@@ -960,31 +960,38 @@ export function applyPortfolioOverrides(
     }
   }
 
-  // 4.6 Bind Profile Images (Prevents Flickering)
-  bindProfileImages(rootEl, portfolioData, auditLog);
+  // Check if rootEl contains a React-managed template root
+  const isReactTemplate = rootEl.querySelector('[data-campuscv-template]') !== null || 
+    rootEl.querySelector('.campuscv-template-root') !== null ||
+    (portfolioData as any)?.__IS_REACT_TEMPLATE__ === true;
 
-  // 4.7 Bind Social Links to Anchors
-  bindSocialLinks(rootEl, portfolioData, auditLog);
+  if (!isReactTemplate) {
+    // 4.6 Bind Profile Images (For pure HTML templates)
+    bindProfileImages(rootEl, portfolioData, auditLog);
 
-  // 4.8 Universal Automatic Binding Engine Orchestration
-  UniversalBindingEngine.bindPortfolioToDOM(rootEl, portfolioData);
+    // 4.7 Bind Social Links to Anchors
+    bindSocialLinks(rootEl, portfolioData, auditLog);
 
-  // 4.85 Final Override Enforcement: Re-apply explicit content/image overrides so user edits take precedence over auto-binding
-  Object.entries(mergedContent).forEach(([nodeId, override]) => {
-    if (override === undefined || override === null) return;
-    if (deletedNodes[nodeId] === true) return;
-    const targetEl = resolveOverrideElement(rootEl, nodeId);
-    if (!targetEl) return;
-    applyContentOverrideToElement(targetEl, override, nodeId, portfolioData);
-  });
+    // 4.8 Universal Automatic Binding Engine Orchestration
+    UniversalBindingEngine.bindPortfolioToDOM(rootEl, portfolioData);
 
-  // 4.9 Content-Driven Section Visibility Rules
-  applySectionVisibilityRules(rootEl, portfolioData);
+    // 4.85 Final Override Enforcement: Re-apply explicit content/image overrides so user edits take precedence over auto-binding
+    Object.entries(mergedContent).forEach(([nodeId, override]) => {
+      if (override === undefined || override === null) return;
+      if (deletedNodes[nodeId] === true) return;
+      const targetEl = resolveOverrideElement(rootEl, nodeId);
+      if (!targetEl) return;
+      applyContentOverrideToElement(targetEl, override, nodeId, portfolioData);
+    });
 
-  // 5. Apply Section Reordering
-  const sectionOrder = portfolioData.sectionOrder || [];
-  if (Array.isArray(sectionOrder) && sectionOrder.length > 0) {
-    reorderDOMSections(rootEl, sectionOrder);
+    // 4.9 Content-Driven Section Visibility Rules
+    applySectionVisibilityRules(rootEl, portfolioData);
+
+    // 5. Apply Section Reordering for static HTML templates
+    const sectionOrder = portfolioData.sectionOrder || [];
+    if (Array.isArray(sectionOrder) && sectionOrder.length > 0) {
+      reorderDOMSections(rootEl, sectionOrder);
+    }
   }
 
   // 6. Render Dynamically Added Elements (Headings, Text, Buttons, Images)
@@ -1033,18 +1040,23 @@ export function applyPortfolioOverrides(
 export function reorderDOMSections(rootEl: HTMLElement, sectionOrder: string[] = []): void {
   if (!rootEl || !Array.isArray(sectionOrder) || sectionOrder.length < 2) return;
 
-  // If the root element or its children is a dynamic React-rendered template (like Card deck, stu-creative-bold, centerd)
-  // that manages its own section ordering via React state and JSX, avoid mutating raw DOM nodes to prevent virtual DOM de-sync and infinite reconciliation loops.
-  if (
-    rootEl.querySelector('[data-campuscv-template], [data-template-id], .card-deck-template-root, .uploaded-template-runner, .template-runtime-root') ||
-    rootEl.closest('[data-campuscv-template], [data-template-id], .uploaded-template-runner, .template-runtime-root') ||
+  // React templates handle section ordering natively in JSX via data.sectionOrder / data.sections.
+  // We should NEVER manipulate the DOM node tree (e.g. appendChild) on React-managed templates
+  // as it breaks React fiber reconciliation and causes removeChild / NotFoundError crashes.
+  const isReactManaged = Boolean(
+    rootEl.querySelector('[data-campuscv-template], [data-template-id], .card-deck-template-root, .uploaded-template-runner, .template-runtime-root, .campuscv-template-root') ||
+    rootEl.closest('[data-campuscv-template], [data-template-id], .uploaded-template-runner, .template-runtime-root, .campuscv-template-root') ||
     rootEl.getAttribute('data-template-id') ||
-    rootEl.classList.contains('uploaded-template-runner')
-  ) {
+    rootEl.getAttribute('data-campuscv-template') ||
+    rootEl.classList.contains('uploaded-template-runner') ||
+    rootEl.classList.contains('campuscv-template-root')
+  );
+
+  if (isReactManaged) {
     return;
   }
 
-  // Collect all section candidate DOM elements
+  // Collect all section candidate DOM elements for static HTML previews
   const allSectionEls = Array.from(
     rootEl.querySelectorAll('section, [data-cv-section], [data-section], [data-section-id], #hero, #home, #intro, #about, #projects, #experience, #education, #skills, #certifications, #achievements, #interests, #publications, #awards, #contact, #footer, #process, #testimonial, .custom-added-section')
   ) as HTMLElement[];
@@ -1125,46 +1137,18 @@ export function reorderDOMSections(rootEl: HTMLElement, sectionOrder: string[] =
 
   orderedEls.push(...remainingEls);
 
-  // Group ordered elements by common parent or top-level wrapper under rootEl
-  // and reorder them deterministically
-  const parents = new Set<HTMLElement>();
-  orderedEls.forEach(el => {
-    if (el.parentElement) parents.add(el.parentElement);
-  });
-
-  parents.forEach(parent => {
-    const childrenOfParent = orderedEls.filter(el => el.parentElement === parent);
-    if (childrenOfParent.length > 1) {
-      // Find position of the first child in parent
-      const firstChild = childrenOfParent[0];
-      let insertionAnchor: Node | null = firstChild.nextSibling;
-
-      for (let i = 0; i < childrenOfParent.length; i++) {
-        parent.appendChild(childrenOfParent[i]);
+  // Apply CSS order safely without reparenting
+  orderedEls.forEach((el, idx) => {
+    el.style.order = String(idx);
+    if (el.parentElement) {
+      const parentEl = el.parentElement;
+      const comp = window.getComputedStyle(parentEl);
+      if (comp.display !== 'flex' && comp.display !== 'grid') {
+        parentEl.style.display = 'flex';
+        parentEl.style.flexDirection = 'column';
       }
     }
   });
-
-  // For sections with wrapper elements under rootEl
-  for (let i = 0; i < orderedEls.length - 1; i++) {
-    const curr = orderedEls[i];
-    const next = orderedEls[i + 1];
-    if (curr && next && curr.parentElement && next.parentElement) {
-      if (curr.parentElement === next.parentElement) {
-        if (curr.nextElementSibling !== next) {
-          curr.after(next);
-        }
-      } else {
-        const currTop = getTopLevelSectionWrapper(curr, rootEl);
-        const nextTop = getTopLevelSectionWrapper(next, rootEl);
-        if (currTop && nextTop && currTop !== nextTop && currTop.parentElement === nextTop.parentElement) {
-          if (currTop.nextElementSibling !== nextTop) {
-            currTop.after(nextTop);
-          }
-        }
-      }
-    }
-  }
 }
 
 function getTopLevelSectionWrapper(el: HTMLElement, rootEl: HTMLElement): HTMLElement | null {
@@ -1489,6 +1473,23 @@ function bindItemFieldsToClone(clone: HTMLElement, item: any, sectionId: string)
   }
 }
 
+function isElementReactManaged(el: HTMLElement | null): boolean {
+  if (!el) return false;
+  const doc = el.ownerDocument || (typeof document !== 'undefined' ? document : null);
+  if (!doc) return false;
+  if (doc.getElementById('iframe-root') || doc.getElementById('template-root') || doc.getElementById('template-inner-wrapper')) {
+    return true;
+  }
+  return Boolean(
+    el.querySelector('[data-campuscv-template], [data-template-id], .uploaded-template-runner, .template-runtime-root, .campuscv-template-root') ||
+    el.closest('[data-campuscv-template], [data-template-id], .uploaded-template-runner, .template-runtime-root, .campuscv-template-root') ||
+    el.getAttribute('data-template-id') ||
+    el.getAttribute('data-campuscv-template') ||
+    el.classList.contains('uploaded-template-runner') ||
+    el.classList.contains('campuscv-template-root')
+  );
+}
+
 function renderRepeatableSectionItems(
   sectionEl: HTMLElement,
   record: any,
@@ -1496,12 +1497,18 @@ function renderRepeatableSectionItems(
 ): { renderedItems: number; renderedText: string[] } {
   const dataKey = record.dataKey || record.id;
   const userItems = Array.isArray(portfolioData[dataKey]) ? portfolioData[dataKey] : [];
+
+  // React templates handle all card rendering and mapping natively via JSX.
+  // Never perform raw DOM cloning, element hiding, or appendChild on React-managed components.
+  if (isElementReactManaged(sectionEl)) {
+    return { renderedItems: userItems.length, renderedText: [] };
+  }
+
   // Preserve React-rendered alternating cards and independent image bindings
   const hasExistingDynamicCards = sectionEl.querySelectorAll('[data-cv*=".items["], [data-node-id*="card:"]').length > 1;
   if (hasExistingDynamicCards) {
     return { renderedItems: userItems.length, renderedText: [] };
   }
-
 
   let prototypeEl = sectionEl.querySelector('[data-prototype-card="true"]') as HTMLElement | null;
   let listContainer: HTMLElement | null = prototypeEl ? prototypeEl.parentElement : null;
@@ -1575,6 +1582,9 @@ function renderNonRepeatableSectionItem(
 ): void {
   // If the section is inside an uploaded React template, React itself binds the props.
   // We only bind if explicit data-cv attributes exist and do not mutate raw p/h1 tags.
+  if (isElementReactManaged(sectionEl)) {
+    return;
+  }
   if (record.id === 'about') {
     const aboutObj = portfolioData.about || {};
     const bioText = portfolioData.summary || portfolioData.bio || aboutObj.bio || aboutObj.summary || (typeof portfolioData.about === 'string' ? portfolioData.about : '');

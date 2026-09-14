@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.0",
+  "template": {
+    "id": "agri-student",
+    "name": "Agronomy & Precision AgriTech Portfolio",
+    "version": "1.0.0",
+    "entry": "src/index.jsx",
+    "category": "Agriculture & AgriTech",
+    "author": "CampusCV",
+    "description": "High-impact portfolio tailored for agriculture scholars, agronomists, precision farming innovators, and soil science researchers."
+  },
+  "design": {
+    "structure": "locked",
+    "typography": "locked",
+    "spacing": "locked",
+    "layout": "locked"
+  },
+  "theme": {
+    "editable": true,
+    "tokens": [
+      "primary",
+      "accent",
+      "lime",
+      "forest",
+      "background",
+      "foreground",
+      "border"
+    ]
+  },
+  "fields": {
+    "hero.name": { "type": "text", "label": "Full Name" },
+    "hero.role": { "type": "text", "label": "Specialization / Title" },
+    "hero.headline": { "type": "text", "label": "Main Headline" },
+    "hero.description": { "type": "textarea", "label": "Hero Introduction Bio" },
+    "hero.location": { "type": "text", "label": "Location / Region" },
+    "hero.degree": { "type": "text", "label": "Degree / Major" },
+    "hero.gpa": { "type": "text", "label": "Academic Standing / GPA" },
+    "hero.coverImage": { "type": "image", "label": "Hero Background Image", "default": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80" },
+    "hero.profileImage": { "type": "image", "label": "Profile Image / Portrait", "styleLocked": true },
+
+    "about.visible": { "type": "boolean", "label": "Show About Section", "default": true },
+    "about.eyebrow": { "type": "text", "label": "About Eyebrow" },
+    "about.title": { "type": "text", "label": "About Title" },
+    "about.description": { "type": "textarea", "label": "About Summary / Agronomic Vision" },
+
+    "education.visible": { "type": "boolean", "label": "Show Education Section", "default": true },
+    "education.title": { "type": "text", "label": "Education Title" },
+    "education.description": { "type": "textarea", "label": "Education Overview" },
+
+    "experience.visible": { "type": "boolean", "label": "Show Experience Section", "default": true },
+    "experience.title": { "type": "text", "label": "Experience Title" },
+    "experience.description": { "type": "textarea", "label": "Experience Overview" },
+
+    "projects.visible": { "type": "boolean", "label": "Show Projects Section", "default": true },
+    "projects.title": { "type": "text", "label": "Projects Title" },
+    "projects.description": { "type": "textarea", "label": "Projects Overview" },
+
+    "skills.visible": { "type": "boolean", "label": "Show Skills Section", "default": true },
+    "skills.title": { "type": "text", "label": "Skills Title" },
+    "skills.description": { "type": "textarea", "label": "Skills Overview" },
+
+    "certificates.visible": { "type": "boolean", "label": "Show Certificates Section", "default": true },
+    "certificates.title": { "type": "text", "label": "Certificates Title" },
+    "certificates.description": { "type": "textarea", "label": "Certificates Overview" },
+
+    "contact.visible": { "type": "boolean", "label": "Show Contact Section", "default": true },
+    "contact.email": { "type": "email", "label": "Contact Email" },
+    "contact.phone": { "type": "text", "label": "Contact Phone" },
+    "contact.location": { "type": "text", "label": "Location / Base" },
+    "contact.university": { "type": "text", "label": "University / Institute" }
+  },
+  "collections": {
+    "projects": {
+      "type": "collection",
+      "label": "Research Projects & Field Innovations",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Project Title" },
+        "category": { "type": "text", "label": "Category" },
+        "tagline": { "type": "text", "label": "Tagline" },
+        "summary": { "type": "textarea", "label": "Summary Description" },
+        "image": { "type": "image", "label": "Project Image" },
+        "results": { "type": "textarea", "label": "Trial Outcome / Impact" },
+        "liveUrl": { "type": "url", "label": "Live Demo URL" },
+        "githubUrl": { "type": "url", "label": "GitHub / Code URL" },
+        "paperUrl": { "type": "url", "label": "Publication URL" }
+      }
+    },
+    "education": {
+      "type": "collection",
+      "label": "Academic Degrees & Specializations",
+      "itemSchema": {
+        "degree": { "type": "text", "label": "Degree Name" },
+        "major": { "type": "text", "label": "Major / Field" },
+        "institution": { "type": "text", "label": "University / College" },
+        "location": { "type": "text", "label": "Location" },
+        "period": { "type": "text", "label": "Time Period" },
+        "grade": { "type": "text", "label": "GPA / Grade" },
+        "description": { "type": "textarea", "label": "Thesis / Highlights" }
+      }
+    },
+    "experience": {
+      "type": "collection",
+      "label": "Field Work & Research Experience",
+      "itemSchema": {
+        "role": { "type": "text", "label": "Position / Role" },
+        "organization": { "type": "text", "label": "Organization / Lab" },
+        "location": { "type": "text", "label": "Location" },
+        "type": { "type": "text", "label": "Type (Research / Field Work / Internship)" },
+        "period": { "type": "text", "label": "Period" },
+        "description": { "type": "textarea", "label": "Overview" }
+      }
+    },
+    "skills": {
+      "type": "collection",
+      "label": "Technical Skills & Toolchain",
+      "itemSchema": {
+        "name": { "type": "text", "label": "Skill Name" },
+        "category": { "type": "text", "label": "Category" },
+        "level": { "type": "number", "label": "Proficiency Level (%)" }
+      }
+    },
+    "certifications": {
+      "type": "collection",
+      "label": "Accreditations & Licenses",
+      "itemSchema": {
+        "title": { "type": "text", "label": "Certificate Title" },
+        "issuer": { "type": "text", "label": "Issuing Authority" },
+        "issueDate": { "type": "text", "label": "Issue Date" },
+        "credentialId": { "type": "text", "label": "Credential ID" },
+        "verificationUrl": { "type": "url", "label": "Verification URL" }
+      }
+    }
+  }
+}

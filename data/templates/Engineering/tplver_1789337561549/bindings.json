@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "name": "Engineering",
+  "bindings": {
+    "hero.name": "fullName",
+    "hero.role": "title",
+    "hero.headline": "headline",
+    "hero.tagline": "tagline",
+    "hero.description": "summary",
+    "hero.coverImage": "profileImage",
+    "hero.availability": "availability",
+    "about.headline": "aboutSummary",
+    "about.image": "avatarUrl",
+    "about.story": "summary",
+    "contact.email": "contact.email",
+    "contact.phone": "contact.phone",
+    "contact.location": "contact.location",
+    "experience.items": "experience",
+    "education.items": "education",
+    "projects.items": "projects",
+    "skills.categories": "skills",
+    "certificates.items": "certificates"
+  },
+  "sections": [
+    { "id": "header", "name": "Navigation Bar", "required": true },
+    { "id": "hero", "name": "Hero Section", "required": true },
+    { "id": "about", "name": "Meet The Systems Architect", "required": true },
+    { "id": "education", "name": "Education & Research", "required": true },
+    { "id": "experience", "name": "Engineering Experience", "required": true },
+    { "id": "projects", "name": "Featured Architecture Projects", "required": true },
+    { "id": "skills", "name": "Skills & Technologies", "required": true },
+    { "id": "certificates", "name": "Industry Certifications", "required": true },
+    { "id": "contact", "name": "Start A Collaboration", "required": true },
+    { "id": "footer", "name": "Footer & Dispatch", "required": true }
+  ]
+}

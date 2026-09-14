@@ -101,10 +101,13 @@ export default function AdminPage() {
           params.set('totalChunks', String(totalChunks));
 
           if (chunkIndex === totalChunks - 1) {
-            params.set('templateId', record.id);
-            params.set('name', record.name);
-            params.set('version', record.version);
-            params.set('category', record.category);
+            const cleanId = (record.id && record.id !== 'undefined')
+              ? record.id
+              : (record.name ? record.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : `tpl-${Date.now()}`);
+            params.set('templateId', cleanId);
+            params.set('name', record.name || cleanId);
+            params.set('version', record.version || '1.0.0');
+            params.set('category', record.category || 'Developer');
             params.set('author', record.author || 'Admin');
             params.set('description', record.description || '');
             params.set('supportsDarkMode', String(record.supportsDarkMode ?? true));

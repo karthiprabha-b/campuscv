@@ -66,6 +66,28 @@ export function resolveDeterministicProfileImage(portfolio: any, templateDemoIma
   return SAFE_AVATAR_PLACEHOLDER;
 }
 
+export function cleanBioParagraph(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+
+  const rawSentences = trimmed.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+  const uniqueSentences: string[] = [];
+  const seen = new Set<string>();
+
+  for (const sent of rawSentences) {
+    const normalized = sent.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normalized.length > 5 && !seen.has(normalized)) {
+      seen.add(normalized);
+      uniqueSentences.push(sent);
+    }
+  }
+
+  // Keep at most 2-3 concise sentences (under ~45 words) for a clean, punchy bio paragraph
+  const conciseSentences = uniqueSentences.slice(0, 3);
+  return conciseSentences.join(' ').trim();
+}
+
 export function normalizePortfolio(raw: any): PortfolioData {
   if (!raw || typeof raw !== 'object') return raw;
 
@@ -211,6 +233,9 @@ export function normalizePortfolio(raw: any): PortfolioData {
 
     const resolvedLocation = boundProps.location || raw.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || raw.personal?.location || raw.profile?.location || '';
 
+    const rawSummary = boundProps.aboutMe || raw.aboutMe || canonicalProfile.personal?.summary || raw.profile?.summary || raw.profile?.bio || raw.summary || '';
+    const cleanSummary = cleanBioParagraph(rawSummary);
+
     const normalizedObj: PortfolioData = {
       ...raw,
       ...boundProps,
@@ -225,12 +250,14 @@ export function normalizePortfolio(raw: any): PortfolioData {
       photo: resolvedImg,
       image: resolvedImg,
       email: emailVal,
-      aboutMe: boundProps.aboutMe || raw.aboutMe,
+      aboutMe: cleanSummary,
       hero: {
         name: raw.hero?.name || boundProps.name || raw.name || canonicalProfile.personal?.fullName || '',
         role: raw.hero?.role || boundProps.role || raw.role || canonicalProfile.personal?.headline || '',
         title: raw.hero?.title || raw.tagline || raw.headline || boundProps.headline || canonicalProfile.personal?.headline || '',
         subtitle: raw.hero?.subtitle || raw.tagline || boundProps.headline || canonicalProfile.personal?.headline || '',
+        description: cleanBioParagraph(raw.hero?.description || cleanSummary),
+        introductionText: cleanBioParagraph(raw.hero?.introductionText || cleanSummary),
         degree: raw.hero?.degree || raw.university || (canonicalProfile.education?.[0] ? `${canonicalProfile.education[0].degree || ''} at ${canonicalProfile.education[0].institution || (canonicalProfile.education[0] as any).school || ''}`.trim() : ''),
         university: raw.hero?.university || raw.university || (canonicalProfile.education?.[0]?.institution || (canonicalProfile.education?.[0] as any)?.school || ''),
         location: raw.hero?.location || resolvedLocation,
@@ -245,6 +272,8 @@ export function normalizePortfolio(raw: any): PortfolioData {
       about: {
         ...(raw.about || {}),
         ...(boundProps.about || {}),
+        description: cleanBioParagraph(raw.about?.description || cleanSummary),
+        bio: cleanBioParagraph(raw.about?.bio || cleanSummary),
         avatarUrl: resolvedImg || raw.about?.avatarUrl || boundProps.about?.avatarUrl,
         profileImage: resolvedImg || raw.about?.profileImage || boundProps.about?.profileImage,
         image: resolvedImg,
@@ -294,7 +323,7 @@ export function normalizePortfolio(raw: any): PortfolioData {
         phone: raw.phone || canonicalProfile.personal?.phone || '',
         profilePhoto: resolvedImg,
         avatarUrl: resolvedImg,
-        summary: boundProps.aboutMe || raw.aboutMe || canonicalProfile.personal?.summary || '',
+        summary: cleanSummary,
         availability: raw.personal?.availability || ''
       },
       profile: {
@@ -302,9 +331,9 @@ export function normalizePortfolio(raw: any): PortfolioData {
         fullName: boundProps.fullName || raw.fullName || raw.profile?.fullName || '',
         headline: boundProps.headline || raw.headline || raw.profile?.headline || '',
         role: boundProps.headline || raw.headline || raw.profile?.role || raw.profile?.headline || '',
-        summary: boundProps.aboutMe || raw.aboutMe || raw.profile?.summary || '',
-        bio: boundProps.aboutMe || raw.aboutMe || raw.profile?.bio || raw.profile?.summary || '',
-        about: boundProps.aboutMe || raw.aboutMe || raw.profile?.about || '',
+        summary: cleanSummary,
+        bio: cleanSummary,
+        about: cleanSummary,
         location: resolvedLocation,
         email: emailVal,
         phone: raw.phone || raw.profile?.phone || '',
@@ -320,32 +349,50 @@ export function normalizePortfolio(raw: any): PortfolioData {
         location: resolvedLocation,
         socials: mergedSocials
       },
-    socials: mergedSocials,
-    socialLinks: mergedSocials,
-    social: mergedSocials,
-    images: raw.images || {
-      profileImage: resolvedImg,
-      projects: (boundProps.projects || []).map((p: any) => p.imageUrl || p.image).filter(Boolean)
-    },
-    resume: raw.resume || canonicalProfile.resume || null,
-    canonicalProfile,
-    universalCanonicalProfile: toUniversalCanonicalProfile(raw),
-    renderMode,
-    mode: renderMode,
-    id: raw.id || 'default-id',
-    username: raw.username || '',
-    templateId: raw.templateId || raw.layoutStyle || 'default',
-    templateType: isUploaded ? 'uploaded' : (raw.templateType || 'built-in'),
-    category: raw.category || 'Portfolio',
-    published: !!raw.published,
-    dataVersion: raw.dataVersion !== undefined ? raw.dataVersion : (raw._dataVersion || 1),
+      socials: mergedSocials,
+      socialLinks: mergedSocials,
+      social: mergedSocials,
+      images: raw.images || {
+        profileImage: resolvedImg,
+        projects: (boundProps.projects || []).map((p: any) => p.imageUrl || p.image).filter(Boolean)
+      },
+      resume: raw.resume || canonicalProfile.resume || null,
+      canonicalProfile,
+      universalCanonicalProfile: toUniversalCanonicalProfile(raw),
+      renderMode,
+      mode: renderMode,
+      id: raw.id || 'default-id',
+      username: raw.username || '',
+      templateId: raw.templateId || raw.layoutStyle || 'default',
+      templateType: isUploaded ? 'uploaded' : (raw.templateType || 'built-in'),
+      category: raw.category || 'Portfolio',
+      published: !!raw.published,
+      dataVersion: raw.dataVersion !== undefined ? raw.dataVersion : (raw._dataVersion || 1),
 
-    sectionFiles,
-    templateCode,
-    customCSS,
-    bindings,
-    schema,
-    assetMap
+      // Explicitly preserve top-level editor states and customization:
+      sectionOrder: Array.isArray(raw.sectionOrder) && raw.sectionOrder.length > 0 ? raw.sectionOrder : (Array.isArray(raw.section_order) && raw.section_order.length > 0 ? raw.section_order : (Array.isArray(raw.sections) && raw.sections.length > 0 ? raw.sections : undefined)),
+      sections: Array.isArray(raw.sections) && raw.sections.length > 0 ? raw.sections : (Array.isArray(raw.sectionOrder) && raw.sectionOrder.length > 0 ? raw.sectionOrder : undefined),
+      deletedNodes: raw.deletedNodes || {},
+      hiddenNodes: raw.hiddenNodes || {},
+      hiddenFields: Array.isArray(raw.hiddenFields) ? raw.hiddenFields : [],
+      hiddenSections: Array.isArray(raw.hiddenSections) ? raw.hiddenSections : [],
+      styleOverrides: raw.styleOverrides || {},
+      theme: raw.theme,
+      themeColor: raw.themeColor || raw.theme?.primaryColor || raw.theme?.accentColor || raw.accentColor || raw.userSelectedAccent,
+      accentColor: raw.accentColor || raw.themeColor || raw.userSelectedAccent,
+      userSelectedAccent: raw.userSelectedAccent || raw.themeColor || raw.accentColor,
+      userSelectedFont: raw.userSelectedFont || raw.fontPack || raw.typography?.fontFamily,
+      userSelectedFontSize: raw.userSelectedFontSize || raw.baseFontSize || raw.typography?.fontSize,
+      typography: raw.typography,
+      fontPack: raw.fontPack,
+      baseFontSize: raw.baseFontSize,
+
+      sectionFiles,
+      templateCode,
+      customCSS,
+      bindings,
+      schema,
+      assetMap
   };
 
   console.log('[CV DEBUG][STAGE D: NORMALIZATION]', {

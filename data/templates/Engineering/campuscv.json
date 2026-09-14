@@ -1,0 +1,36 @@
+{
+  "name": "Alex Mercer",
+  "fullName": "Alex Mercer",
+  "title": "Senior Full-Stack & Systems Architect",
+  "role": "Senior Full-Stack & Systems Architect",
+  "tagline": "Engineering resilient distributed systems & high-performance modern web apps",
+  "headline": "Resilient Distributed Systems & Cloud Platforms",
+  "subheadline": "Specializing in fault-tolerant event streaming, microservices architectures, and hyper-performant web applications.",
+  "bio": "I am a Senior Software Engineer and Systems Architect who loves building clean, hyper-performant web applications, event-driven backends, and fault-tolerant cloud architecture. Over the last 7+ years, I have helped startups scale from zero to millions of users and led modern architecture overhauls at enterprise scale.",
+  "experienceYears": 7,
+  "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+  "profileImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+  "coverImage": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+  "location": "San Francisco, CA & Remote Worldwide",
+  "availability": "Available for Senior Roles & High-Impact Consulting",
+  "email": "alex.mercer.dev@example.com",
+  "phone": "+1 (415) 890-3421",
+  "contact": {
+    "location": "San Francisco, CA & Remote Worldwide",
+    "phone": "+1 (415) 890-3421",
+    "email": "alex.mercer.dev@example.com",
+    "responseTime": "Guaranteed Response < 24 Hours",
+    "telegram": "@alexmercer_arch"
+  },
+  "socials": {
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "twitter": "https://twitter.com"
+  },
+  "stats": [
+    { "value": "7+", "label": "Years Experience", "sublabel": "Production Engineering" },
+    { "value": "48+", "label": "Services Deployed", "sublabel": "Microservices & Serverless" },
+    { "value": "99.99%", "label": "Uptime Achieved", "sublabel": "Critical Infrastructure" },
+    { "value": "1.2M+", "label": "Daily Req Handled", "sublabel": "Sub-50ms Latency" }
+  ]
+}

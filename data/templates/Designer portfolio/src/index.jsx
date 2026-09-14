@@ -58,23 +58,78 @@ export default function Template(props = {}) {
     return true;
   };
 
+  const sectionComponentMap = {
+    hero: <Hero key="hero" data={data} />,
+    about: <About key="about" data={data} />,
+    education: <Education key="education" data={data} />,
+    experience: <Experience key="experience" data={data} />,
+    projects: <Projects key="projects" data={data} />,
+    skills: <Skills key="skills" data={data} />,
+    certifications: <Certifications key="certifications" data={data} />,
+    process: <Process key="process" data={data} />,
+    testimonial: <Testimonial key="testimonial" data={data} />,
+    contact: <Contact key="contact" data={data} />
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certifications',
+    'process',
+    'testimonial',
+    'contact'
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certificates' || id === 'awards') id = 'certifications';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech') id = 'skills';
+    if (id === 'workflow') id = 'process';
+    if (id === 'testimonials' || id === 'reviews') id = 'testimonial';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
   return (
     <div
       style={dynamicStyles}
-      className="min-h-screen bg-[var(--campuscv-background,#FAF8F5)] text-[var(--campuscv-foreground,#111111)] font-sans overflow-x-hidden"
+      data-campuscv-template="designer-portfolio"
+      className="campuscv-template-root min-h-screen bg-[var(--campuscv-background,#FAF8F5)] text-[var(--campuscv-foreground,#111111)] font-sans overflow-x-hidden"
     >
       <Header data={data} />
       <main>
-        {isSectionVisible('hero') && <Hero data={data} />}
-        {isSectionVisible('about') && <About data={data} />}
-        {isSectionVisible('education') && <Education data={data} />}
-        {isSectionVisible('experience') && <Experience data={data} />}
-        {isSectionVisible('projects') && <Projects data={data} />}
-        {isSectionVisible('skills') && <Skills data={data} />}
-        {isSectionVisible('certifications') && <Certifications data={data} />}
-        {isSectionVisible('process') && <Process data={data} />}
-        {isSectionVisible('testimonial') && <Testimonial data={data} />}
-        {isSectionVisible('contact') && <Contact data={data} />}
+        {mainSectionIds.map((secId) => {
+          if (!isSectionVisible(secId)) return null;
+          return sectionComponentMap[secId] || null;
+        })}
       </main>
       {isSectionVisible('footer') && <Footer data={data} />}
     </div>
@@ -82,4 +137,3 @@ export default function Template(props = {}) {
 }
 
 export { Template };
-

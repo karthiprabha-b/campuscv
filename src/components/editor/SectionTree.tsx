@@ -222,6 +222,14 @@ const TEMPLATE_SECTION_DEFAULTS: Record<string, string[]> = {
   'Centered': ['hero', 'about', 'services', 'experience', 'projects', 'skills', 'education', 'contact'],
   'stu-creative-bold': ['hero', 'about', 'services', 'approach', 'education', 'skills', 'tools', 'certifications', 'projects', 'experience', 'testimonials', 'achievements', 'contact'],
   'stu_creative_bold': ['hero', 'about', 'services', 'approach', 'education', 'skills', 'tools', 'certifications', 'projects', 'experience', 'testimonials', 'achievements', 'contact'],
+  'stu_lawyer': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'stu-lawyer': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'stu lawyer': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'lawyer': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'executive-lawyer-portfolio': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'executive lawyer': ['hero', 'achievements', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'testimonials', 'contact'],
+  'engineering': ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact'],
+  'Engineering': ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact'],
 };
 
 export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddModal }: SectionTreeProps) {
@@ -401,6 +409,7 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
     const templateKey = (portfolio.templateId || (portfolio as any).layoutStyle || '').toLowerCase().trim();
     const templateBuiltin = TEMPLATE_SECTION_DEFAULTS[templateKey] ||
       (templateKey.includes('static') ? TEMPLATE_SECTION_DEFAULTS['static-panel'] :
+       templateKey.includes('lawyer') || templateKey.includes('executive') ? TEMPLATE_SECTION_DEFAULTS['stu_lawyer'] :
        templateKey.includes('designer') ? TEMPLATE_SECTION_DEFAULTS['designer-portfolio'] :
        templateKey.includes('doctor') ? TEMPLATE_SECTION_DEFAULTS['doctor'] :
        templateKey.includes('cs') ? TEMPLATE_SECTION_DEFAULTS['cs-portfolio'] :
@@ -479,13 +488,35 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
   const toggleVisibility = (id: string) => {
     const isCurrentlyHidden = !isVisible(id);
     const hiddenFields = portfolio.hiddenFields || [];
-    const updated = isCurrentlyHidden
+    const updatedHiddenFields = isCurrentlyHidden
       ? hiddenFields.filter(f => f !== id && f !== `sections.${id}`)
       : [...hiddenFields, id];
-    if (onFieldChange) {
-      onFieldChange('hiddenFields', updated);
-      onFieldChange(`hiddenNodes.${id}`, !isCurrentlyHidden);
-      onFieldChange(`styleOverrides.${id}.display`, isCurrentlyHidden ? '' : 'none');
+
+    const updatedHiddenNodes = {
+      ...((portfolio as any).hiddenNodes || {}),
+      [id]: !isCurrentlyHidden,
+      [`section:${id}:root:section:0`]: !isCurrentlyHidden
+    };
+
+    const updatedStyleOverrides = {
+      ...((portfolio as any).styleOverrides || {}),
+      [id]: {
+        ...(((portfolio as any).styleOverrides || {})[id] || {}),
+        display: isCurrentlyHidden ? '' : 'none'
+      }
+    };
+
+    const updated: PortfolioData = {
+      ...portfolio,
+      hiddenFields: updatedHiddenFields,
+      hiddenNodes: updatedHiddenNodes,
+      styleOverrides: updatedStyleOverrides
+    } as any;
+
+    if (onPortfolioChange) {
+      onPortfolioChange(updated);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updated);
     }
   };
 
@@ -700,8 +731,14 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
     reordered.splice(dropIdx, 0, moved);
 
     const nextOrder = reordered.map(s => s.id);
-    if (onFieldChange) {
-      onFieldChange('sectionOrder', nextOrder);
+    const updated: PortfolioData = {
+      ...portfolio,
+      sectionOrder: nextOrder
+    };
+    if (onPortfolioChange) {
+      onPortfolioChange(updated);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updated);
     }
 
     handleDragEnd();

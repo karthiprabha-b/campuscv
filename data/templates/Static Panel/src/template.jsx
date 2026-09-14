@@ -205,15 +205,16 @@ export default function Template(props = {}) {
   const mainSectionIds = [];
   const added = new Set();
 
-  rawOrder.forEach((rawId) => {
-    let id = String(rawId).toLowerCase().trim();
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
     if (id === 'home' || id === 'intro') id = 'hero';
     if (id === 'certifications') id = 'certificates';
     if (id === 'timeline' || id === 'work') id = 'experience';
     if (id === 'academics') id = 'education';
     if (id === 'portfolio') id = 'projects';
     if (id === 'tech') id = 'skills';
-    if (id === 'hero' || id === 'footer') return;
+    if (id === 'hero' || id === 'footer' || !id) return;
     if (sectionComponentMap[id] && !added.has(id)) {
       mainSectionIds.push(id);
       added.add(id);

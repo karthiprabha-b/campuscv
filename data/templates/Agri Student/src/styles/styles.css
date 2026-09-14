@@ -1,0 +1,524 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Forest Green Theme Tokens */
+  --color-forest-950: #04130c;
+  --color-forest-900: #082015;
+  --color-forest-850: #0c2d1e;
+  --color-forest-800: #123e2a;
+  --color-forest-700: #185338;
+  --color-forest-600: #1f6b49;
+  
+  /* Dynamic CampusCV Accent support */
+  --campuscv-accent: #10b981;
+  --primary: var(--campuscv-accent, #10b981);
+  --primary-accent: var(--campuscv-accent, #10b981);
+  --primary-foreground: #ffffff;
+
+  /* Emerald & Jade Tokens */
+  --color-emerald-500: var(--primary, #10b981);
+  --color-emerald-400: var(--primary, #34d399);
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-50: #ecfdf5;
+
+  /* Lime / Ag-Tech Accents */
+  --color-lime-500: var(--primary, #84cc16);
+  --color-lime-400: var(--primary, #a3e635);
+  --color-lime-300: #bef264;
+  --color-lime-100: #ecfccb;
+
+  /* Clean Neutrals */
+  --color-bg-base: #f8faf9;
+  --color-bg-card: #ffffff;
+  --color-bg-muted: #f0f7f3;
+  --color-text-main: #0f231a;
+  --color-text-muted: #4b6356;
+  --color-text-light: #708c7f;
+  --color-border: #e1ede6;
+  --color-border-hover: #a7d9bf;
+
+  /* Shadows & Glows */
+  --shadow-sm: 0 2px 8px rgba(12, 45, 30, 0.04);
+  --shadow-md: 0 8px 24px rgba(12, 45, 30, 0.08);
+  --shadow-lg: 0 16px 40px rgba(12, 45, 30, 0.12);
+  --shadow-xl: 0 24px 60px rgba(12, 45, 30, 0.18);
+  --glow-green: 0 0 35px rgba(52, 211, 153, 0.35);
+  --glow-lime: 0 0 30px rgba(163, 230, 53, 0.3);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dynamic Primary Accent Helper Utilities */
+[class*="bg-[#10b981]"], [class*="bg-[#10B981]"], [class*="bg-[#059669]"], [class*="bg-emerald-500"], [class*="bg-emerald-600"] {
+  background-color: var(--primary, #10b981) !important;
+}
+
+[class*="text-[#10b981]"], [class*="text-[#10B981]"], [class*="text-[#059669]"], [class*="text-emerald-500"], [class*="text-emerald-600"], [class*="text-lime-400"] {
+  color: var(--primary, #10b981) !important;
+}
+
+[class*="border-[#10b981]"], [class*="border-[#10B981]"], [class*="border-[#059669]"], [class*="border-emerald-500"] {
+  border-color: var(--primary, #10b981) !important;
+}
+
+.agri-template-root {
+  --color-emerald-500: var(--primary, #10b981);
+  --color-lime-500: var(--primary, #84cc16);
+  --color-lime-400: var(--primary, #a3e635);
+  font-family: var(--font-body);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.agri-template-root *, 
+.agri-template-root *::before, 
+.agri-template-root *::after {
+  box-sizing: border-box;
+}
+
+.agri-template-root h1, 
+.agri-template-root h2, 
+.agri-template-root h3, 
+.agri-template-root h4, 
+.agri-template-root h5, 
+.agri-template-root h6 {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+  word-break: break-word;
+}
+
+.agri-template-root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.agri-template-root button, 
+.agri-template-root input, 
+.agri-template-root textarea, 
+.agri-template-root select {
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+/* Responsive Containers */
+.agri-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .agri-container {
+    padding: 0 1rem;
+  }
+}
+
+.agri-section-padding {
+  padding: 5.5rem 0;
+}
+
+@media (max-width: 1024px) {
+  .agri-section-padding {
+    padding: 4rem 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .agri-section-padding {
+    padding: 3rem 0;
+  }
+}
+
+/* Badge & Section Header Styles */
+.agri-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  background: var(--color-emerald-50);
+  color: var(--color-forest-700);
+  border: 1px solid var(--color-emerald-300);
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.85rem;
+  width: fit-content;
+}
+
+.agri-badge-pill.dark {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-lime-300);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.agri-section-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 3rem auto;
+}
+
+@media (max-width: 768px) {
+  .agri-section-header {
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+  .agri-badge-pill {
+    margin-left: 0;
+  }
+}
+
+.agri-section-title {
+  font-size: clamp(1.75rem, 4.2vw, 2.5rem);
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: var(--color-forest-900);
+  line-height: 1.18;
+}
+
+.agri-section-title.dark {
+  color: #ffffff;
+}
+
+.agri-section-description {
+  font-size: clamp(0.92rem, 1.8vw, 1.05rem);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.agri-section-description.dark {
+  color: #a7cfba;
+}
+
+/* Standard Buttons */
+.agri-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  min-height: 46px;
+}
+
+@media (max-width: 640px) {
+  .agri-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+.agri-btn-primary {
+  background: var(--primary, #10b981) !important;
+  color: var(--primary-foreground, #ffffff) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.agri-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.agri-btn-lime {
+  background: var(--primary, #84cc16) !important;
+  color: var(--primary-foreground, #082015) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.agri-btn-lime:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.agri-btn-secondary {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-forest-900);
+  border: 1px solid var(--color-border);
+}
+
+.agri-btn-secondary:hover {
+  background: #ffffff;
+  border-color: var(--color-emerald-400);
+  color: var(--color-forest-700);
+}
+
+.agri-btn-glass {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+/* Card Foundations */
+.agri-card-white {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: 2rem;
+  transition: all var(--transition-smooth);
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .agri-card-white {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+}
+
+.agri-card-dark {
+  background: linear-gradient(145deg, var(--color-forest-900) 0%, var(--color-forest-850) 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  box-shadow: 0 12px 36px rgba(4, 19, 12, 0.4);
+  padding: 2rem;
+  color: #ffffff;
+  transition: all var(--transition-smooth);
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .agri-card-dark {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+}
+
+/* Fluid Responsive Grids */
+.agri-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.agri-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.agri-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .agri-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .agri-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .agri-grid-2, .agri-grid-3, .agri-grid-4 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Modal Overlay */
+.agri-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(4, 19, 12, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Horizontal Scrolling Filter Bars on Mobile */
+.agri-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .agri-filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 0.4rem 0.2rem 0.6rem 0.2rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .agri-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .agri-filter-bar > button {
+    flex-shrink: 0;
+  }
+}
+
+/* Volumetric Skills Styling */
+.agri-volumetric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(8, 32, 21, 0.09), 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-color: #bbf0cc;
+}
+
+.agri-skill-chip:hover {
+  transform: translateY(-2px);
+  background: #ffffff !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* ============================================================
+   NAVBAR — Responsive
+   ============================================================ */
+
+/* Show desktop nav, hide hamburger by default */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.desktop-cta-btn {
+  display: inline-flex;
+}
+
+.mobile-menu-toggle {
+  display: none !important;
+}
+
+/* Tablet: collapse nav to hamburger */
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .desktop-cta-btn {
+    display: none !important;
+  }
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+}
+
+/* ============================================================
+   HERO SECTION — Responsive
+   ============================================================ */
+
+/* Hero stats bar: 2 columns on tablet */
+@media (max-width: 1024px) and (min-width: 641px) {
+  .hero-stats-bar {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+}
+
+/* Hero stats bar: 2 columns on mobile too (compact) */
+@media (max-width: 640px) {
+  .hero-stats-bar {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem !important;
+    padding: 1rem !important;
+    border-radius: 16px !important;
+  }
+  .hero-stat-cell {
+    text-align: center !important;
+  }
+}
+
+/* Hero action buttons: full-width column on mobile */
+@media (max-width: 640px) {
+  .hero-buttons-wrap {
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .hero-buttons-wrap > * {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* Hero credential badges: scrollable row on mobile */
+@media (max-width: 640px) {
+  .hero-cred-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding-bottom: 0.5rem !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.5rem !important;
+  }
+  .hero-cred-row::-webkit-scrollbar {
+    display: none;
+  }
+  .hero-cred-row > div {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* ============================================================
+   ABOUT SECTION — Responsive
+   ============================================================ */
+
+/* About grid: stack on tablet & mobile */
+@media (max-width: 860px) {
+  .about-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .about-floating-badge {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   GENERAL — Stat cells divider on desktop only
+   ============================================================ */
+@media (min-width: 1025px) {
+  .hero-stat-cell:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 1.25rem;
+  }
+}
+

@@ -9,6 +9,7 @@ import CampusCvLogo from '../../components/common/CampusCvLogo';
 import CampusCvBrand from '../../components/common/CampusCvBrand';
 import CampusCvQrCode from '../../components/common/CampusCvQrCode';
 import CustomDomainSection from '../../components/dashboard/CustomDomainSection';
+import PortfolioAnalytics from '../../components/analytics/PortfolioAnalytics';
 import { supabase } from '../../lib/supabase/client';
 import { 
   Plus, 
@@ -1080,21 +1081,21 @@ function DashboardContent() {
         <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
           {/* Left: Logo */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 sm:w-[220px]">
             <Link href="/" className="flex items-center shrink-0">
               <CampusCvLogo className="h-7 sm:h-9 w-auto" />
             </Link>
           </div>
 
-          {/* Center: Nav Tabs — hidden on mobile, shown sm+ */}
-          <nav className="hidden sm:flex items-center gap-1">
+          {/* Center: Nav Tabs — properly centered pill */}
+          <nav className="hidden sm:flex items-center justify-center gap-1 p-1 bg-zinc-100/80 rounded-2xl border border-zinc-200/60 shadow-xs">
             <button
               type="button"
               onClick={() => setActiveTab('overview')}
-              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'overview'
-                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                  ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
               }`}
             >
               Overview
@@ -1103,10 +1104,10 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setActiveTab('templates')}
-              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'templates'
-                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                  ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
               }`}
             >
               Templates
@@ -1115,60 +1116,63 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setActiveTab('billing')}
-              className={`px-3 sm:px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'billing'
-                  ? 'bg-purple-50 text-[#7C3AED] shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                  ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
+                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
               }`}
             >
               Plans &amp; Billing
             </button>
           </nav>
 
-          <div className="h-5 w-px bg-zinc-200 hidden sm:block" />
+          {/* Right: User dropdown & neat divider docked together */}
+          <div className="flex items-center gap-3 shrink-0 sm:w-[220px] justify-end">
+            <div className="h-5 w-px bg-zinc-200 hidden sm:block" />
 
-          {/* User dropdown with avatar & name */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setShowUserDropdown(prev => !prev)}
-              className="flex items-center gap-1.5 sm:gap-2.5 pl-2 sm:pl-3 pr-1.5 sm:pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
-            >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white text-xs font-bold uppercase shrink-0">
-                {user?.name?.[0] || 'U'}
-              </div>
-              <span className="text-sm font-semibold text-zinc-800 hidden md:block max-w-[120px] lg:max-w-[160px] truncate">{user?.name || 'User'}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
-            </button>
+            {/* User dropdown with avatar & name */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowUserDropdown(prev => !prev)}
+                className="flex items-center gap-1.5 sm:gap-2.5 pl-2 sm:pl-3 pr-1.5 sm:pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
+              >
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 shadow-xs">
+                  {user?.name?.[0] || 'U'}
+                </div>
+                <span className="text-sm font-semibold text-zinc-800 hidden md:block max-w-[120px] lg:max-w-[160px] truncate">{user?.name || 'User'}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+              </button>
 
-            {showUserDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-zinc-200 shadow-xl shadow-zinc-900/10 overflow-hidden z-50">
-                <div className="p-3 border-b border-zinc-100">
-                  <p className="text-xs font-bold text-zinc-900">{user?.name}</p>
-                  <p className="text-[11px] text-zinc-500 truncate">{user?.email}</p>
+              {showUserDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-zinc-200 shadow-xl shadow-zinc-900/10 overflow-hidden z-50">
+                  <div className="p-3 border-b border-zinc-100">
+                    <p className="text-xs font-bold text-zinc-900">{user?.name}</p>
+                    <p className="text-[11px] text-zinc-500 truncate">{user?.email}</p>
+                  </div>
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      onClick={() => { setShowProfileModal(true); setShowUserDropdown(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors text-left cursor-pointer"
+                    >
+                      <Settings className="w-4 h-4 text-zinc-400" />
+                      Account Settings
+                    </button>
+                    <div className="border-t border-zinc-100 my-1" />
+                    <button
+                      onClick={() => { if (confirm("Reset CampusCV Database? This will erase all local data.")) { localStorage.clear(); window.location.href = '/'; } }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Reset All Data
+                    </button>
+                    <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 transition-colors text-left cursor-pointer">
+                      <LogOut className="w-4 h-4 text-zinc-400" />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
-                <div className="p-1.5 space-y-0.5">
-                  <button
-                    onClick={() => { setShowProfileModal(true); setShowUserDropdown(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors text-left cursor-pointer"
-                  >
-                    <Settings className="w-4 h-4 text-zinc-400" />
-                    Account Settings
-                  </button>
-                  <div className="border-t border-zinc-100 my-1" />
-                  <button
-                    onClick={() => { if (confirm("Reset CampusCV Database? This will erase all local data.")) { localStorage.clear(); window.location.href = '/'; } }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors text-left cursor-pointer"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Reset All Data
-                  </button>
-                  <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-zinc-700 hover:bg-zinc-50 transition-colors text-left cursor-pointer">
-                    <LogOut className="w-4 h-4 text-zinc-400" />
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -1421,6 +1425,14 @@ function DashboardContent() {
 
                 </div>
               </div>
+            )}
+
+            {/* VISITOR ANALYTICS SECTION */}
+            {selectedPortfolio && (
+              <PortfolioAnalytics
+                portfolioId={selectedPortfolio.id}
+                username={selectedPortfolio.username}
+              />
             )}
 
             {/* CUSTOM DOMAIN SETTINGS */}

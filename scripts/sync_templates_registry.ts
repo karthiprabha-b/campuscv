@@ -25,7 +25,24 @@ const templateMapping: Record<string, string> = {
   'Card': 'Card',
   'stu_lawyer': 'stu_lawyer',
   'stu-lawyer': 'stu_lawyer',
-  'executive-lawyer-portfolio': 'stu_lawyer'
+  'stu lawyer': 'stu_lawyer',
+  'executive-lawyer-portfolio': 'stu_lawyer',
+  'executive lawyer': 'stu_lawyer',
+  'executive lawyer portfolio': 'stu_lawyer',
+  'lawyer': 'stu_lawyer',
+  'photography-portfolio': 'photography',
+  'photography': 'photography',
+  'agri-student': 'Agri Student',
+  'agri_student': 'Agri Student',
+  'agri student': 'Agri Student',
+  'Agri Student': 'Agri Student',
+  'beautician-portfolio': 'Beautician',
+  'beautician': 'Beautician',
+  'Beautician': 'Beautician',
+  'engineering': 'Engineering',
+  'Engineering': 'Engineering',
+  'engineering-portfolio': 'Engineering',
+  'Engineering Portfolio': 'Engineering'
 };
 
 for (const [regKey, dirName] of Object.entries(templateMapping)) {

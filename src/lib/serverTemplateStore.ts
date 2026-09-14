@@ -56,12 +56,12 @@ export function walkTemplateDir(baseDir: string): Record<string, string> {
     if (!fs.existsSync(dir)) return;
     const list = fs.readdirSync(dir);
     for (const file of list) {
-      if (['node_modules', '.git', '.next', 'dist', 'build'].includes(file) || file.startsWith('tplver_') || file.startsWith('v_')) continue;
+      if (['node_modules', '.git', '.next', 'dist', 'build'].includes(file) || file.startsWith('tplver_') || file.startsWith('v_') || file.endsWith('.d.ts')) continue;
       const fullPath = path.join(dir, file);
       const stat = fs.statSync(fullPath);
       if (stat.isDirectory()) {
         walk(fullPath);
-      } else if (/\.(tsx|jsx|ts|js|json|css|scss|sass|less|html|mjs|cjs|svg|png|jpg|jpeg|webp|gif|ico|woff|woff2|ttf|otf|eot)$/i.test(file)) {
+      } else if (/\.(tsx|jsx|ts|js|json|css|scss|sass|less|html|mjs|cjs|svg|png|jpg|jpeg|webp|gif|ico|woff|woff2|ttf|otf|eot)$/i.test(file) && !file.endsWith('.d.ts')) {
         const relPath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
         // Do not return binary image data as utf-8 string if not text
         if (/\.(png|jpg|jpeg|svg|webp|gif|ico|woff|woff2|ttf|otf|eot)$/i.test(file)) {
@@ -130,12 +130,6 @@ export function walkTemplateDir(baseDir: string): Record<string, string> {
         }
       }
     });
-
-    // Remove dummy placeholder files if real components exist
-    const hasRealComponents = Object.keys(files).some(k => k.includes('src/App.') || k.includes('src/template.') || k.includes('App.jsx') || k.includes('App.tsx'));
-    if (hasRealComponents && files['template.jsx'] && files['template.jsx'].length < 150) {
-      delete files['template.jsx'];
-    }
   } catch (err) {
     console.error('[serverTemplateStore] Error reading template dir:', baseDir, err);
   }
@@ -178,10 +172,18 @@ function findPreferredEntry(files: Record<string, string>): string {
  */
 export function getTemplateFilesServer(templateId: string, versionId?: string): { templateId: string; versionId?: string; entryFile?: string; files: Record<string, string> } | null {
   if (!templateId) return null;
-
   const templateRootDir = path.join(DATA_TEMPLATES_DIR, templateId);
 
-  // 1. Direct live root check: If data/templates/[templateId]/src exists, ALWAYS load directly from live root directory
+  // 1. Check registry.json first for pre-bundled sectionFiles
+  const registry = loadRegistryServer();
+  const regRecord = registry[templateId] || registry[templateId.toLowerCase()] || registry[templateId.replace(/[\s_-]+/g, '-')] || registry[templateId.replace(/[\s-]+/g, '_')];
+  if (regRecord?.sectionFiles && Object.keys(regRecord.sectionFiles).length > 0) {
+    console.log(`[SERVER TEMPLATE LOAD] Loaded directly from server registry: templateId="${templateId}" | fileCount: ${Object.keys(regRecord.sectionFiles).length}`);
+    const entryFile = findPreferredEntry(regRecord.sectionFiles);
+    return { templateId, versionId: regRecord.currentVersionId || 'v1', entryFile, files: regRecord.sectionFiles };
+  }
+
+  // 1.5 Direct live root check: If data/templates/[templateId]/src exists, ALWAYS load directly from live root directory
   if (fs.existsSync(templateRootDir)) {
     const rootSrc = path.join(templateRootDir, 'src');
     if (fs.existsSync(rootSrc)) {
@@ -194,8 +196,6 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     }
   }
 
-  const registry = loadRegistryServer();
-  const regRecord = registry[templateId];
   const targetVersionId = versionId || regRecord?.currentVersionId;
 
   // 2. Check targetVersionId directory under data/templates/[templateId]/[targetVersionId]
@@ -211,7 +211,7 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     }
   }
 
-  // 1.5 Auto-discover latest tplver_* directory under data/templates/[templateId]/ if targetVersionId missed
+  // 2.5 Auto-discover latest tplver_* directory under data/templates/[templateId]/ if targetVersionId missed
   if (fs.existsSync(templateRootDir)) {
     try {
       const subdirs = fs.readdirSync(templateRootDir, { withFileTypes: true })
@@ -252,9 +252,23 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     'card': ['Card', 'card'],
     'card-deck': ['Card', 'card'],
     'executive-lawyer-portfolio': ['stu_lawyer', 'stu-lawyer'],
+    'executive lawyer': ['stu_lawyer', 'stu-lawyer'],
+    'executive lawyer portfolio': ['stu_lawyer', 'stu-lawyer'],
+    'executive legal & executive': ['stu_lawyer', 'stu-lawyer'],
     'stu_lawyer': ['stu_lawyer', 'stu-lawyer'],
+    'stu lawyer': ['stu_lawyer', 'stu-lawyer'],
     'stu-lawyer': ['stu_lawyer', 'stu-lawyer'],
-    'lawyer': ['stu_lawyer', 'stu-lawyer']
+    'lawyer': ['stu_lawyer', 'stu-lawyer'],
+    'beautician-portfolio': ['Beautician', 'beautician'],
+    'beautician': ['Beautician', 'beautician'],
+    'beauty': ['Beautician', 'beautician'],
+    'agri-student': ['Agri Student', 'agri-student'],
+    'agri_student': ['Agri Student', 'agri-student'],
+    'agri': ['Agri Student', 'agri-student'],
+    'agronomy': ['Agri Student', 'agri-student'],
+    'photography-portfolio': ['photography', 'Photography'],
+    'photography': ['photography', 'Photography'],
+    'photographer': ['photography', 'Photography']
   };
 
   const directMapped = KNOWN_TEMPLATE_DIR_MAP[templateId.toLowerCase().trim()] || [];
@@ -268,6 +282,9 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     templateId.replace(/portfolio$/i, ''),
     templateId.replace(/[-_]/g, ' '),
     templateId.replace(/\s+/g, '-').toLowerCase(),
+    templateId.replace(/\s+/g, '_').toLowerCase(),
+    templateId.replace(/[-_]/g, '_').toLowerCase(),
+    templateId.replace(/[-_]/g, '-').toLowerCase(),
     templateId.replace(/\s+/g, ''),
     templateId.replace(/-+$/, ''),
     templateId.replace(/-\d+-?$/, ''),
@@ -303,7 +320,18 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
       }
     }
 
-    // 2. Secondary storage: `src/templates/[candId]/`
+    // 2. Secondary storage: `public/templates/[candId]/`
+    const publicDir = path.join(process.cwd(), 'public', 'templates', candId);
+    if (fs.existsSync(publicDir)) {
+      const files = walkTemplateDir(publicDir);
+      if (Object.keys(files).length > 0) {
+        console.log(`[SERVER TEMPLATE LOAD] Found public disk template for: "${candId}" (requested: "${templateId}") | fileCount: ${Object.keys(files).length}`);
+        const entryFile = findPreferredEntry(files);
+        return { templateId, entryFile, files };
+      }
+    }
+
+    // 3. Tertiary storage: `src/templates/[candId]/`
     const secondaryDir = path.join(process.cwd(), 'src', 'templates', candId);
     if (fs.existsSync(secondaryDir)) {
       const files = walkTemplateDir(secondaryDir);
@@ -671,7 +699,17 @@ export async function extractAndSaveZipServer(
     } catch (e) {}
   }
 
-  const rawId = options?.templateId || manifestObj?.id || options?.overrideMetadata?.id || `tpl-${Date.now()}`;
+  let candidateId = options?.templateId;
+  if (candidateId === 'undefined' || candidateId === 'null' || !candidateId) {
+    candidateId = undefined;
+  }
+  const manifestId = (manifestObj?.id && manifestObj.id !== 'undefined') ? manifestObj.id : undefined;
+  const overrideId = (options?.overrideMetadata?.id && options.overrideMetadata.id !== 'undefined') ? options.overrideMetadata.id : undefined;
+  const nameFallback = (options?.overrideMetadata?.name || manifestObj?.name) 
+    ? String(options?.overrideMetadata?.name || manifestObj?.name).toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-')
+    : undefined;
+
+  const rawId = candidateId || manifestId || overrideId || nameFallback || `tpl-${Date.now()}`;
   const targetId = String(rawId).toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '') || 'custom-template';
   const versionId = options?.versionId || `tplver_${Date.now()}`;
 
@@ -683,19 +721,39 @@ export async function extractAndSaveZipServer(
   let extractedCount = 0;
   for (const relPath of fileNames) {
     const entry = zipContent.files[relPath];
-    if (entry.dir || relPath.includes('..') || relPath.startsWith('/') || relPath.includes('node_modules')) continue;
+    if (!entry) continue;
 
     const normalizedRel = relPath.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalizedRel || normalizedRel.includes('..') || normalizedRel.startsWith('/')) continue;
+    if (normalizedRel.includes('node_modules') || normalizedRel.startsWith('__MACOSX') || normalizedRel.includes('/.DS_Store') || normalizedRel === '.DS_Store') continue;
+
     const versionPath = path.join(versionDir, normalizedRel);
-    ensureDir(path.dirname(versionPath));
-
     const rootPath = path.join(rootDir, normalizedRel);
-    ensureDir(path.dirname(rootPath));
 
-    const buf = await entry.async('nodebuffer');
-    fs.writeFileSync(versionPath, buf);
-    fs.writeFileSync(rootPath, buf);
-    extractedCount++;
+    // If entry is a directory (flagged by JSZip or ending with slash), ensure directory exists and skip file write
+    if (entry.dir || normalizedRel.endsWith('/') || normalizedRel.endsWith('\\')) {
+      ensureDir(versionPath);
+      ensureDir(rootPath);
+      continue;
+    }
+
+    try {
+      ensureDir(path.dirname(versionPath));
+      ensureDir(path.dirname(rootPath));
+
+      // Safety: if the destination path already exists as a directory, do not attempt to write as file
+      if ((fs.existsSync(versionPath) && fs.statSync(versionPath).isDirectory()) || 
+          (fs.existsSync(rootPath) && fs.statSync(rootPath).isDirectory())) {
+        continue;
+      }
+
+      const buf = await entry.async('nodebuffer');
+      fs.writeFileSync(versionPath, buf);
+      fs.writeFileSync(rootPath, buf);
+      extractedCount++;
+    } catch (writeErr) {
+      console.warn(`[ZIP EXTRACT WARN] Skipped writing "${normalizedRel}":`, writeErr);
+    }
   }
 
   // 2. Discover metadata / thumbnail recursively across all extracted files

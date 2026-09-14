@@ -52,21 +52,48 @@ async function packageAll() {
   for (const d of dirs) {
     const dirPath = path.join(DATA_TEMPLATES_DIR, d.name);
     const lowerName = d.name.toLowerCase().replace(/\s+/g, '-');
+    const underscoresName = d.name.toLowerCase().replace(/\s+/g, '_');
 
     // 1. Save in data/templates/
     await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `${d.name}.zip`));
+    await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `${lowerName}.zip`));
 
     // 2. Save in public/templates/
     await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `${lowerName}.zip`));
     await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `${lowerName}-template.zip`));
+    await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `${underscoresName}.zip`));
 
     if (d.name === 'Card') {
       await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `card.zip`));
       await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `card-template.zip`));
     }
+    if (d.name === 'stu_lawyer') {
+      await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `executive-lawyer-portfolio.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `executive-lawyer-portfolio.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `stu_lawyer.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `stu-lawyer.zip`));
+    }
+    if (d.name === 'Agri Student') {
+      await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `agri-student.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `agri-student.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `agri-student-template.zip`));
+    }
+    if (d.name === 'Beautician') {
+      await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `beautician-portfolio.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `beautician.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `beautician-portfolio.zip`));
+    }
+    if (d.name === 'photography') {
+      await zipDirectory(dirPath, path.join(DATA_TEMPLATES_DIR, `photography-portfolio.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `photography-portfolio.zip`));
+    }
+    if (d.name === 'Designer portfolio') {
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `designer-portfolio.zip`));
+      await zipDirectory(dirPath, path.join(PUBLIC_TEMPLATES_DIR, `product-designer.zip`));
+    }
   }
 
-  console.log('All templates packaged successfully!');
+  console.log('All template zip packages generated successfully!');
 }
 
 packageAll().catch(console.error);

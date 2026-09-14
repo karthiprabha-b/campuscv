@@ -101,6 +101,17 @@ export default function LeftSidebar({
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.18, ease: 'easeInOut' }}
+            onUpdate={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('campuscv:layout-shift'));
+              }
+            }}
+            onAnimationComplete={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('campuscv:layout-shift'));
+                window.dispatchEvent(new Event('resize'));
+              }
+            }}
             className="h-full bg-white border-r border-zinc-100 overflow-hidden shrink-0 flex flex-col"
           >
             {/* Drawer header */}
@@ -355,27 +366,54 @@ function DesignPanel({
 
   const handleColorApply = (hex: string) => {
     setCustomHex(hex);
-    if (onFieldChange) {
-      onFieldChange('theme.primaryColor', hex);
-      onFieldChange('themeColor', hex);
-      onFieldChange('accentColor', hex);
-      onFieldChange('userSelectedAccent', hex);
+    const updated: PortfolioData = {
+      ...portfolio,
+      theme: {
+        ...(portfolio.theme || { primaryColor: hex }),
+        primaryColor: hex,
+      },
+      themeColor: hex,
+      userSelectedAccent: hex,
+    } as any;
+    if (onPortfolioChange) {
+      onPortfolioChange(updated);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updated);
     }
   };
 
   const handleFontSelect = (font: FontPreset) => {
-    if (onFieldChange) {
-      onFieldChange('typography.fontFamily', font.fontFamily);
-      onFieldChange('fontPack', font.id);
-      onFieldChange('userSelectedFont', font.fontFamily);
+    const updated: PortfolioData = {
+      ...portfolio,
+      typography: {
+        ...(portfolio.typography || { fontFamily: font.fontFamily }),
+        fontFamily: font.fontFamily
+      },
+      fontPack: font.id,
+      userSelectedFont: font.fontFamily
+    } as any;
+    if (onPortfolioChange) {
+      onPortfolioChange(updated);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updated);
     }
   };
 
   const handleFontSizeChange = (size: number) => {
-    if (onFieldChange) {
-      onFieldChange('typography.fontSize', size);
-      onFieldChange('baseFontSize', size);
-      onFieldChange('userSelectedFontSize', size);
+    const updated: PortfolioData = {
+      ...portfolio,
+      typography: {
+        fontFamily: portfolio.typography?.fontFamily || 'Inter, sans-serif',
+        ...(portfolio.typography || {}),
+        fontSize: size
+      },
+      baseFontSize: size,
+      userSelectedFontSize: size
+    } as any;
+    if (onPortfolioChange) {
+      onPortfolioChange(updated);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updated);
     }
   };
 
