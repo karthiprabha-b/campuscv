@@ -102,7 +102,7 @@ export default function Header(props = {}) {
                 data-node-id="text:header:brand:name:0"
                 data-node-type="text"
                 data-cv="profile.name"
-                className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[150px] sm:max-w-none"
+                className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight"
               >
                 {profile.name}
               </span>
@@ -134,14 +134,14 @@ export default function Header(props = {}) {
             })}
           </nav>
 
-          {/* CTA & Actions */}
-          <div className="flex items-center gap-3">
+          {/* Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {profile.github && (
               <a
                 href={profile.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/60 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center transition-all hidden md:flex shrink-0"
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/60 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center transition-all hidden sm:flex shrink-0"
                 aria-label="GitHub Profile"
               >
                 <Github className="w-4 h-4" />
@@ -153,27 +153,12 @@ export default function Header(props = {}) {
                 href={profile.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/60 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center transition-all hidden md:flex shrink-0"
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/60 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center transition-all hidden sm:flex shrink-0"
                 aria-label="LinkedIn Profile"
               >
                 <Linkedin className="w-4 h-4" />
               </a>
             )}
-
-            <a
-              href="#contact"
-              data-node-id="button:header:cta:connect:0"
-              data-node-type="button"
-              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
-              style={{
-                background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
-                color: 'var(--primary-foreground, #030712)',
-                boxShadow: '0 0 20px -3px rgba(var(--campuscv-accent-rgb), 0.4)'
-              }}
-            >
-              <span style={{ color: 'var(--primary-foreground, #030712)' }}>CONNECT</span>
-              <ArrowUpRight className="w-3.5 h-3.5" style={{ color: 'var(--primary-foreground, #030712)' }} />
-            </a>
 
             {/* Mobile Hamburger Toggle */}
             <button

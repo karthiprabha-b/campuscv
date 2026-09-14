@@ -59,7 +59,7 @@ export default function Header() {
               <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-cyber-950" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[150px] sm:max-w-none">
+              <span className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight">
                 {PORTFOLIO_DATA.profile.name}
               </span>
             </div>
@@ -85,38 +85,34 @@ export default function Header() {
             })}
           </nav>
 
-          {/* CTA & Actions */}
-          <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+          {/* Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <a
               href={PORTFOLIO_DATA.profile.github}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub Profile"
-              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors hidden sm:flex"
             >
               <Github className="w-4 h-4" />
             </a>
 
-            <Link
-              href="#contact"
-              className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-gradient-cyan-pill text-cyber-950 text-xs font-bold uppercase tracking-wider shadow-cyan-glow hover:scale-105 transition-all shrink-0"
-            >
-              <span>Connect</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+            {PORTFOLIO_DATA.profile.linkedin && (
+              <a
+                href={PORTFOLIO_DATA.profile.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile"
+                className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors hidden sm:flex"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+            )}
 
-          {/* Mobile/Tablet Menu Toggle Button */}
-          <div className="flex xl:hidden items-center gap-2">
-            <Link
-              href="#contact"
-              className="sm:hidden px-3 py-1.5 rounded-full bg-gradient-cyan-pill text-cyber-950 text-xs font-bold shadow-sm"
-            >
-              Connect
-            </Link>
+            {/* Mobile/Tablet Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+              className="xl:hidden p-2 rounded-full text-white hover:bg-white/10 transition-colors"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
