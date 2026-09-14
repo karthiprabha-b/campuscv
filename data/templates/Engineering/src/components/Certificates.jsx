@@ -7,6 +7,10 @@ export default function Certificates({ data = {} }) {
   const norm = data?.profile ? data : normalizeEngineeringData(data);
   const { certificates } = norm;
 
+  if (!certificates || certificates.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id="certificates"

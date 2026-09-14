@@ -516,18 +516,29 @@ export function normalizeEngineeringData(rawPortfolio) {
   }
 
   // 8. Resolve Certificates (100% user data preserved)
-  let certificates = activeDef.certificates;
-  const rawCerts = p.certificates || p.certifications || p.credentials || [];
-  if (Array.isArray(rawCerts) && rawCerts.length > 0) {
-    certificates = rawCerts.map((cert, idx) => ({
-      id: cert.id || `cert-${idx + 1}`,
-      title: cert.title || cert.name || `Professional Certification ${idx + 1}`,
-      issuer: cert.issuer || cert.organization || cert.authority || 'Issuing Organization',
-      date: cert.date || cert.year || cert.issueDate || '2023',
-      verifyUrl: cert.verifyUrl || cert.url || cert.link || 'https://example.com',
-      badge: cert.badge || cert.level || 'Certified'
-    }));
-  }
+  const candidateCerts = (Array.isArray(p.certificates) && p.certificates.length > 0)
+    ? p.certificates
+    : ((Array.isArray(p.certifications) && p.certifications.length > 0)
+        ? p.certifications
+        : ((Array.isArray(p.awards) && p.awards.length > 0)
+            ? p.awards
+            : ((Array.isArray(p.credentials) && p.credentials.length > 0)
+                ? p.credentials
+                : null)));
+
+  const isExplicitEmptyCerts = (Array.isArray(p.certificates) && p.certificates.length === 0) ||
+    (Array.isArray(p.certifications) && p.certifications.length === 0);
+
+  const rawCerts = candidateCerts || (isExplicitEmptyCerts ? [] : (activeDef.certificates || []));
+
+  const certificates = rawCerts.map((cert, idx) => ({
+    id: cert.id || `cert-${idx + 1}`,
+    title: cert.title || cert.name || cert.certificateName || cert.award || `Professional Certification ${idx + 1}`,
+    issuer: cert.issuer || cert.organization || cert.authority || cert.issuedBy || 'Issuing Organization',
+    date: cert.date || cert.year || cert.issueDate || '2023',
+    verifyUrl: cert.verifyUrl || cert.url || cert.link || cert.credentialUrl || '#',
+    badge: cert.badge || cert.level || 'Certified'
+  }));
 
   // 9. Resolve Contact
   const contact = {

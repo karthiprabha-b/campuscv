@@ -805,7 +805,10 @@ function executeUploadedPackage(
     experience: Array.isArray(liveData.experience || liveData.timeline) ? (liveData.experience || liveData.timeline) : [],
     timeline: Array.isArray(liveData.timeline || liveData.experience) ? (liveData.timeline || liveData.experience) : [],
     achievements: Array.isArray(liveData.achievements) ? liveData.achievements : [],
-    certifications: Array.isArray(liveData.certifications) ? liveData.certifications : [],
+    certifications: Array.isArray(liveData.certifications || liveData.certificates || liveData.awards || liveData.credentials) ? (liveData.certifications || liveData.certificates || liveData.awards || liveData.credentials) : [],
+    certificates: Array.isArray(liveData.certificates || liveData.certifications || liveData.awards || liveData.credentials) ? (liveData.certificates || liveData.certifications || liveData.awards || liveData.credentials) : [],
+    awards: Array.isArray(liveData.awards || liveData.certifications || liveData.certificates || liveData.credentials) ? (liveData.awards || liveData.certifications || liveData.certificates || liveData.credentials) : [],
+    credentials: Array.isArray(liveData.credentials || liveData.certifications || liveData.certificates || liveData.awards) ? (liveData.credentials || liveData.certifications || liveData.certificates || liveData.awards) : [],
     interests: Array.isArray(liveData.interests) ? liveData.interests : [],
 
     // Contact & Social links
@@ -851,13 +854,24 @@ function executeUploadedPackage(
         return (live as any)[prop];
       }
       if (
+        prop === 'certifications' ||
+        prop === 'certificates' ||
+        prop === 'awards' ||
+        prop === 'credentials'
+      ) {
+        return (live as any)?.[prop] || (target as any)?.[prop] || [];
+      }
+      if (
         prop === 'photographyProfile' ||
         prop === 'profile' ||
         prop === 'portfolioProfile' ||
+        prop === 'beauticianProfile' ||
+        prop === 'doctorProfile' ||
         prop === 'lawyerData' ||
         prop === 'default' ||
         prop === 'initialPortfolioData' ||
         prop === 'DEFAULT_ENGINEERING_DATA' ||
+        prop === 'defaultDataObj' ||
         prop === 'portfolioData'
       ) {
         return live || target;
@@ -931,7 +945,7 @@ function executeUploadedPackage(
       return sharedPortfolioContextModule;
     }
 
-    // Intercept mockData / sampleData / demoData / defaultData — replace with live user data
+    // Intercept mockData / sampleData / demoData / defaultData / defaults — replace with live user data
     if (
       importPath.includes('mockData') ||
       importPath.includes('sampleData') ||
@@ -939,7 +953,7 @@ function executeUploadedPackage(
       importPath.includes('defaultData') ||
       importPath.includes('initialData') ||
       importPath.includes('portfolioData') ||
-      (importPath.endsWith('defaults') && !importPath.includes('defaults.ts'))
+      importPath.toLowerCase().includes('defaults')
     ) {
       console.log(`[CAMPUSCV DATA BINDING] Intercepted "${importPath}" — injecting live portfolio data`);
       return sharedMockDataModule;
@@ -1002,7 +1016,7 @@ function executeUploadedPackage(
 
     // 4. Resolve target file path inside uploaded package
     const resolvedKey = resolvePath(currentFile, importPath);
-    if (moduleCache[resolvedKey] && !resolvedKey.includes('defaults')) {
+    if (moduleCache[resolvedKey] && !resolvedKey.toLowerCase().includes('defaults')) {
       return moduleCache[resolvedKey];
     }
 
@@ -1017,7 +1031,7 @@ function executeUploadedPackage(
 
     const actualKey = fileMatch ? fileMatch.key : resolvedKey;
 
-    if (moduleCache[actualKey] && !actualKey.includes('defaults')) {
+    if (moduleCache[actualKey] && !actualKey.toLowerCase().includes('defaults')) {
       return moduleCache[actualKey];
     }
 
@@ -1037,7 +1051,9 @@ function executeUploadedPackage(
       actualKey.includes('sampleData') ||
       actualKey.includes('demoData') ||
       actualKey.includes('defaultData') ||
-      actualKey.includes('initialData')
+      actualKey.includes('initialData') ||
+      actualKey.includes('portfolioData') ||
+      actualKey.toLowerCase().includes('defaults')
     ) {
       moduleCache[actualKey] = sharedMockDataModule;
       return sharedMockDataModule;

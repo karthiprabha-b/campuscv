@@ -262,13 +262,17 @@ export function getTemplateFilesServer(templateId: string, versionId?: string): 
     'beautician-portfolio': ['Beautician', 'beautician'],
     'beautician': ['Beautician', 'beautician'],
     'beauty': ['Beautician', 'beautician'],
-    'agri-student': ['Agri Student', 'agri-student'],
-    'agri_student': ['Agri Student', 'agri-student'],
+    'agri-student': ['Agri Student', 'agri-student', 'agri_student'],
+    'agri_student': ['Agri Student', 'agri-student', 'agri_student'],
     'agri': ['Agri Student', 'agri-student'],
     'agronomy': ['Agri Student', 'agri-student'],
     'photography-portfolio': ['photography', 'Photography'],
     'photography': ['photography', 'Photography'],
-    'photographer': ['photography', 'Photography']
+    'photographer': ['photography', 'Photography'],
+    'engineering-portfolio': ['Engineering', 'engineering'],
+    'engineering': ['Engineering', 'engineering'],
+    'engineer': ['Engineering', 'engineering'],
+    'engineering-build': ['Engineering', 'engineering']
   };
 
   const directMapped = KNOWN_TEMPLATE_DIR_MAP[templateId.toLowerCase().trim()] || [];

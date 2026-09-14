@@ -2,17 +2,17 @@ import React from 'react';
 import { Award } from 'lucide-react';
 
 export default function Certifications({ data = {} }) {
-  const certList = Array.isArray(data.certifications)
+  const certList = (Array.isArray(data.certifications) && data.certifications.length > 0)
     ? data.certifications
-    : (Array.isArray(data.certifications?.items)
-      ? data.certifications.items
-      : (Array.isArray(data.data?.certifications)
-        ? data.data.certifications
-        : (Array.isArray(data.content?.certifications)
-          ? data.content.certifications
-          : (Array.isArray(data.resume?.certifications)
-            ? data.resume.certifications
-            : (Array.isArray(data.awards) ? data.awards : [])))));
+    : ((Array.isArray(data.certificates) && data.certificates.length > 0)
+        ? data.certificates
+        : ((Array.isArray(data.awards) && data.awards.length > 0)
+            ? data.awards
+            : ((Array.isArray(data.credentials) && data.credentials.length > 0)
+                ? data.credentials
+                : ((Array.isArray(data.certifications?.items) && data.certifications.items.length > 0)
+                    ? data.certifications.items
+                    : []))));
 
   if (!certList || certList.length === 0) {
     return null;

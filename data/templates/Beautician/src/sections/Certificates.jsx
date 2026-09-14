@@ -5,9 +5,24 @@ import { beauticianProfile } from '../data/beauticianDefaults.js';
 const _default = beauticianProfile || {};
 
 export default function Certificates({ data = {} }) {
-  const rawCerts = Array.isArray(data?.certificates) && data.certificates.length > 0 
-    ? data.certificates 
-    : (Array.isArray(data?.certifications) && data.certifications.length > 0 ? data.certifications : (_default.certificates || []));
+  const candidateList = (Array.isArray(data?.certificates) && data.certificates.length > 0)
+    ? data.certificates
+    : ((Array.isArray(data?.certifications) && data.certifications.length > 0)
+        ? data.certifications
+        : ((Array.isArray(data?.awards) && data.awards.length > 0)
+            ? data.awards
+            : ((Array.isArray(data?.credentials) && data.credentials.length > 0)
+                ? data.credentials
+                : null)));
+
+  const isExplicitEmpty = (Array.isArray(data?.certificates) && data.certificates.length === 0) ||
+    (Array.isArray(data?.certifications) && data.certifications.length === 0);
+
+  const rawCerts = candidateList || (isExplicitEmpty ? [] : (_default.certificates || []));
+
+  if (!rawCerts || rawCerts.length === 0) {
+    return null;
+  }
 
   const certificates = rawCerts.map((cert, idx) => {
     const id = cert?.id || `cert-${idx + 1}`;
@@ -16,13 +31,19 @@ export default function Certificates({ data = {} }) {
     const dateKey = `text:certificates:card:${id}:issueDate`;
     const descKey = `text:certificates:card:${id}:description`;
 
+    const title = data?.contentOverrides?.[titleKey]?.value || (typeof data?.contentOverrides?.[titleKey] === 'string' ? data?.contentOverrides?.[titleKey] : null) || cert?.title || cert?.name || cert?.certificateName || cert?.award || 'Aesthetic Board Certification';
+    const issuer = data?.contentOverrides?.[issuerKey]?.value || (typeof data?.contentOverrides?.[issuerKey] === 'string' ? data?.contentOverrides?.[issuerKey] : null) || cert?.issuer || cert?.authority || cert?.organization || cert?.issuedBy || 'CIDESCO Section Zurich';
+    const issueDate = data?.contentOverrides?.[dateKey]?.value || (typeof data?.contentOverrides?.[dateKey] === 'string' ? data?.contentOverrides?.[dateKey] : null) || cert?.issueDate || cert?.date || cert?.year || '2024';
+    const credentialUrl = cert?.credentialUrl || cert?.url || cert?.link || cert?.verifyUrl || '#';
+    const description = data?.contentOverrides?.[descKey]?.value || (typeof data?.contentOverrides?.[descKey] === 'string' ? data?.contentOverrides?.[descKey] : null) || cert?.description || cert?.details || cert?.summary || cert?.desc || 'Validated clinical proficiency in luxury therapies and treatments.';
+
     return {
       id,
-      title: data?.contentOverrides?.[titleKey]?.value || (typeof data?.contentOverrides?.[titleKey] === 'string' ? data?.contentOverrides?.[titleKey] : null) || cert?.title || cert?.name || 'Aesthetic Board Certification',
-      issuer: data?.contentOverrides?.[issuerKey]?.value || (typeof data?.contentOverrides?.[issuerKey] === 'string' ? data?.contentOverrides?.[issuerKey] : null) || cert?.issuer || cert?.authority || cert?.organization || 'CIDESCO Section Zurich',
-      issueDate: data?.contentOverrides?.[dateKey]?.value || (typeof data?.contentOverrides?.[dateKey] === 'string' ? data?.contentOverrides?.[dateKey] : null) || cert?.issueDate || cert?.date || cert?.year || '2024',
-      credentialUrl: cert?.credentialUrl || cert?.url || cert?.link || '#',
-      description: data?.contentOverrides?.[descKey]?.value || (typeof data?.contentOverrides?.[descKey] === 'string' ? data?.contentOverrides?.[descKey] : null) || cert?.description || cert?.desc || 'Validated clinical proficiency in luxury skin therapies and cosmetic chemistry.',
+      title,
+      issuer,
+      issueDate,
+      credentialUrl,
+      description,
       titleKey,
       issuerKey,
       dateKey,

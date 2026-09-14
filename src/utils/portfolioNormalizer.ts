@@ -200,8 +200,24 @@ export function normalizePortfolio(raw: any): PortfolioData {
         t.includes('typescript enterprise') ||
         t.includes('full-stack web engineering boot camp') ||
         t.includes('advanced react & next.js') ||
-        t === 'professional certification'
+        t.includes('aws certified solutions architect') ||
+        t.includes('certified kubernetes administrator') ||
+        t.includes('meta certified front-end') ||
+        t.includes('meta certified frontend') ||
+        t.includes('adobe certified professional in visual design') ||
+        t.includes('capture one certified professional') ||
+        t.includes('sony alpha imaging academy') ||
+        t.includes('national scholastic silver key for photography') ||
+        t.includes('cidesco section zurich') ||
+        t.includes('figma advanced design systems master') ||
+        t === 'professional certification' ||
+        t === 'certification'
       );
+    };
+
+    const isDemoCertList = (list: any): boolean => {
+      if (!Array.isArray(list) || list.length === 0) return true;
+      return list.every((c: any) => isExactDemoCertTitle(c?.title || c?.name || c?.award || ''));
     };
 
     const resolvedSkills = (() => {
@@ -306,28 +322,33 @@ export function normalizePortfolio(raw: any): PortfolioData {
         description: desc,
         summary: desc,
         achievements,
-        highlights: achievements,
-        details: achievements,
-        techStack,
-        technologies: techStack,
-        skills: techStack,
-        tags: techStack
+        description,
+        details: description,
+        coursework,
+        courses: coursework,
+        highlights: coursework
       };
     });
 
     const resolvedCertifications = (() => {
-      const candidateList = Array.isArray(raw.certifications) && raw.certifications.length > 0
+      const canonicalCerts = Array.isArray(canonicalProfile.certifications) ? canonicalProfile.certifications : [];
+      if (canonicalCerts.length > 0 && isDemoCertList(raw.certifications)) {
+        return canonicalCerts;
+      }
+      const candidateList = (Array.isArray(raw.certifications) && raw.certifications.length > 0)
         ? raw.certifications
-        : (Array.isArray(raw.certificates) && raw.certificates.length > 0
+        : ((Array.isArray(raw.certificates) && raw.certificates.length > 0)
           ? raw.certificates
-          : (Array.isArray(raw.awards) && raw.awards.length > 0
+          : ((Array.isArray(raw.awards) && raw.awards.length > 0)
             ? raw.awards
-            : (boundProps.certifications !== undefined ? boundProps.certifications : (canonicalProfile.certifications || []))));
+            : ((Array.isArray(raw.credentials) && raw.credentials.length > 0)
+              ? raw.credentials
+              : (boundProps.certifications !== undefined ? boundProps.certifications : canonicalCerts))));
       
       if (Array.isArray(candidateList) && candidateList.length > 0) {
-        const hasReal = candidateList.some((c: any) => !isExactDemoCertTitle(c.title || c.name || ''));
+        const hasReal = candidateList.some((c: any) => !isExactDemoCertTitle(c?.title || c?.name || c?.award || ''));
         if (hasReal) {
-          return candidateList.filter((c: any) => !isExactDemoCertTitle(c.title || c.name || ''));
+          return candidateList.filter((c: any) => !isExactDemoCertTitle(c?.title || c?.name || c?.award || ''));
         }
       }
       return candidateList;
@@ -339,35 +360,64 @@ export function normalizePortfolio(raw: any): PortfolioData {
           id: `cert-${idx + 1}`,
           title: cert,
           name: cert,
+          certificateName: cert,
+          award: cert,
+          credential: cert,
           issuer: '',
           organization: '',
+          authority: '',
+          issuedBy: '',
+          company: '',
           date: '',
           year: '',
           issueDate: '',
+          issuedDate: '',
+          period: '',
           link: '',
           url: '',
-          credentialUrl: ''
+          credentialUrl: '',
+          certificateUrl: '',
+          verificationUrl: '',
+          verifyUrl: '',
+          description: '',
+          details: '',
+          summary: '',
+          desc: ''
         };
       }
-      const title = (cert.title || cert.name || cert.credential || '').toString().trim();
-      const issuer = (cert.issuer || cert.organization || cert.authority || cert.issuedBy || '').toString().trim();
-      const date = (cert.date || cert.year || cert.issueDate || '').toString().trim();
-      const url = (cert.url || cert.link || cert.credentialUrl || '').toString().trim();
+      const title = (cert.title || cert.name || cert.certificateName || cert.award || cert.credential || '').toString().trim();
+      const issuer = (cert.issuer || cert.organization || cert.authority || cert.issuedBy || cert.company || cert.by || '').toString().trim();
+      const date = (cert.date || cert.year || cert.issueDate || cert.issuedDate || cert.period || '').toString().trim();
+      const url = (cert.url || cert.link || cert.credentialUrl || cert.certificateUrl || cert.verificationUrl || cert.verifyUrl || '').toString().trim();
+      const desc = (cert.description || cert.details || cert.summary || cert.desc || '').toString().trim();
       return {
         ...cert,
         id: cert.id || `cert-${idx + 1}`,
-        title,
-        name: title,
-        credential: title,
-        issuer,
-        organization: issuer,
-        authority: issuer,
+        title: title || 'Certification',
+        name: title || 'Certification',
+        certificateName: title || 'Certification',
+        award: title || 'Certification',
+        credential: title || 'Certification',
+        issuer: issuer || 'Issuing Authority',
+        organization: issuer || 'Issuing Authority',
+        authority: issuer || 'Issuing Authority',
+        issuedBy: issuer || 'Issuing Authority',
+        company: issuer || 'Issuing Authority',
         date,
         year: date,
         issueDate: date,
-        link: url,
-        url,
-        credentialUrl: url
+        issuedDate: date,
+        period: date,
+        link: url || '#',
+        url: url || '#',
+        credentialUrl: url || '#',
+        certificateUrl: url || '#',
+        verificationUrl: url || '#',
+        verifyUrl: url || '#',
+        description: desc,
+        details: desc,
+        summary: desc,
+        desc
       };
     });
 

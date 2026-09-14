@@ -56,15 +56,28 @@ export default function Certificates({ data = {} }: CertificatesProps) {
     }
   ];
 
-  const rawCertificates = (Array.isArray(data?.certificates) && data.certificates.length > 0)
+  const candidateList = (Array.isArray(data?.certificates) && data.certificates.length > 0)
     ? data.certificates
-    : (Array.isArray(data?.certifications) && data.certifications.length > 0)
-      ? data.certifications
-      : (Array.isArray(certSection?.items) && certSection.items.length > 0)
-        ? certSection.items
-        : defaultCertificates;
+    : ((Array.isArray(data?.certifications) && data.certifications.length > 0)
+        ? data.certifications
+        : ((Array.isArray(data?.awards) && data.awards.length > 0)
+            ? data.awards
+            : ((Array.isArray(data?.credentials) && data.credentials.length > 0)
+                ? data.credentials
+                : ((Array.isArray(certSection?.items) && certSection.items.length > 0)
+                    ? certSection.items
+                    : null))));
 
-  const certificates = (Array.isArray(rawCertificates) && rawCertificates.length > 0 ? rawCertificates : defaultCertificates).map((cert: any, idx: number) => {
+  const isExplicitEmpty = (Array.isArray(data?.certificates) && data.certificates.length === 0) ||
+    (Array.isArray(data?.certifications) && data.certifications.length === 0);
+
+  const rawCertificates = candidateList || (isExplicitEmpty ? [] : defaultCertificates);
+
+  if (!rawCertificates || rawCertificates.length === 0) {
+    return null;
+  }
+
+  const certificates = rawCertificates.map((cert: any, idx: number) => {
     if (typeof cert === 'string') {
       return {
         id: `cert-${idx}`,
@@ -84,11 +97,11 @@ export default function Certificates({ data = {} }: CertificatesProps) {
 
     return {
       id: cert?.id || `cert-${idx}`,
-      title: cert?.title || cert?.name || 'Certification Name',
-      issuer: cert?.issuer || cert?.organization || cert?.authority || 'Issuing Authority',
+      title: cert?.title || cert?.name || cert?.certificateName || cert?.award || 'Certification Name',
+      issuer: cert?.issuer || cert?.organization || cert?.authority || cert?.issuedBy || 'Issuing Authority',
       issueDate: cert?.issueDate || cert?.date || cert?.year || '2024',
       credentialId: cert?.credentialId || cert?.id || `ID-00${idx + 1}`,
-      verifyUrl: cert?.verifyUrl || cert?.url || cert?.link || '#',
+      verifyUrl: cert?.verifyUrl || cert?.url || cert?.link || cert?.credentialUrl || '#',
       badge: cert?.badge || 'Verified Credential',
       skillsCovered
     };

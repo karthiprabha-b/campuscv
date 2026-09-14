@@ -6,22 +6,37 @@ const _agriCerts = (typeof certificatesData !== 'undefined' && certificatesData)
 export default function Certificates({ data = {} }) {
   const [selectedCert, setSelectedCert] = useState(null);
 
-  const rawCertificates = Array.isArray(data?.certifications) && data.certifications.length > 0
+  const candidateList = (Array.isArray(data?.certifications) && data.certifications.length > 0)
     ? data.certifications
-    : (Array.isArray(data?.certificates) && data.certificates.length > 0 ? data.certificates : _agriCerts);
+    : ((Array.isArray(data?.certificates) && data.certificates.length > 0)
+        ? data.certificates
+        : ((Array.isArray(data?.awards) && data.awards.length > 0)
+            ? data.awards
+            : ((Array.isArray(data?.credentials) && data.credentials.length > 0)
+                ? data.credentials
+                : null)));
+
+  const isExplicitEmpty = (Array.isArray(data?.certifications) && data.certifications.length === 0) ||
+    (Array.isArray(data?.certificates) && data.certificates.length === 0);
+
+  const rawCertificates = candidateList || (isExplicitEmpty ? [] : _agriCerts);
+
+  if (!rawCertificates || rawCertificates.length === 0) {
+    return null;
+  }
 
   const certList = rawCertificates.map((cert, idx) => ({
     id: cert.id || `cert-${idx}`,
-    title: cert.title || cert.name || 'Professional Certification',
-    issuer: cert.issuer || cert.authority || 'Accreditation Board',
-    issueDate: cert.issueDate || cert.year || '2024',
+    title: cert.title || cert.name || cert.certificateName || cert.award || 'Professional Certification',
+    issuer: cert.issuer || cert.authority || cert.organization || cert.issuedBy || 'Accreditation Board',
+    issueDate: cert.issueDate || cert.date || cert.year || '2024',
     expiryDate: cert.expiryDate,
     credentialId: cert.credentialId || `AGRI-CRED-${1000 + idx}`,
     skillsCovered: Array.isArray(cert.skillsCovered) && cert.skillsCovered.length > 0
       ? cert.skillsCovered
-      : ['Precision Ag', 'Field Operations', 'Safety'],
+      : (Array.isArray(cert.skills) ? cert.skills : ['Precision Ag', 'Field Operations', 'Safety']),
     badgeColor: cert.badgeColor || (idx % 2 === 0 ? '#10b981' : '#3b82f6'),
-    verificationUrl: cert.verificationUrl || cert.url || cert.link
+    verificationUrl: cert.verificationUrl || cert.url || cert.link || cert.credentialUrl || '#'
   }));
 
   return (
