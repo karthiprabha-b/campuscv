@@ -36,7 +36,10 @@ export default function Education({ data = {} }) {
                 {/* Header */}
                 <div className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-full bg-cyber-950 text-cyber-brightCyan flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shrink-0">
+                    <div 
+                      className="w-12 sm:w-14 h-12 sm:h-14 rounded-full bg-cyber-950 flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shrink-0"
+                      style={{ color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}
+                    >
                       {item.institution ? item.institution.charAt(0) : 'U'}
                     </div>
                     <div>

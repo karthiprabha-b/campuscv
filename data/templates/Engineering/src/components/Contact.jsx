@@ -70,8 +70,14 @@ export default function Contact({ data = {} }) {
               {/* 1-Click Copy Email Pill */}
               <div className="p-4 sm:p-5 rounded-3xl bg-cyber-900/90 border border-cyber-700/60 flex items-center justify-between gap-3 shadow-inner">
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gradient-cyan-pill flex items-center justify-center font-bold text-cyber-950 shrink-0 shadow-cyan-glow">
-                    <Mail className="w-5 sm:w-6 h-5 sm:h-6 text-cyber-950" />
+                  <div 
+                    className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gradient-cyan-pill flex items-center justify-center font-bold text-cyber-950 shrink-0 shadow-cyan-glow"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                      color: 'var(--primary-foreground, #030712)'
+                    }}
+                  >
+                    <Mail className="w-5 sm:w-6 h-5 sm:h-6" style={{ color: 'var(--primary-foreground, #030712)' }} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] font-mono uppercase text-cyber-300">Email Address</p>
@@ -134,9 +140,13 @@ export default function Contact({ data = {} }) {
               <a
                 href={`mailto:${contact.email}`}
                 className="w-full py-3 sm:py-4 px-6 rounded-full bg-gradient-cyan-pill text-cyber-950 font-bold uppercase text-xs sm:text-sm tracking-wider shadow-cyan-glow flex items-center justify-center gap-2 transition-all hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                  color: 'var(--primary-foreground, #030712)'
+                }}
               >
-                <span>OPEN EMAIL CLIENT</span>
-                <ArrowRight className="w-4 h-4" />
+                <span style={{ color: 'var(--primary-foreground, #030712)' }}>OPEN EMAIL CLIENT</span>
+                <ArrowRight className="w-4 h-4" style={{ color: 'var(--primary-foreground, #030712)' }} />
               </a>
             </div>
           </div>

@@ -88,8 +88,14 @@ export default function Header(props = {}) {
         <div className="flex items-center justify-between">
           {/* Logo & Brand */}
           <a href="#home" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-cyan-pill flex items-center justify-center font-bold text-slate-950 shadow-cyan-glow group-hover:scale-105 transition-transform shrink-0">
-              <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
+            <div 
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold shadow-sm group-hover:scale-105 transition-transform shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                color: 'var(--primary-foreground, #030712)'
+              }}
+            >
+              <Cpu className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'var(--primary-foreground, #030712)' }} />
             </div>
             <div className="flex flex-col">
               <span
@@ -113,9 +119,14 @@ export default function Header(props = {}) {
                   href={link.href}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-cyan-pill text-slate-950 font-bold shadow-cyan-glow'
+                      ? 'font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`}
+                  style={isActive ? {
+                    background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                    color: 'var(--primary-foreground, #030712)',
+                    boxShadow: '0 0 15px -2px rgba(var(--campuscv-accent-rgb), 0.5)'
+                  } : {}}
                 >
                   {link.label}
                 </a>
@@ -153,10 +164,15 @@ export default function Header(props = {}) {
               href="#contact"
               data-node-id="button:header:cta:connect:0"
               data-node-type="button"
-              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-cyan-pill text-slate-950 font-bold text-xs uppercase tracking-wider shadow-cyan-glow flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
+              style={{
+                background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                color: 'var(--primary-foreground, #030712)',
+                boxShadow: '0 0 20px -3px rgba(var(--campuscv-accent-rgb), 0.4)'
+              }}
             >
-              <span>CONNECT</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span style={{ color: 'var(--primary-foreground, #030712)' }}>CONNECT</span>
+              <ArrowUpRight className="w-3.5 h-3.5" style={{ color: 'var(--primary-foreground, #030712)' }} />
             </a>
 
             {/* Mobile Hamburger Toggle */}

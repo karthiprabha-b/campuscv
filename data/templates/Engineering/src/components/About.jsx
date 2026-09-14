@@ -84,6 +84,10 @@ export default function About({ data = {} }) {
                 data-node-id="button:about:cta:experience:0"
                 data-node-type="button"
                 className="w-full py-3 sm:py-3.5 px-6 rounded-full bg-gradient-cyan-pill text-cyber-950 font-bold uppercase text-xs tracking-wider shadow-cyan-glow flex items-center justify-center gap-2 transition-all hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                  color: 'var(--primary-foreground, #030712)'
+                }}
               >
                 <span>CAREER CHRONICLES</span>
                 <ArrowRight className="w-3.5 h-3.5" />

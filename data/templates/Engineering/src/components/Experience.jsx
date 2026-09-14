@@ -33,7 +33,12 @@ export default function Experience({ data = {} }) {
               className="bg-gradient-to-br from-slate-50 to-white rounded-[36px] sm:rounded-[48px] lg:rounded-[56px] p-6 sm:p-8 lg:p-10 shadow-soft-elevation border border-slate-200/80 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-deep-float relative overflow-hidden"
             >
               {/* Accent Left Border Bar */}
-              <div className="absolute top-0 left-0 bottom-0 w-2.5 sm:w-3 bg-gradient-to-b from-cyber-brightCyan via-cyber-500 to-cyber-neonViolet"></div>
+              <div 
+                className="absolute top-0 left-0 bottom-0 w-2.5 sm:w-3"
+                style={{
+                  background: 'linear-gradient(to bottom, var(--campuscv-accent-light, var(--campuscv-accent)), var(--campuscv-accent), var(--campuscv-accent-dark, var(--campuscv-accent)))'
+                }}
+              ></div>
 
               <div className="space-y-6 pl-2 sm:pl-4">
                 {/* Role Header Bar */}
@@ -72,7 +77,8 @@ export default function Experience({ data = {} }) {
                     data-node-id={`text:experience:duration:${idx}:0`}
                     data-node-type="text"
                     data-cv={`experience.items[${idx}].duration`}
-                    className="px-4 py-1.5 rounded-full bg-cyber-950 text-cyber-brightCyan font-mono font-bold text-xs sm:text-sm shadow-sm"
+                    className="px-4 py-1.5 rounded-full bg-cyber-950 font-mono font-bold text-xs sm:text-sm shadow-sm"
+                    style={{ color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}
                   >
                     {item.duration}
                   </div>

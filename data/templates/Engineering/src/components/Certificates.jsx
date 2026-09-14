@@ -47,8 +47,11 @@ export default function Certificates({ data = {} }) {
                   >
                     {cert.issuer}
                   </span>
-                  <span className="flex items-center gap-1 text-[11px] font-bold text-cyber-950 bg-cyber-brightCyan/30 px-3 py-0.5 rounded-full">
-                    <CheckCircle className="w-3.5 h-3.5 text-cyber-700" /> Verified
+                  <span 
+                    className="flex items-center gap-1 text-[11px] font-bold text-cyber-950 px-3 py-0.5 rounded-full"
+                    style={{ backgroundColor: 'rgba(var(--campuscv-accent-rgb, 6, 182, 212), 0.25)' }}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" style={{ color: 'var(--campuscv-accent, #06b6d4)' }} /> Verified
                   </span>
                 </div>
 

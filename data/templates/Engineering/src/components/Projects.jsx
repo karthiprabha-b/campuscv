@@ -45,6 +45,11 @@ export default function Projects({ data = {} }) {
                   ? 'bg-gradient-cyan-pill text-cyber-950 shadow-cyan-glow scale-105'
                   : 'bg-white text-slate-700 hover:bg-cyber-50 hover:text-cyber-900 border border-slate-200'
               }`}
+              style={activeCategory === cat ? {
+                background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                color: 'var(--primary-foreground, #030712)',
+                boxShadow: '0 0 15px -2px rgba(var(--campuscv-accent-rgb), 0.5)'
+              } : {}}
             >
               {cat}
             </button>
@@ -159,6 +164,10 @@ export default function Projects({ data = {} }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 sm:p-2.5 bg-gradient-cyan-pill text-cyber-950 rounded-full shadow-cyan-glow hover:scale-105 transition-transform"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                        color: 'var(--primary-foreground, #030712)'
+                      }}
                       title="Live Deployment"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -232,6 +241,10 @@ export default function Projects({ data = {} }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-2.5 rounded-full bg-gradient-cyan-pill text-cyber-950 text-xs font-bold uppercase tracking-wider shadow-cyan-glow flex items-center gap-2"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                    color: 'var(--primary-foreground, #030712)'
+                  }}
                 >
                   <span>View Repository</span>
                   <ExternalLink className="w-3.5 h-3.5" />

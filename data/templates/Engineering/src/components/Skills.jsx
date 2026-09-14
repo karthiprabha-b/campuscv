@@ -73,6 +73,11 @@ export default function Skills({ data = {} }) {
                       ? 'bg-gradient-cyan-pill text-cyber-950 shadow-cyan-glow scale-105 ring-2 ring-cyan-400/50'
                       : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200/90 hover:text-slate-950 border border-slate-200'
                   }`}
+                  style={isActive ? {
+                    background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                    color: 'var(--primary-foreground, #030712)',
+                    boxShadow: '0 0 15px -2px rgba(var(--campuscv-accent-rgb), 0.5)'
+                  } : {}}
                 >
                   {getIcon(cat.icon || (idx === 0 ? 'Code2' : (idx === 1 ? 'Server' : 'Layers')))}
                   <span>{catTitle}</span>

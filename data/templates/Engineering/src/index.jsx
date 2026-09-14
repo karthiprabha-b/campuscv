@@ -34,22 +34,30 @@ export default function Template(props = {}) {
     return yiq >= 150 ? '#0F172A' : '#FFFFFF';
   };
 
-  const rawAccent = data?.userSelectedAccent ||
-    data?.theme?.primaryColor || 
-    data?.theme?.accentColor || 
-    data?.themeColor || 
-    data?.accentColor || 
-    data?.primaryColor || 
-    rawData?.userSelectedAccent ||
-    rawData?.theme?.primaryColor ||
-    rawData?.themeColor ||
-    rawData?.accentColor ||
-    data?.theme?.color || 
-    data?.color || 
-    '';
+  const isValidHex = (val) => typeof val === 'string' && val.trim().length > 0 && val !== 'transparent' && val !== 'none' && !val.includes('false') && !val.includes('true');
 
-  const isInvalidAccent = !rawAccent || rawAccent === 'transparent' || rawAccent === 'none';
-  const accentColor = isInvalidAccent ? '#06b6d4' : rawAccent;
+  const candidates = [
+    typeof data?.userSelectedAccent === 'string' ? data.userSelectedAccent : null,
+    typeof data?.themeColor === 'string' ? data.themeColor : null,
+    typeof data?.accentColor === 'string' ? data.accentColor : null,
+    typeof data?.primaryColor === 'string' ? data.primaryColor : null,
+    typeof data?.theme?.primaryColor === 'string' ? data.theme.primaryColor : null,
+    typeof data?.theme?.accentColor === 'string' ? data.theme.accentColor : null,
+    typeof data?.theme?.color === 'string' ? data.theme.color : null,
+    typeof data?.color === 'string' ? data.color : null,
+    typeof rawData?.userSelectedAccent === 'string' ? rawData.userSelectedAccent : null,
+    typeof rawData?.themeColor === 'string' ? rawData.themeColor : null,
+    typeof rawData?.accentColor === 'string' ? rawData.accentColor : null,
+    typeof rawData?.primaryColor === 'string' ? rawData.primaryColor : null,
+    typeof rawData?.theme?.primaryColor === 'string' ? rawData.theme.primaryColor : null,
+    typeof rawData?.theme?.accentColor === 'string' ? rawData.theme.accentColor : null,
+    typeof props?.themeColor === 'string' ? props.themeColor : null,
+    typeof props?.accentColor === 'string' ? props.accentColor : null,
+    typeof props?.userSelectedAccent === 'string' ? props.userSelectedAccent : null,
+  ];
+
+  const matchedAccent = candidates.find(isValidHex);
+  const accentColor = matchedAccent ? (matchedAccent.startsWith('#') ? matchedAccent : `#${matchedAccent}`) : '#06b6d4';
   const primaryForeground = getContrastForeground(accentColor);
 
   const cleanHex = String(accentColor || '#06b6d4').trim().replace('#', '');

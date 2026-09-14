@@ -70,8 +70,14 @@ export default function Footer(props = {}) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-12 border-b border-slate-800">
           {/* Brand */}
           <div className="flex flex-col sm:flex-row items-center gap-3.5 text-center sm:text-left">
-            <div className="w-12 h-12 rounded-full bg-gradient-cyan-pill flex items-center justify-center font-bold text-slate-950 shadow-cyan-glow shrink-0">
-              <Cpu className="w-6 h-6 text-slate-950" />
+            <div 
+              className="w-12 h-12 rounded-full bg-gradient-cyan-pill flex items-center justify-center font-bold text-slate-950 shadow-cyan-glow shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                color: 'var(--primary-foreground, #030712)'
+              }}
+            >
+              <Cpu className="w-6 h-6" style={{ color: 'var(--primary-foreground, #030712)' }} />
             </div>
             <div>
               <span
@@ -86,7 +92,8 @@ export default function Footer(props = {}) {
                 data-node-id="text:footer:brand:title:0"
                 data-node-type="text"
                 data-cv="profile.title"
-                className="text-xs text-cyan-300 font-mono mt-0.5"
+                className="text-xs font-mono mt-0.5"
+                style={{ color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}
               >
                 {profile.title || 'Senior Full-Stack & Systems Architect'}
               </p>

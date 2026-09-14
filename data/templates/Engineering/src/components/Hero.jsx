@@ -81,9 +81,9 @@ export default function Hero({ data = {} }) {
                   key={idx}
                   className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-[11px] sm:text-xs text-slate-200 font-mono shadow-sm"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--campuscv-accent)' }}></span>
                   <span className="font-semibold text-white">{badge.name}</span>
-                  <span className="text-[10px] text-cyan-300">({badge.tag})</span>
+                  <span className="text-[10px]" style={{ color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}>({badge.tag})</span>
                 </div>
               ))}
             </div>
@@ -94,10 +94,15 @@ export default function Hero({ data = {} }) {
                 href="#projects"
                 data-node-id="button:hero:cta:projects:0"
                 data-node-type="button"
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-gradient-cyan-pill text-slate-950 font-bold uppercase text-xs sm:text-sm tracking-wider shadow-cyan-glow hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold uppercase text-xs sm:text-sm tracking-wider hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                style={{
+                  background: 'linear-gradient(135deg, var(--campuscv-accent-light, var(--campuscv-accent)) 0%, var(--campuscv-accent) 100%)',
+                  color: 'var(--primary-foreground, #030712)',
+                  boxShadow: '0 0 20px -3px rgba(var(--campuscv-accent-rgb), 0.4)'
+                }}
               >
-                <span>EXPLORE PROJECTS</span>
-                <ArrowRight className="w-4 h-4" />
+                <span style={{ color: 'var(--primary-foreground, #030712)' }}>EXPLORE PROJECTS</span>
+                <ArrowRight className="w-4 h-4" style={{ color: 'var(--primary-foreground, #030712)' }} />
               </a>
             </div>
           </div>
@@ -127,7 +132,10 @@ export default function Hero({ data = {} }) {
               style={{ backgroundColor: 'rgba(3, 7, 18, 0.95)' }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                <div 
+                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs"
+                  style={{ backgroundColor: 'rgba(var(--campuscv-accent-rgb, 6, 182, 212), 0.2)', color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}
+                >
                   <Cpu className="w-4 h-4" />
                 </div>
                 <div>
@@ -138,11 +146,14 @@ export default function Hero({ data = {} }) {
             </div>
 
             <div 
-              className="absolute -top-4 right-2 sm:right-6 bg-[#030712]/95 backdrop-blur-md border border-slate-700/80 rounded-3xl p-3.5 sm:p-4 shadow-violet-glow space-y-1 animate-float-reverse hidden sm:block"
+              className="absolute -top-4 right-2 sm:right-6 bg-[#030712]/95 backdrop-blur-md border border-slate-700/80 rounded-3xl p-3.5 sm:p-4 shadow-cyan-glow space-y-1 animate-float-reverse hidden sm:block"
               style={{ backgroundColor: 'rgba(3, 7, 18, 0.95)' }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
+                <div 
+                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs"
+                  style={{ backgroundColor: 'rgba(var(--campuscv-accent-rgb, 6, 182, 212), 0.2)', color: 'var(--campuscv-accent-light, var(--campuscv-accent))' }}
+                >
                   <Shield className="w-4 h-4" />
                 </div>
                 <div>
