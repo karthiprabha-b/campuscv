@@ -45,13 +45,13 @@ export default function Sidebar({
       const val = typeof s === 'object' && s !== null ? (s.id || s.name || '') : s;
       return String(val || '').toLowerCase().trim().replace(/^home$|^intro$/, 'hero').replace(/^certificates$|^awards$/, 'certifications').replace(/^timeline$|^work$/, 'experience').replace(/^academics$/, 'education').replace(/^portfolio$/, 'projects').replace(/^tech$/, 'skills');
     };
-    const orderMap = new Map(orderList.map((id: any, idx: number) => [norm(id), idx]));
+    const orderMap = new Map<string, number>(orderList.map((id: any, idx: number) => [norm(id), idx]));
     
     sortedNavItems.sort((a, b) => {
       const aNorm = norm(a.sectionKey);
       const bNorm = norm(b.sectionKey);
-      const aIdx = orderMap.has(aNorm) ? orderMap.get(aNorm)! : 999;
-      const bIdx = orderMap.has(bNorm) ? orderMap.get(bNorm)! : 999;
+      const aIdx: number = orderMap.has(aNorm) ? (orderMap.get(aNorm) ?? 999) : 999;
+      const bIdx: number = orderMap.has(bNorm) ? (orderMap.get(bNorm) ?? 999) : 999;
       return aIdx - bIdx;
     });
   }
