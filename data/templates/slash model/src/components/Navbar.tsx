@@ -43,9 +43,10 @@ export default function Navbar({ data = {} }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const dynamicSections = Array.isArray(data?.sections) && data.sections.length > 0
-    ? data.sections
-    : ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
+  const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
+  const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+    ? data.sectionOrder
+    : defaultOrder;
 
   const navLinks = dynamicSections
     .filter((sec: any) => {

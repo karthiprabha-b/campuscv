@@ -49,11 +49,10 @@ export default function Header({
     localStorage.setItem('theme', nextTheme);
   };
 
+  const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
   const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
     ? data.sectionOrder
-    : (Array.isArray(data?.sections) && data.sections.length > 0
-      ? data.sections
-      : ['Hero', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Certificates', 'Contact']);
+    : defaultOrder;
 
   const navItems = dynamicSections
     .filter((sec: any) => {
