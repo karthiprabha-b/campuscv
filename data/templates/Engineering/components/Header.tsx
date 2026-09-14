@@ -59,11 +59,8 @@ export default function Header() {
               <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-cyber-950" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[130px] sm:max-w-none">
+              <span className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[150px] sm:max-w-none">
                 {PORTFOLIO_DATA.profile.name}
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-cyber-300 font-mono -mt-1 hidden sm:inline">
-                Systems Architect
               </span>
             </div>
           </Link>

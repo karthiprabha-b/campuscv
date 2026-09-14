@@ -96,18 +96,9 @@ export default function Header(props = {}) {
                 data-node-id="text:header:brand:name:0"
                 data-node-type="text"
                 data-cv="profile.name"
-                className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[130px] sm:max-w-none"
+                className="font-display font-bold text-white text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[150px] sm:max-w-none"
               >
                 {profile.name}
-              </span>
-              <span
-                data-node-id="text:header:brand:title:0"
-                data-node-type="text"
-                data-cv="profile.title"
-                className="text-[10px] sm:text-[11px] text-[#38bdf8] font-mono -mt-1 hidden sm:inline"
-                style={{ color: '#38bdf8' }}
-              >
-                {profile.title || 'Systems Architect'}
               </span>
             </div>
           </a>

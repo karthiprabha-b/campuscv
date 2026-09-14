@@ -34,11 +34,16 @@ export default function Template(props = {}) {
     return yiq >= 150 ? '#0F172A' : '#FFFFFF';
   };
 
-  const rawAccent = data?.theme?.primaryColor || 
+  const rawAccent = data?.userSelectedAccent ||
+    data?.theme?.primaryColor || 
     data?.theme?.accentColor || 
     data?.themeColor || 
     data?.accentColor || 
     data?.primaryColor || 
+    rawData?.userSelectedAccent ||
+    rawData?.theme?.primaryColor ||
+    rawData?.themeColor ||
+    rawData?.accentColor ||
     data?.theme?.color || 
     data?.color || 
     '';
@@ -47,16 +52,40 @@ export default function Template(props = {}) {
   const accentColor = isInvalidAccent ? '#06b6d4' : rawAccent;
   const primaryForeground = getContrastForeground(accentColor);
 
+  const cleanHex = String(accentColor || '#06b6d4').trim().replace('#', '');
+  let hex = cleanHex;
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const r = parseInt(hex.substring(0, 2), 16) || 6;
+  const g = parseInt(hex.substring(2, 4), 16) || 182;
+  const b = parseInt(hex.substring(4, 6), 16) || 212;
+
+  const dr = Math.max(0, Math.floor(r * 0.8));
+  const dg = Math.max(0, Math.floor(g * 0.8));
+  const db = Math.max(0, Math.floor(b * 0.8));
+  const darkHex = `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
+
+  const lr = Math.min(255, Math.floor(r + (255 - r) * 0.35));
+  const lg = Math.min(255, Math.floor(g + (255 - g) * 0.35));
+  const lb = Math.min(255, Math.floor(b + (255 - b) * 0.35));
+  const lightHex = `#${lr.toString(16).padStart(2, '0')}${lg.toString(16).padStart(2, '0')}${lb.toString(16).padStart(2, '0')}`;
+
   const fontFamily = data?.typography?.fontFamily || data?.fontPack || '';
   const fontSize = data?.typography?.fontSize || data?.baseFontSize || '';
 
   const dynamicStyles = {
     '--campuscv-accent': accentColor,
+    '--campuscv-accent-rgb': `${r}, ${g}, ${b}`,
+    '--campuscv-accent-dark': darkHex,
+    '--campuscv-accent-light': lightHex,
     '--cv-accent': accentColor,
     '--primary': accentColor,
     '--primary-accent': accentColor,
     '--primary-foreground': primaryForeground,
     '--color-cyan-500': accentColor,
+    '--cyber-bright-cyan': lightHex,
+    '--cyber-neon-cyan': accentColor,
+    '--cyber-neon-violet': lightHex,
+    '--cyber-electric-purple': darkHex,
     '--accent': accentColor,
     '--brand': accentColor,
     ...(fontFamily ? {

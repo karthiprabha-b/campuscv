@@ -40,13 +40,13 @@ export default function Hero({ data = {} }) {
           <div className="lg:col-span-6 space-y-6 sm:space-y-8 text-center lg:text-left">
             {/* Status Pill */}
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 shadow-inner">
-              <span className="w-8 sm:w-10 h-[2px] bg-[#38bdf8] rounded-full"></span>
+              <span className="w-8 sm:w-10 h-[2px] rounded-full" style={{ backgroundColor: 'var(--campuscv-accent, #38bdf8)' }}></span>
               <span
                 data-node-id="text:hero:availability:0"
                 data-node-type="text"
                 data-cv="profile.availability"
-                className="text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-widest text-[#38bdf8] font-mono"
-                style={{ color: '#38bdf8' }}
+                className="text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-widest font-mono"
+                style={{ color: 'var(--campuscv-accent, #38bdf8)' }}
               >
                 {profile.availability || 'AVAILABLE FOR OPPORTUNITIES & HIGH-IMPACT ROLES'}
               </span>
