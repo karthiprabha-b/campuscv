@@ -70,11 +70,16 @@ async function getJsPdfInstance(): Promise<any> {
     return (window as any).jspdf.jsPDF;
   }
 
-  // Try dynamic import
+  // Try runtime dynamic import without triggering webpack static bundle analysis
   try {
-    const jspdfModule = await import('jspdf');
-    return jspdfModule.jsPDF || (jspdfModule as any).default?.jsPDF || (jspdfModule as any).default;
+    const importDynamic = new Function('modulePath', 'return import(modulePath)');
+    const jspdfModule = await importDynamic('jspdf');
+    if (jspdfModule) {
+      return jspdfModule.jsPDF || jspdfModule.default?.jsPDF || jspdfModule.default || jspdfModule;
+    }
   } catch (e) {
+    // Continue to CDN fallback below
+  }
     // If not in node_modules on runtime, load via fast CDN
     return new Promise((resolve, reject) => {
       const existingScript = document.getElementById('jspdf-cdn-script');
