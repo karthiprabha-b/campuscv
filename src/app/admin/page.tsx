@@ -415,8 +415,8 @@ export default function AdminPage() {
                   <input type="text" defaultValue="CampusCV" className="w-full px-3.5 py-2.5 bg-[#F8F9FB] border border-[#E7E9EE] rounded-xl text-xs text-[#111318] outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-[#111318] uppercase tracking-wider font-mono">Admin Contact Email</label>
-                  <input type="email" defaultValue="admin@campuscv.com" className="w-full px-3.5 py-2.5 bg-[#F8F9FB] border border-[#E7E9EE] rounded-xl text-xs text-[#111318] outline-none" />
+                  <label className="font-bold text-[#111318] uppercase tracking-wider font-mono">Official Support / Contact Email</label>
+                  <input type="email" defaultValue="support@campuscv.com" className="w-full px-3.5 py-2.5 bg-[#F8F9FB] border border-[#E7E9EE] rounded-xl text-xs text-[#111318] outline-none" />
                 </div>
                 <div className="pt-2">
                   <button className="px-5 py-2.5 bg-purple-600 text-white font-bold rounded-xl text-xs shadow-xs">

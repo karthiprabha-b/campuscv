@@ -56,6 +56,7 @@ import {
   getUserPlanTier,
   getPlanTemplateLimit
 } from '../../utils/mockDb';
+import { downloadInvoicePdf } from '../../utils/invoicePdfGenerator';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { TemplateRecord } from '../../types/adminTemplate';
 import { getPortfolios, savePortfolio, deletePortfolio } from '../../lib/portfolioStore';
@@ -882,176 +883,12 @@ function DashboardContent() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleDownloadInvoice = (tx: any) => {
-    const buyDateObj = tx.startDate ? new Date(tx.startDate) : (tx.timestamp ? new Date(tx.timestamp) : new Date());
-    const buyDateStr = buyDateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-    const buyTimeStr = buyDateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-    let durationDays = tx.durationDays;
-    if (!durationDays) {
-      if (tx.itemName?.includes('365') || tx.planId?.includes('yearly')) durationDays = 365;
-      else if (tx.itemName?.includes('90') || tx.planId?.includes('quarterly')) durationDays = 90;
-      else durationDays = 30;
+  const handleDownloadInvoice = async (tx: any) => {
+    try {
+      await downloadInvoicePdf(tx, user, selectedPortfolio?.username);
+    } catch (err) {
+      console.error('[Invoice Download Error]', err);
     }
-
-    let expiresDateObj: Date;
-    if (tx.expiresDate) {
-      expiresDateObj = new Date(tx.expiresDate);
-    } else {
-      expiresDateObj = new Date(buyDateObj.getTime() + durationDays * 86400000);
-    }
-    const expiresDateStr = expiresDateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-
-    const customerName = tx.customerName || user?.name || user?.email?.split('@')[0] || 'Valued Customer';
-    const customerEmail = tx.customerEmail || tx.email || user?.email || 'customer@campuscv.com';
-    const paymentId = tx.paymentId || (tx.id ? 'pay_' + tx.id.replace(/^tx-/, '') : 'Online Payment');
-    const orderId = tx.orderId || tx.subscriptionId || (tx.id ? 'ord_' + tx.id.replace(/^tx-/, '') : 'RZP-DIRECT');
-    const originalPrice = tx.originalPrice ? Number(tx.originalPrice).toFixed(2) : Number(tx.price).toFixed(2);
-    const paidPrice = Number(tx.price).toFixed(2);
-    const discountAmount = tx.originalPrice ? (Number(tx.originalPrice) - Number(tx.price)).toFixed(2) : '0.00';
-
-    const invoiceDocHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head>
-  <meta charset='utf-8'>
-  <title>CampusCV Invoice - ${tx.id}</title>
-  <!--[if gte mso 9]>
-  <xml>
-    <w:WordDocument>
-      <w:View>Print</w:View>
-      <w:Zoom>100</w:Zoom>
-      <w:DoNotOptimizeForBrowser/>
-    </w:WordDocument>
-  </xml>
-  <![endif]-->
-  <style>
-    @page { size: A4 portrait; margin: 0.8in; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e1b4b; background-color: #ffffff; margin: 0; padding: 10px; line-height: 1.5; }
-    .invoice-card { width: 100%; max-width: 700px; margin: 0 auto; background: #ffffff; border: 2px solid #7c3aed; border-radius: 16px; padding: 28px; }
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    .logo-text { font-size: 26px; font-weight: 900; color: #7c3aed; letter-spacing: -0.5px; text-transform: none; }
-    .tagline { font-size: 11px; color: #64748b; font-weight: 500; }
-    .invoice-title { font-size: 20px; font-weight: 800; color: #0f172a; text-align: right; }
-    .invoice-sub { font-size: 12px; color: #64748b; text-align: right; font-family: monospace; }
-    .badge-paid { background-color: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 11px; display: inline-block; }
-    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
-    .info-table td { padding: 14px; vertical-align: top; font-size: 12px; color: #334155; }
-    .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #7c3aed; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .period-box { background: #ede9fe; border: 1px solid #c4b5fd; border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #5b21b6; font-weight: 600; }
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    .items-table th { background: #7c3aed; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 10px 12px; text-align: left; }
-    .items-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #1e293b; }
-    .totals-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .totals-table td { padding: 6px 12px; font-size: 12px; }
-    .grand-total { font-size: 18px; font-weight: 900; color: #7c3aed; border-top: 2px solid #7c3aed; border-bottom: 2px solid #7c3aed; padding: 10px 12px !important; }
-    .footer-note { margin-top: 30px; padding-top: 16px; border-top: 1px dashed #cbd5e1; text-align: center; font-size: 11px; color: #64748b; }
-  </style>
-</head>
-<body>
-  <div class="invoice-card">
-    <table class="header-table">
-      <tr>
-        <td style="vertical-align: middle;">
-          <div class="logo-text">CampusCV</div>
-          <div class="tagline">A Smarter Way to Build Your Resume &amp; Portfolio</div>
-          <div class="tagline" style="color: #94a3b8;">https://campuscv.com &bull; billing@campuscv.com</div>
-        </td>
-        <td style="vertical-align: middle; text-align: right;">
-          <div class="invoice-title">TAX INVOICE</div>
-          <div class="invoice-sub">Invoice #${tx.id}</div>
-          <div style="margin-top: 6px;"><span class="badge-paid">&#10003; PAID &amp; VERIFIED</span></div>
-        </td>
-      </tr>
-    </table>
-
-    <table class="info-table">
-      <tr>
-        <td style="width: 50%; border-right: 1px solid #e2e8f0;">
-          <div class="section-title">BILLED TO</div>
-          <strong>${customerName}</strong><br>
-          Email: ${customerEmail}<br>
-          Username: @${selectedPortfolio?.username || user?.email?.split('@')[0] || 'customer'}<br>
-          User ID: ${user?.id || 'CCV-USER'}
-        </td>
-        <td style="width: 50%;">
-          <div class="section-title">PAYMENT &amp; ORDER INFO</div>
-          <strong>Payment Mode:</strong> Razorpay AutoPay (Secured)<br>
-          <strong>Payment ID:</strong> ${paymentId}<br>
-          <strong>Order / Sub ID:</strong> ${orderId}<br>
-          <strong>Date Purchased:</strong> ${buyDateStr} at ${buyTimeStr}
-        </td>
-      </tr>
-    </table>
-
-    <!-- Subscription Period Highlight -->
-    <div class="period-box">
-      &#128197; <strong>Subscription Validity:</strong> Valid from <strong>${buyDateStr}</strong> to <strong>${expiresDateStr}</strong> (${durationDays} Days Access)
-    </div>
-
-    <!-- Itemized Table -->
-    <table class="items-table">
-      <thead>
-        <tr>
-          <th style="width: 45%;">Plan / Item Description</th>
-          <th style="width: 20%;">Validity Period</th>
-          <th style="width: 15%; text-align: right;">Original Price</th>
-          <th style="width: 20%; text-align: right;">Amount Paid</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <strong>${tx.itemName}</strong><br>
-            <span style="font-size: 11px; color: #64748b;">Full Portfolio Access, QR Code, Template Switching, Live Hosting</span>
-          </td>
-          <td>${buyDateStr} &mdash; ${expiresDateStr} (${durationDays} Days)</td>
-          <td style="text-align: right;">₹ ${originalPrice}</td>
-          <td style="text-align: right; font-weight: bold; color: #0f172a;">₹ ${paidPrice}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Totals Table -->
-    <table class="totals-table">
-      <tr>
-        <td style="width: 65%;"></td>
-        <td style="width: 20%; text-align: right; color: #64748b;">Subtotal:</td>
-        <td style="width: 15%; text-align: right; font-weight: 600;">₹ ${originalPrice}</td>
-      </tr>
-      ${tx.couponApplied ? `
-      <tr>
-        <td></td>
-        <td style="text-align: right; color: #15803d;">Coupon (${tx.couponApplied}):</td>
-        <td style="text-align: right; font-weight: 600; color: #15803d;">- ₹ ${discountAmount}</td>
-      </tr>` : ''}
-      <tr>
-        <td></td>
-        <td style="text-align: right; color: #64748b;">GST / Tax (0%):</td>
-        <td style="text-align: right; font-weight: 600;">₹ 0.00</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="grand-total" style="text-align: right;">TOTAL PAID:</td>
-        <td class="grand-total" style="text-align: right;">₹ ${paidPrice} INR</td>
-      </tr>
-    </table>
-
-    <div class="footer-note">
-      This is a computer-generated tax invoice issued by <strong>CampusCV Technologies</strong> and requires no physical signature.<br>
-      For billing queries or support, visit <a href="https://campuscv.com" style="color: #7c3aed; text-decoration: none;"><strong>campuscv.com</strong></a> or email <a href="mailto:billing@campuscv.com" style="color: #7c3aed; text-decoration: none;"><strong>billing@campuscv.com</strong></a>.
-    </div>
-  </div>
-</body>
-</html>`;
-
-    const blob = new Blob(['\ufeff', invoiceDocHtml], { type: 'application/msword;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CampusCV-Invoice-${tx.id}.doc`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   // Helpers

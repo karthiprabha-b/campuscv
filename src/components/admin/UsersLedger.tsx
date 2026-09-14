@@ -31,6 +31,7 @@ import {
   EnrichedTransaction, 
   matchUserPlan 
 } from '../../utils/adminStatsHelper';
+import { downloadInvoicePdf } from '../../utils/invoicePdfGenerator';
 
 export default function UsersLedger() {
   const [mounted, setMounted] = useState(false);
@@ -492,12 +493,13 @@ export default function UsersLedger() {
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[11px]">Payment Gateway</th>
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[11px]">Date &amp; Time</th>
                   <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[11px]">Status</th>
+                  <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[11px] text-right">Invoice PDF</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-400 font-medium">
+                    <td colSpan={8} className="py-8 text-center text-slate-400 font-medium">
                       No purchase transactions found matching the filter.
                     </td>
                   </tr>
@@ -540,6 +542,16 @@ export default function UsersLedger() {
                             <CheckCircle2 className="w-3 h-3" />
                             {t.status || 'PAID'}
                           </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => downloadInvoicePdf(t)}
+                            title="Download PDF Invoice"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-900 text-[11px] font-bold rounded-lg border border-orange-200 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5 text-orange-600" />
+                            <span>PDF</span>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -696,9 +708,19 @@ export default function UsersLedger() {
                         </div>
                         <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono pt-2 border-t border-orange-100/80">
                           <span>{new Date(tx.timestamp).toLocaleDateString()} • {tx.gateway || 'Razorpay'}</span>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase text-[9px]">
-                            {tx.status || 'PAID'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase text-[9px]">
+                              {tx.status || 'PAID'}
+                            </span>
+                            <button
+                              onClick={() => downloadInvoicePdf(tx, null, selectedUser.name)}
+                              className="px-2 py-0.5 bg-white hover:bg-orange-100 border border-orange-200 text-orange-700 rounded font-sans font-bold text-[10px] inline-flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                              title="Download PDF Invoice"
+                            >
+                              <Download className="w-2.5 h-2.5" />
+                              <span>PDF</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
