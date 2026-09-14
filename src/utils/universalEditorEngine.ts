@@ -242,107 +242,163 @@ export function createUniversalCollectionObject(collectionKey: string, existingL
   const sample = existingList && existingList.length > 0 ? existingList[0] : null;
 
   if (typeof sample === 'string' || (keyLower === 'skills' && (!sample || typeof sample === 'string'))) {
-    return '';
+    return 'New Skill';
   }
 
   // 1. Projects
-  if (keyLower === 'projects' || keyLower === 'project') {
+  if (keyLower === 'projects' || keyLower === 'project' || keyLower === 'portfolio') {
     return {
       id: `proj-${timestamp}-${random}`,
-      title: '',
-      name: '',
-      projectName: '',
-      desc: '',
-      description: '',
-      summary: '',
-      details: '',
-      tags: [],
-      technologies: [],
-      techStack: [],
-      tech: [],
-      skills: [],
-      link: '',
-      liveUrl: '',
-      githubUrl: '',
-      github: '',
-      url: '',
-      href: '',
-      category: '',
-      type: '',
-      subCategory: '',
-      image: '',
-      thumbnail: '',
-      imageUrl: '',
+      title: 'New Portfolio Project',
+      name: 'New Portfolio Project',
+      projectName: 'New Portfolio Project',
+      subtitle: 'Modern Web Application & Cloud Architecture',
+      tagline: 'Modern Web Application & Cloud Architecture',
+      desc: 'Engineered a full-stack web application with responsive UI, robust backend services, and automated CI/CD.',
+      description: 'Engineered a full-stack web application with responsive UI, robust backend services, and automated CI/CD.',
+      summary: 'Engineered a full-stack web application with responsive UI, robust backend services, and automated CI/CD.',
+      details: 'Engineered a full-stack web application with responsive UI, robust backend services, and automated CI/CD.',
+      tags: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      technologies: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      techStack: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      tech: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      link: 'https://github.com',
+      liveUrl: 'https://github.com',
+      githubUrl: 'https://github.com',
+      github: 'https://github.com',
+      url: 'https://github.com',
+      href: 'https://github.com',
+      category: 'Full Stack',
+      type: 'Web Application',
+      subCategory: 'Frontend & Backend',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+      thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+      highlights: [
+        'Designed high-performance user interface with optimized bundle size and fast render times.',
+        'Integrated RESTful APIs and real-time state management for seamless interactions.'
+      ],
+      metrics: [
+        { label: 'Performance', value: '99%' },
+        { label: 'Uptime', value: '99.9%' }
+      ],
       featured: false,
     };
   }
 
   // 2. Timeline / Experience / Work
-  if (keyLower === 'timeline' || keyLower === 'experience' || keyLower === 'work') {
+  if (keyLower === 'timeline' || keyLower === 'experience' || keyLower === 'work' || keyLower === 'workexperience') {
     return {
       id: `exp-${timestamp}-${random}`,
-      title: '',
-      role: '',
-      position: '',
-      company: '',
-      organization: '',
-      employer: '',
-      period: '',
-      date: '',
-      startDate: '',
-      endDate: '',
-      start: '',
-      end: '',
-      current: false,
-      desc: '',
-      description: '',
-      summary: '',
-      details: [],
+      title: 'Software Engineer',
+      role: 'Software Engineer',
+      position: 'Software Engineer',
+      designation: 'Software Engineer',
+      company: 'Tech Enterprise',
+      organization: 'Tech Enterprise',
+      employer: 'Tech Enterprise',
+      subtitle: 'Tech Enterprise',
+      period: '2023 – Present',
+      date: '2023 – Present',
+      duration: '2023 – Present',
+      year: '2023 – Present',
+      years: '2023 – Present',
+      startDate: '2023',
+      endDate: 'Present',
+      start: '2023',
+      end: 'Present',
+      location: 'Remote',
+      type: 'Full-Time',
+      current: true,
+      desc: 'Engineered high-performance web applications and collaborated with cross-functional product teams.',
+      description: 'Engineered high-performance web applications and collaborated with cross-functional product teams.',
+      summary: 'Engineered high-performance web applications and collaborated with cross-functional product teams.',
+      achievements: [
+        'Architected core system features delivering sub-second latency and 99.9% uptime.',
+        'Collaborated with cross-functional teams to design, test, and deploy production software.'
+      ],
+      highlights: [
+        'Architected core system features delivering sub-second latency and 99.9% uptime.',
+        'Collaborated with cross-functional teams to design, test, and deploy production software.'
+      ],
+      details: [
+        'Architected core system features delivering sub-second latency and 99.9% uptime.',
+        'Collaborated with cross-functional teams to design, test, and deploy production software.'
+      ],
+      techStack: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+      technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+      skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+      tags: ['Engineering', 'Product'],
       featured: false,
     };
   }
 
   // 3. Education
-  if (keyLower === 'education' || keyLower === 'edu') {
+  if (keyLower === 'education' || keyLower === 'edu' || keyLower === 'academics') {
     return {
       id: `edu-${timestamp}-${random}`,
-      title: '',
-      degree: '',
-      credential: '',
-      school: '',
-      university: '',
-      institution: '',
-      company: '',
-      period: '',
-      date: '',
-      startYear: '',
-      endYear: '',
-      start: '',
-      end: '',
-      gpa: '',
-      department: '',
-      specialization: '',
-      desc: '',
-      description: '',
+      title: 'Bachelor of Technology',
+      degree: 'Bachelor of Technology',
+      qualification: 'Bachelor of Technology',
+      credential: 'Bachelor of Technology',
+      school: 'University Institute of Technology',
+      university: 'University Institute of Technology',
+      institution: 'University Institute of Technology',
+      college: 'University Institute of Technology',
+      company: 'University Institute of Technology',
+      field: 'Computer Science & Engineering',
+      fieldOfStudy: 'Computer Science & Engineering',
+      department: 'Computer Science & Engineering',
+      specialization: 'Computer Science & Engineering',
+      major: 'Computer Science & Engineering',
+      period: '2020 – 2024',
+      duration: '2020 – 2024',
+      year: '2020 – 2024',
+      years: '2020 – 2024',
+      date: '2020 – 2024',
+      startYear: '2020',
+      endYear: '2024',
+      startDate: '2020',
+      endDate: '2024',
+      start: '2020',
+      end: '2024',
+      gpa: '8.8 / 10.0',
+      grade: '8.8 / 10.0',
+      cgpa: '8.8 / 10.0',
+      location: 'Campus City',
+      honors: 'First Class with Distinction',
+      desc: 'Core coursework in Algorithms, Data Structures, Operating Systems, and Distributed Computing.',
+      description: 'Core coursework in Algorithms, Data Structures, Operating Systems, and Distributed Computing.',
+      highlights: [
+        'Specialized in Algorithms, Distributed Systems, and Modern Software Engineering.',
+        'Participated in university hackathons and led the developer student club.'
+      ],
+      keyCourses: ['Data Structures & Algorithms', 'Operating Systems', 'Database Management', 'Computer Networks'],
+      courses: ['Data Structures & Algorithms', 'Operating Systems', 'Database Management', 'Computer Networks'],
       featured: false,
     };
   }
 
   // 4. Certifications / Certificates / Awards
-  if (keyLower === 'certifications' || keyLower === 'certificates' || keyLower === 'awards') {
+  if (keyLower === 'certifications' || keyLower === 'certificates' || keyLower === 'awards' || keyLower === 'achievements') {
     return {
       id: `cert-${timestamp}-${random}`,
-      name: '',
-      title: '',
-      credential: '',
-      issuer: '',
-      organization: '',
-      date: '',
-      year: '',
-      issueDate: '',
-      link: '',
-      url: '',
-      credentialUrl: '',
+      name: 'Professional Cloud & Engineering Certification',
+      title: 'Professional Cloud & Engineering Certification',
+      credential: 'Professional Cloud & Engineering Certification',
+      issuer: 'Technical Certification Authority',
+      organization: 'Technical Certification Authority',
+      authority: 'Technical Certification Authority',
+      issuedBy: 'Technical Certification Authority',
+      date: '2024',
+      year: '2024',
+      issueDate: '2024',
+      link: 'https://credentials.example.com',
+      url: 'https://credentials.example.com',
+      credentialUrl: 'https://credentials.example.com',
+      desc: 'Demonstrated proficiency in building, deploying, and maintaining production cloud systems.',
+      description: 'Demonstrated proficiency in building, deploying, and maintaining production cloud systems.',
     };
   }
 
@@ -369,16 +425,17 @@ export function createUniversalCollectionObject(collectionKey: string, existingL
       if (typeof val === 'boolean') cloned[k] = false;
       else if (typeof val === 'number') cloned[k] = 0;
       else if (Array.isArray(val)) cloned[k] = [];
+      else if (typeof val === 'string' && val.length > 0) cloned[k] = val;
       else cloned[k] = '';
     });
     return cloned;
   }
 
-  // Fallback empty object
+  // Fallback object
   return {
     id: `item-${timestamp}-${random}`,
-    title: '',
-    name: '',
+    title: 'New Item',
+    name: 'New Item',
     description: '',
     desc: '',
     featured: false,

@@ -412,14 +412,41 @@ function EditorInner({ id }: { id: string }) {
       setByPath(updated, fieldPath, value);
 
       // Auto-sync canonicalProfile and root fields for collection edits
-      const collectionKeys = ['education', 'experience', 'projects', 'skills', 'certifications'];
+      const collectionKeys = ['education', 'experience', 'timeline', 'work', 'workExperience', 'projects', 'skills', 'certifications', 'certificates', 'awards', 'services', 'testimonials'];
       collectionKeys.forEach(col => {
         if (fieldPath === col || fieldPath.startsWith(`${col}.`) || fieldPath.startsWith(`${col}[`)) {
-          if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
-            updated.canonicalProfile[col] = updated[col];
-          }
-          if (updated.data && typeof updated.data === 'object') {
-            updated.data[col] = updated[col];
+          // If experience or timeline is edited, mirror to both
+          if (col === 'experience' || col === 'timeline' || col === 'work' || col === 'workExperience') {
+            const expList = updated[col] || updated.experience || updated.timeline || [];
+            updated.experience = expList;
+            updated.timeline = expList;
+            updated.work = expList;
+            updated.workExperience = expList;
+            if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+              updated.canonicalProfile.experience = expList;
+            }
+            if (updated.data && typeof updated.data === 'object') {
+              updated.data.experience = expList;
+              updated.data.timeline = expList;
+            }
+          } else if (col === 'certifications' || col === 'certificates' || col === 'awards') {
+            const certList = updated[col] || updated.certifications || updated.certificates || updated.awards || [];
+            updated.certifications = certList;
+            updated.certificates = certList;
+            updated.awards = certList;
+            if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+              updated.canonicalProfile.certifications = certList;
+            }
+            if (updated.data && typeof updated.data === 'object') {
+              updated.data.certifications = certList;
+            }
+          } else {
+            if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+              updated.canonicalProfile[col] = updated[col];
+            }
+            if (updated.data && typeof updated.data === 'object') {
+              updated.data[col] = updated[col];
+            }
           }
         }
       });

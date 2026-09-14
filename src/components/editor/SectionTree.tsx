@@ -633,21 +633,35 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
   };
 
   const handleAddItem = (dataKey: keyof PortfolioData | string, sectionId: string) => {
-    let targetKey = dataKey as string;
-    if ((targetKey === 'experience' || targetKey === 'timeline') && Array.isArray(portfolio.timeline) && portfolio.timeline.length > 0 && (!portfolio.experience || portfolio.experience.length === 0)) {
-      targetKey = 'timeline';
-    } else if (targetKey === 'experience' || targetKey === 'timeline') {
-      targetKey = 'experience';
-    }
+    const rawKey = String(dataKey || sectionId).toLowerCase().trim();
+    let canonicalKey = rawKey;
+    if (rawKey === 'timeline' || rawKey === 'work' || rawKey === 'workexperience') canonicalKey = 'experience';
+    if (rawKey === 'certificates' || rawKey === 'awards' || rawKey === 'achievements') canonicalKey = 'certifications';
+    if (rawKey === 'academics') canonicalKey = 'education';
+    if (rawKey === 'portfolio') canonicalKey = 'projects';
 
-    const currentList = getSectionItems(portfolio, targetKey);
-    const newItem = createUniversalCollectionObject(targetKey, currentList);
-    const updated = [...currentList, newItem];
+    const currentList = getSectionItems(portfolio, canonicalKey);
+    const newItem = createUniversalCollectionObject(canonicalKey, currentList);
+    const updatedList = [...currentList, newItem];
 
     const deletedNodes = { ...((portfolio as any)?.deletedNodes || {}) };
     delete deletedNodes[`section:${sectionId}:root:section:0`];
     delete deletedNodes[sectionId];
-    delete deletedNodes[targetKey];
+    delete deletedNodes[canonicalKey];
+    delete deletedNodes[rawKey];
+    Object.keys(deletedNodes).forEach(k => {
+      if (k.toLowerCase().includes(sectionId.toLowerCase()) || k.toLowerCase().includes(canonicalKey.toLowerCase())) {
+        delete deletedNodes[k];
+      }
+    });
+
+    const hiddenNodes = { ...((portfolio as any)?.hiddenNodes || {}) };
+    delete hiddenNodes[sectionId];
+    delete hiddenNodes[`section:${sectionId}:root:section:0`];
+
+    const hiddenFields = (portfolio.hiddenFields || []).filter(
+      (f: string) => f !== sectionId && f !== `sections.${sectionId}` && f !== canonicalKey
+    );
 
     const activatedSections = Array.isArray((portfolio as any)?.activatedSections)
       ? [...((portfolio as any)?.activatedSections || [])]
@@ -655,48 +669,105 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
     if (!activatedSections.includes(sectionId)) {
       activatedSections.push(sectionId);
     }
-
-    if (onFieldChange) {
-      onFieldChange(targetKey, updated);
-      onFieldChange('deletedNodes', deletedNodes);
-      onFieldChange('activatedSections', activatedSections);
+    if (!activatedSections.includes(canonicalKey)) {
+      activatedSections.push(canonicalKey);
     }
+
+    const sections = Array.isArray(portfolio.sections) ? [...portfolio.sections] : ['hero', 'about', 'skills', 'projects', 'experience', 'contact'];
+    if (!sections.includes(sectionId)) {
+      sections.push(sectionId);
+    }
+
+    const updatedPortfolio: any = {
+      ...portfolio,
+      [canonicalKey]: updatedList,
+      sections,
+      activatedSections,
+      deletedNodes,
+      hiddenNodes,
+      hiddenFields,
+    };
+
+    // Synchronize twin keys
+    if (canonicalKey === 'experience') {
+      updatedPortfolio.timeline = updatedList;
+      updatedPortfolio.work = updatedList;
+      updatedPortfolio.workExperience = updatedList;
+    } else if (canonicalKey === 'certifications') {
+      updatedPortfolio.certificates = updatedList;
+      updatedPortfolio.awards = updatedList;
+    }
+
+    if (updatedPortfolio.canonicalProfile && typeof updatedPortfolio.canonicalProfile === 'object') {
+      updatedPortfolio.canonicalProfile[canonicalKey] = updatedList;
+      if (canonicalKey === 'experience') {
+        updatedPortfolio.canonicalProfile.experience = updatedList;
+      }
+    }
+
+    if (onPortfolioChange) {
+      onPortfolioChange(updatedPortfolio);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updatedPortfolio);
+    }
+
     setExpandedSections(prev => new Set(prev).add(sectionId));
 
-    const newIdx = updated.length - 1;
-    const isList = targetKey === 'skills' || typeof newItem === 'string';
-    const itemId = typeof newItem === 'object' && newItem?.id ? newItem.id : `item-${targetKey}-${newIdx}`;
+    const newIdx = updatedList.length - 1;
+    const isList = canonicalKey === 'skills' || typeof newItem === 'string';
+    const itemId = typeof newItem === 'object' && newItem?.id ? newItem.id : `item-${canonicalKey}-${newIdx}`;
 
     setTimeout(() => {
       setSelectedElement({
         id: itemId,
-        fieldPath: `${targetKey}[${newIdx}]`,
+        fieldPath: `${canonicalKey}[${newIdx}]`,
         elementType: isList ? 'list' : 'card',
         sectionId: sectionId,
         index: newIdx,
-        label: typeof newItem === 'string' ? newItem : (newItem.title || newItem.name || 'New Item')
+        label: typeof newItem === 'string' ? newItem : (newItem.title || newItem.name || newItem.role || 'New Item')
       });
       setInspectorMode(isList ? 'list' : 'card');
     }, 50);
   };
 
   const handleDeleteItem = (dataKey: string, itemIdx: number, itemId?: string) => {
-    let targetKey = dataKey;
-    if ((targetKey === 'experience' || targetKey === 'timeline') && Array.isArray(portfolio.timeline) && portfolio.timeline.length > 0) {
-      targetKey = 'timeline';
-    }
-    const currentList = getSectionItems(portfolio, targetKey);
-    const updated = currentList.filter((item: any, i: number) => {
+    const rawKey = String(dataKey).toLowerCase().trim();
+    let canonicalKey = rawKey;
+    if (rawKey === 'timeline' || rawKey === 'work' || rawKey === 'workexperience') canonicalKey = 'experience';
+    if (rawKey === 'certificates' || rawKey === 'awards' || rawKey === 'achievements') canonicalKey = 'certifications';
+    if (rawKey === 'academics') canonicalKey = 'education';
+    if (rawKey === 'portfolio') canonicalKey = 'projects';
+
+    const currentList = getSectionItems(portfolio, canonicalKey);
+    const updatedList = currentList.filter((item: any, i: number) => {
       if (itemId && typeof item === 'object' && item?.id) {
         return item.id !== itemId;
       }
       return i !== itemIdx;
     });
-    if (onFieldChange) {
-      onFieldChange(targetKey, updated);
-      if (targetKey === 'timeline' && Array.isArray(portfolio.experience)) {
-        onFieldChange('experience', updated);
-      }
+
+    const updatedPortfolio: any = {
+      ...portfolio,
+      [canonicalKey]: updatedList,
+    };
+
+    if (canonicalKey === 'experience') {
+      updatedPortfolio.timeline = updatedList;
+      updatedPortfolio.work = updatedList;
+      updatedPortfolio.workExperience = updatedList;
+    } else if (canonicalKey === 'certifications') {
+      updatedPortfolio.certificates = updatedList;
+      updatedPortfolio.awards = updatedList;
+    }
+
+    if (updatedPortfolio.canonicalProfile && typeof updatedPortfolio.canonicalProfile === 'object') {
+      updatedPortfolio.canonicalProfile[canonicalKey] = updatedList;
+    }
+
+    if (onPortfolioChange) {
+      onPortfolioChange(updatedPortfolio);
+    } else if (onFieldChange) {
+      onFieldChange('_FULL_PORTFOLIO_UPDATE_', updatedPortfolio);
     }
   };
 

@@ -244,6 +244,29 @@ export default function SchemaSidebarRenderer({
     onPortfolioChange(updated);
   };
 
+  const syncTwinCollections = (target: any, key: string, list: any[]) => {
+    if (key === 'experience' || key === 'timeline' || key === 'work' || key === 'workExperience') {
+      target.experience = list;
+      target.timeline = list;
+      target.work = list;
+      target.workExperience = list;
+      if (target.canonicalProfile && typeof target.canonicalProfile === 'object') {
+        target.canonicalProfile.experience = list;
+      }
+    } else if (key === 'certifications' || key === 'certificates' || key === 'awards') {
+      target.certifications = list;
+      target.certificates = list;
+      target.awards = list;
+      if (target.canonicalProfile && typeof target.canonicalProfile === 'object') {
+        target.canonicalProfile.certifications = list;
+      }
+    } else {
+      if (target.canonicalProfile && typeof target.canonicalProfile === 'object') {
+        target.canonicalProfile[key] = list;
+      }
+    }
+  };
+
   // Array operations
   const handleAddItem = (section: EditorSectionSchema) => {
     const updated = { ...portfolio };
@@ -263,6 +286,7 @@ export default function SchemaSidebarRenderer({
 
     list.push(newItem);
     (updated as any)[section.id] = list;
+    syncTwinCollections(updated, section.id, list);
     onPortfolioChange(updated);
   };
 
@@ -271,6 +295,7 @@ export default function SchemaSidebarRenderer({
     const list = Array.isArray((updated as any)[sectionId]) ? [...(updated as any)[sectionId]] : [];
     list.splice(idx, 1);
     (updated as any)[sectionId] = list;
+    syncTwinCollections(updated, sectionId, list);
     onPortfolioChange(updated);
   };
 
@@ -281,6 +306,7 @@ export default function SchemaSidebarRenderer({
       const dup = { ...list[idx], id: `${sectionId}-${Date.now()}` };
       list.splice(idx + 1, 0, dup);
       (updated as any)[sectionId] = list;
+      syncTwinCollections(updated, sectionId, list);
       onPortfolioChange(updated);
     }
   };
@@ -294,6 +320,7 @@ export default function SchemaSidebarRenderer({
       list[idx] = list[targetIdx];
       list[targetIdx] = temp;
       (updated as any)[sectionId] = list;
+      syncTwinCollections(updated, sectionId, list);
       onPortfolioChange(updated);
     }
   };

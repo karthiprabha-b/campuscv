@@ -147,15 +147,21 @@ export default function UniversalAddModal({
     }
 
     // Collection item target (Projects, Skills, Experience, Education, Certifications, Social Links)
-    const actualKey = (dataKey === 'experience' && !portfolio?.experience && Array.isArray(portfolio?.timeline))
-      ? 'timeline'
-      : ((dataKey === 'education' && !portfolio?.education && Array.isArray(portfolio?.timeline)) ? 'timeline' : dataKey);
+    const rawKey = dataKey;
+    let canonicalKey = rawKey;
+    if (rawKey === 'timeline' || rawKey === 'work' || rawKey === 'workexperience') canonicalKey = 'experience';
+    if (rawKey === 'certificates' || rawKey === 'awards' || rawKey === 'achievements') canonicalKey = 'certifications';
+    if (rawKey === 'academics') canonicalKey = 'education';
+    if (rawKey === 'portfolio') canonicalKey = 'projects';
 
-    const targetList = Array.isArray((portfolio as any)?.[actualKey]) ? (portfolio as any)[actualKey] : [];
-    const newItem = createUniversalCollectionObject(actualKey, targetList);
+    const targetList = Array.isArray((portfolio as any)?.[canonicalKey])
+      ? (portfolio as any)[canonicalKey]
+      : (Array.isArray((portfolio as any)?.[rawKey]) ? (portfolio as any)[rawKey] : []);
+
+    const newItem = createUniversalCollectionObject(canonicalKey, targetList);
     const updatedList = [...targetList, newItem];
 
-    const sectionName = actualKey === 'timeline' ? 'experience' : actualKey;
+    const sectionName = canonicalKey;
     let updatedSections = Array.isArray(portfolio?.sections)
       ? [...(portfolio?.sections || [])]
       : ['hero', 'about', 'skills', 'projects', 'experience', 'contact'];
@@ -171,36 +177,69 @@ export default function UniversalAddModal({
     if (!activatedSections.includes(sectionName)) {
       activatedSections.push(sectionName);
     }
+    if (!activatedSections.includes(canonicalKey)) {
+      activatedSections.push(canonicalKey);
+    }
 
-    // Clear any deletedNodes entries hiding this collection
+    // Clear any deletedNodes or hiddenNodes entries hiding this collection
     const deletedNodes = { ...(portfolio?.deletedNodes || {}) };
+    delete deletedNodes[`section:${sectionName}:root:section:0`];
+    delete deletedNodes[sectionName];
+    delete deletedNodes[canonicalKey];
+    delete deletedNodes[rawKey];
     Object.keys(deletedNodes).forEach((k) => {
-      if (k.toLowerCase().includes(sectionName.toLowerCase()) || k.toLowerCase().includes(actualKey.toLowerCase())) {
+      if (k.toLowerCase().includes(sectionName.toLowerCase()) || k.toLowerCase().includes(canonicalKey.toLowerCase())) {
         delete deletedNodes[k];
       }
     });
 
-    const updatedPortfolio = {
+    const hiddenNodes = { ...((portfolio as any)?.hiddenNodes || {}) };
+    delete hiddenNodes[sectionName];
+    delete hiddenNodes[`section:${sectionName}:root:section:0`];
+
+    const hiddenFields = (portfolio?.hiddenFields || []).filter(
+      (f: string) => f !== sectionName && f !== `sections.${sectionName}` && f !== canonicalKey
+    );
+
+    const updatedPortfolio: any = {
       ...(portfolio || {}),
-      [actualKey]: updatedList,
+      [canonicalKey]: updatedList,
       sections: updatedSections,
       activatedSections,
       deletedNodes,
+      hiddenNodes,
+      hiddenFields,
     };
+
+    if (canonicalKey === 'experience') {
+      updatedPortfolio.timeline = updatedList;
+      updatedPortfolio.work = updatedList;
+      updatedPortfolio.workExperience = updatedList;
+    } else if (canonicalKey === 'certifications') {
+      updatedPortfolio.certificates = updatedList;
+      updatedPortfolio.awards = updatedList;
+    }
+
+    if (updatedPortfolio.canonicalProfile && typeof updatedPortfolio.canonicalProfile === 'object') {
+      updatedPortfolio.canonicalProfile[canonicalKey] = updatedList;
+      if (canonicalKey === 'experience') {
+        updatedPortfolio.canonicalProfile.experience = updatedList;
+      }
+    }
 
     onPortfolioChange(updatedPortfolio as PortfolioData);
 
     const newIdx = updatedList.length - 1;
-    const isList = actualKey === 'skills' || typeof newItem === 'string';
+    const isList = canonicalKey === 'skills' || typeof newItem === 'string';
 
     setTimeout(() => {
       setSelectedElement({
-        id: `item-${actualKey}-${newIdx}`,
-        fieldPath: `${actualKey}[${newIdx}]`,
+        id: `item-${canonicalKey}-${newIdx}`,
+        fieldPath: `${canonicalKey}[${newIdx}]`,
         elementType: isList ? 'list' : 'card',
         sectionId: sectionName,
         index: newIdx,
-        label: typeof newItem === 'string' ? newItem : (newItem.title || newItem.name || newItem.degree || 'New Item'),
+        label: typeof newItem === 'string' ? newItem : (newItem.title || newItem.name || newItem.degree || newItem.role || 'New Item'),
       });
       setInspectorMode(isList ? 'list' : 'card');
     }, 50);

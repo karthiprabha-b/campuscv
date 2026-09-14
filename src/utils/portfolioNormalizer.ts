@@ -215,12 +215,114 @@ export function normalizePortfolio(raw: any): PortfolioData {
       return boundProps.skills !== undefined ? boundProps.skills : canonicalSkills;
     })();
 
+    const resolvedExperienceRaw = (Array.isArray(raw.experience) && raw.experience.length > 0)
+      ? raw.experience
+      : (Array.isArray(raw.timeline) && raw.timeline.length > 0
+        ? raw.timeline
+        : (Array.isArray(raw.work) && raw.work.length > 0
+          ? raw.work
+          : (Array.isArray(raw.workExperience) && raw.workExperience.length > 0
+            ? raw.workExperience
+            : (boundProps.experience !== undefined ? boundProps.experience : (canonicalProfile.experience || [])))));
+
+    const normalizedExperience = (Array.isArray(resolvedExperienceRaw) ? resolvedExperienceRaw : []).map((exp: any, idx: number) => {
+      if (typeof exp === 'string') {
+        return {
+          id: `exp-${idx + 1}`,
+          role: exp,
+          title: exp,
+          position: exp,
+          company: '',
+          organization: '',
+          employer: '',
+          subtitle: '',
+          period: '',
+          duration: '',
+          year: '',
+          startDate: '',
+          endDate: '',
+          start: '',
+          end: '',
+          current: false,
+          desc: '',
+          description: '',
+          summary: '',
+          achievements: [],
+          highlights: [],
+          details: [],
+          techStack: [],
+          technologies: [],
+          skills: [],
+          tags: []
+        };
+      }
+      const r = (exp.role || exp.title || exp.position || exp.designation || exp.headline || '').toString().trim();
+      const c = (exp.company || exp.organization || exp.employer || exp.company_name || exp.subtitle || '').toString().trim();
+      const start = (exp.startDate || exp.startYear || exp.start || exp.from || '').toString().trim();
+      const end = (exp.endDate || exp.endYear || exp.end || exp.to || (exp.current ? 'Present' : '')).toString().trim();
+      const period = (exp.period || exp.duration || exp.years || exp.year || (start && end ? `${start} – ${end}` : (start || end || ''))).toString().trim();
+      const desc = (exp.description || exp.desc || exp.summary || '').toString().trim();
+      const achievements: string[] = Array.isArray(exp.achievements) && exp.achievements.length > 0
+        ? exp.achievements.map((a: any) => typeof a === 'string' ? a.trim() : (a?.title || String(a || ''))).filter(Boolean)
+        : (Array.isArray(exp.highlights) && exp.highlights.length > 0
+          ? exp.highlights.map((h: any) => typeof h === 'string' ? h.trim() : String(h || '')).filter(Boolean)
+          : (Array.isArray(exp.bullets) && exp.bullets.length > 0
+            ? exp.bullets.map((b: any) => typeof b === 'string' ? b.trim() : String(b || '')).filter(Boolean)
+            : (Array.isArray(exp.details) && exp.details.length > 0
+              ? exp.details.map((d: any) => typeof d === 'string' ? d.trim() : String(d || '')).filter(Boolean)
+              : (desc ? [desc] : []))));
+
+      const techStack: string[] = Array.isArray(exp.techStack) && exp.techStack.length > 0
+        ? exp.techStack.map((t: any) => typeof t === 'string' ? t.trim() : (t?.name || String(t || ''))).filter(Boolean)
+        : (Array.isArray(exp.technologies) && exp.technologies.length > 0
+          ? exp.technologies.map((t: any) => typeof t === 'string' ? t.trim() : (t?.name || String(t || ''))).filter(Boolean)
+          : (Array.isArray(exp.skills) && exp.skills.length > 0
+            ? exp.skills.map((s: any) => typeof s === 'string' ? s.trim() : (s?.name || String(s || ''))).filter(Boolean)
+            : (Array.isArray(exp.tags) && exp.tags.length > 0
+              ? exp.tags.map((tg: any) => typeof tg === 'string' ? tg.trim() : (tg?.name || String(tg || ''))).filter(Boolean)
+              : [])));
+
+      return {
+        ...exp,
+        id: exp.id || `exp-${idx + 1}`,
+        role: r,
+        title: r,
+        position: r,
+        designation: r,
+        company: c,
+        organization: c,
+        employer: c,
+        subtitle: c,
+        startDate: start,
+        endDate: end,
+        start,
+        end,
+        current: Boolean(exp.current || /present|current/i.test(end || period)),
+        period,
+        duration: period,
+        year: period,
+        years: period,
+        desc,
+        description: desc,
+        summary: desc,
+        achievements,
+        highlights: achievements,
+        details: achievements,
+        techStack,
+        technologies: techStack,
+        skills: techStack,
+        tags: techStack
+      };
+    });
+
     const resolvedCertifications = (() => {
       const candidateList = Array.isArray(raw.certifications) && raw.certifications.length > 0
         ? raw.certifications
-        : (Array.isArray(raw.awards) && raw.awards.length > 0
+        : (Array.isArray(raw.certificates) && raw.certificates.length > 0
+          ? raw.certificates
+          : (Array.isArray(raw.awards) && raw.awards.length > 0
             ? raw.awards
-            : (boundProps.certifications !== undefined ? boundProps.certifications : (canonicalProfile.certifications || [])));
+            : (boundProps.certifications !== undefined ? boundProps.certifications : (canonicalProfile.certifications || []))));
       
       if (Array.isArray(candidateList) && candidateList.length > 0) {
         const hasReal = candidateList.some((c: any) => !isExactDemoCertTitle(c.title || c.name || ''));
@@ -230,6 +332,83 @@ export function normalizePortfolio(raw: any): PortfolioData {
       }
       return candidateList;
     })();
+
+    const normalizedCertifications = (Array.isArray(resolvedCertifications) ? resolvedCertifications : []).map((cert: any, idx: number) => {
+      if (typeof cert === 'string') {
+        return {
+          id: `cert-${idx + 1}`,
+          title: cert,
+          name: cert,
+          issuer: '',
+          organization: '',
+          date: '',
+          year: '',
+          issueDate: '',
+          link: '',
+          url: '',
+          credentialUrl: ''
+        };
+      }
+      const title = (cert.title || cert.name || cert.credential || '').toString().trim();
+      const issuer = (cert.issuer || cert.organization || cert.authority || cert.issuedBy || '').toString().trim();
+      const date = (cert.date || cert.year || cert.issueDate || '').toString().trim();
+      const url = (cert.url || cert.link || cert.credentialUrl || '').toString().trim();
+      return {
+        ...cert,
+        id: cert.id || `cert-${idx + 1}`,
+        title,
+        name: title,
+        credential: title,
+        issuer,
+        organization: issuer,
+        authority: issuer,
+        date,
+        year: date,
+        issueDate: date,
+        link: url,
+        url,
+        credentialUrl: url
+      };
+    });
+
+    const normalizedProjects = (Array.isArray(raw.projects) ? raw.projects : (boundProps.projects !== undefined ? boundProps.projects : (canonicalProfile.projects || []))).map((proj: any, idx: number) => {
+      if (typeof proj === 'string') {
+        return {
+          id: `proj-${idx + 1}`,
+          title: proj,
+          name: proj,
+          description: '',
+          desc: '',
+          tags: [],
+          technologies: [],
+          techStack: [],
+          skills: []
+        };
+      }
+      const title = (proj.title || proj.name || proj.projectName || '').toString().trim();
+      const desc = (proj.description || proj.desc || proj.summary || '').toString().trim();
+      const tags = Array.isArray(proj.tags) && proj.tags.length > 0
+        ? proj.tags
+        : (Array.isArray(proj.technologies) && proj.technologies.length > 0
+          ? proj.technologies
+          : (Array.isArray(proj.techStack) && proj.techStack.length > 0
+            ? proj.techStack
+            : (Array.isArray(proj.skills) && proj.skills.length > 0 ? proj.skills : [])));
+      return {
+        ...proj,
+        id: proj.id || `proj-${idx + 1}`,
+        title,
+        name: title,
+        description: desc,
+        desc,
+        tags,
+        technologies: tags,
+        techStack: tags,
+        skills: tags,
+        metrics: Array.isArray(proj.metrics) ? proj.metrics : [],
+        highlights: Array.isArray(proj.highlights) ? proj.highlights : []
+      };
+    });
 
     const resolvedLocation = boundProps.location || raw.location || [canonicalProfile.personal?.city, canonicalProfile.personal?.state, canonicalProfile.personal?.country].filter(Boolean).join(', ') || raw.personal?.location || raw.profile?.location || '';
 
@@ -279,8 +458,11 @@ export function normalizePortfolio(raw: any): PortfolioData {
         image: resolvedImg,
         photo: resolvedImg
       },
-      projects: Array.isArray(raw.projects) ? raw.projects : (boundProps.projects !== undefined ? boundProps.projects : []),
-      experience: Array.isArray(raw.experience) ? raw.experience : (boundProps.experience !== undefined ? boundProps.experience : []),
+      projects: normalizedProjects,
+      experience: normalizedExperience,
+      timeline: normalizedExperience,
+      work: normalizedExperience,
+      workExperience: normalizedExperience,
       skills: resolvedSkills,
       education: (Array.isArray(raw.education) && raw.education.length > 0 ? raw.education : (canonicalProfile.education || boundProps.education || [])).map((edu: any, idx: number) => {
         const start = (edu.startDate || edu.startYear || edu.start || edu.from || '').toString().trim();
@@ -310,7 +492,9 @@ export function normalizePortfolio(raw: any): PortfolioData {
           specialization: field
         };
       }),
-      certifications: resolvedCertifications,
+      certifications: normalizedCertifications,
+      certificates: normalizedCertifications,
+      awards: normalizedCertifications,
       services: Array.isArray(raw.services) ? raw.services : (boundProps.services !== undefined ? boundProps.services : []),
       testimonials: Array.isArray(raw.testimonials) ? raw.testimonials : (boundProps.testimonials !== undefined ? boundProps.testimonials : []),
       personal: {
