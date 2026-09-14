@@ -1,4 +1,5 @@
 import { UserProfile } from './mockDb';
+import { CAMPUSCV_TRANSPARENT_LOGO_BASE64 } from './logoBase64';
 
 export interface InvoiceTransactionData {
   id: string;
@@ -24,40 +25,6 @@ export interface InvoiceTransactionData {
 }
 
 /**
- * Loads an image from a URL or relative path into an HTMLImageElement and gets base64 / Image element
- */
-const loadImageDataUrl = (src: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      return reject(new Error('Window not available'));
-    }
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const dataURL = canvas.toDataURL('image/png');
-          resolve(dataURL);
-        } else {
-          resolve(src);
-        }
-      } catch (err) {
-        resolve(src);
-      }
-    };
-    img.onerror = () => {
-      resolve(src);
-    };
-    img.src = src;
-  });
-};
-
-/**
  * Dynamically loads the jsPDF library from bundle or CDN fallback
  */
 async function getJsPdfInstance(): Promise<any> {
@@ -80,37 +47,38 @@ async function getJsPdfInstance(): Promise<any> {
   } catch (e) {
     // Continue to CDN fallback below
   }
-    // If not in node_modules on runtime, load via fast CDN
-    return new Promise((resolve, reject) => {
-      const existingScript = document.getElementById('jspdf-cdn-script');
-      if (existingScript) {
-        let retries = 0;
-        const interval = setInterval(() => {
-          if ((window as any).jspdf?.jsPDF) {
-            clearInterval(interval);
-            resolve((window as any).jspdf.jsPDF);
-          } else if (retries++ > 30) {
-            clearInterval(interval);
-            reject(new Error('Failed to load jsPDF library'));
-          }
-        }, 100);
-        return;
-      }
 
-      const script = document.createElement('script');
-      script.id = 'jspdf-cdn-script';
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      script.async = true;
-      script.onload = () => {
+  // If not in node_modules on runtime, load via fast CDN
+  return new Promise((resolve, reject) => {
+    const existingScript = document.getElementById('jspdf-cdn-script');
+    if (existingScript) {
+      let retries = 0;
+      const interval = setInterval(() => {
         if ((window as any).jspdf?.jsPDF) {
+          clearInterval(interval);
           resolve((window as any).jspdf.jsPDF);
-        } else {
-          reject(new Error('jsPDF loaded but constructor not found.'));
+        } else if (retries++ > 30) {
+          clearInterval(interval);
+          reject(new Error('Failed to load jsPDF library'));
         }
-      };
-      script.onerror = () => reject(new Error('Failed to load jsPDF from CDN.'));
-      document.body.appendChild(script);
-    });
+      }, 100);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'jspdf-cdn-script';
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.async = true;
+    script.onload = () => {
+      if ((window as any).jspdf?.jsPDF) {
+        resolve((window as any).jspdf.jsPDF);
+      } else {
+        reject(new Error('jsPDF loaded but constructor not found.'));
+      }
+    };
+    script.onerror = () => reject(new Error('Failed to load jsPDF from CDN.'));
+    document.body.appendChild(script);
+  });
 }
 
 /**
@@ -118,6 +86,7 @@ async function getJsPdfInstance(): Promise<any> {
  * 
  * Requirements:
  * - Logo: /Transperant (1).png (CampusCV official transparent logo)
+ * - Issued by: CampusCV
  * - Attribution: "Powered by Infowaves Media Agency"
  * - Official Email: "support@campuscv.com"
  */
@@ -184,25 +153,16 @@ export async function downloadInvoicePdf(
   doc.setFillColor(124, 58, 237); // #7c3aed (Purple accent line)
   doc.rect(0, 5, pageWidth, 1.5, 'F');
 
-  let currentY = 16;
+  let currentY = 15;
 
-  // 4. Try loading logo image
-  let logoLoaded = false;
+  // 4. Render Transparent Official Logo (Embedded Base64 for 100% Reliability)
   try {
-    const logoBase64 = await loadImageDataUrl('/Transperant (1).png');
-    if (logoBase64 && logoBase64.startsWith('data:image')) {
-      // Aspect ratio for 950x228 = ~4.16 : 1
-      const logoW = 55;
-      const logoH = 13.5;
-      doc.addImage(logoBase64, 'PNG', margin, currentY, logoW, logoH);
-      logoLoaded = true;
-    }
-  } catch {
-    logoLoaded = false;
-  }
-
-  // Fallback text if logo didn't render as image
-  if (!logoLoaded) {
+    // Original dimensions: 989 x 250 (aspect ratio: 3.956)
+    const logoW = 60;
+    const logoH = 15.16;
+    doc.addImage(CAMPUSCV_TRANSPARENT_LOGO_BASE64, 'PNG', margin, currentY - 1, logoW, logoH);
+  } catch (err) {
+    // Fallback text if image cannot render
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(20);
     doc.setTextColor(79, 70, 229);
@@ -250,11 +210,11 @@ export async function downloadInvoicePdf(
   
   currentY += 4.5;
   
-  // Issuer details (Left)
+  // Issuer details (Left) - ISSUED BY CAMPUSCV ONLY
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(30, 41, 59);
-  doc.text('Issued by: CampusCV Technologies', margin, currentY);
+  doc.text('Issued by: CampusCV', margin, currentY);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
@@ -463,7 +423,7 @@ export async function downloadInvoicePdf(
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(30, 41, 59);
-  doc.text('CampusCV Technologies  •  Powered by Infowaves Media Agency', pageWidth / 2, footerY + 5, { align: 'center' });
+  doc.text('CampusCV  •  Powered by Infowaves Media Agency', pageWidth / 2, footerY + 5, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
