@@ -1081,18 +1081,18 @@ function DashboardContent() {
         <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
           {/* Left: Logo */}
-          <div className="flex items-center shrink-0 sm:w-[220px]">
+          <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center shrink-0">
-              <CampusCvLogo className="h-7 sm:h-9 w-auto" />
+              <CampusCvLogo className="h-7 sm:h-8 lg:h-9 w-auto" />
             </Link>
           </div>
 
           {/* Center: Nav Tabs — properly centered pill */}
-          <nav className="hidden sm:flex items-center justify-center gap-1 p-1 bg-zinc-100/80 rounded-2xl border border-zinc-200/60 shadow-xs">
+          <nav className="hidden sm:flex items-center justify-center gap-0.5 sm:gap-1 p-1 bg-zinc-100/80 rounded-2xl border border-zinc-200/60 shadow-xs">
             <button
               type="button"
               onClick={() => setActiveTab('overview')}
-              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
                   : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
@@ -1104,7 +1104,7 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setActiveTab('templates')}
-              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'templates'
                   ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
                   : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
@@ -1116,7 +1116,7 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setActiveTab('billing')}
-              className={`px-3.5 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 lg:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === 'billing'
                   ? 'bg-white text-[#7C3AED] shadow-xs font-bold'
                   : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/60'
@@ -1127,19 +1127,19 @@ function DashboardContent() {
           </nav>
 
           {/* Right: User dropdown & neat divider docked together */}
-          <div className="flex items-center gap-3 shrink-0 sm:w-[220px] justify-end">
-            <div className="h-5 w-px bg-zinc-200 hidden sm:block" />
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 justify-end">
+            <div className="h-5 w-px bg-zinc-200 hidden md:block" />
 
             {/* User dropdown with avatar & name */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowUserDropdown(prev => !prev)}
-                className="flex items-center gap-1.5 sm:gap-2.5 pl-2 sm:pl-3 pr-1.5 sm:pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 pr-1.5 sm:pr-2 py-1.5 rounded-xl hover:bg-zinc-100 transition-colors cursor-pointer"
               >
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 shadow-xs">
                   {user?.name?.[0] || 'U'}
                 </div>
-                <span className="text-sm font-semibold text-zinc-800 hidden md:block max-w-[120px] lg:max-w-[160px] truncate">{user?.name || 'User'}</span>
+                <span className="text-xs sm:text-sm font-semibold text-zinc-800 hidden md:block max-w-[100px] lg:max-w-[160px] truncate">{user?.name || 'User'}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
               </button>
 

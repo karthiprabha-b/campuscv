@@ -695,7 +695,7 @@ export default function OnboardingPage() {
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                         {[
                           { id: 'Software & Data Science', icon: Code2, title: 'Software & Data', desc: 'Development, data engineering & more' },
                           { id: 'Product & UI/UX Design', icon: Palette, title: 'Design & Creative', desc: 'Product design, UX research & visual art' },
@@ -722,35 +722,34 @@ export default function OnboardingPage() {
                                 }));
                                 setTimeout(() => { setDirection(1); nextStep(); }, 150);
                               }}
-                              className={`p-3.5 sm:p-6 sm:h-[130px] rounded-[16px] sm:rounded-[18px] text-left border transition-all duration-200 hover:-translate-y-[2px] relative flex items-center sm:items-stretch sm:flex-col justify-between gap-3 group cursor-pointer ${
+                              className={`p-4 sm:p-5 lg:p-6 rounded-[18px] sm:rounded-[20px] text-left border transition-all duration-200 hover:-translate-y-[2px] relative flex flex-col justify-between min-h-[136px] sm:min-h-[150px] gap-3.5 sm:gap-4 group cursor-pointer ${
                                 selected
-                                  ? 'border-2 border-[#7C3AED] bg-[#FAF7FF] shadow-md shadow-purple-900/5'
-                                  : 'border-[#E5E7EB] bg-white hover:border-purple-300 hover:bg-[#FAF7FF]'
+                                  ? 'border-2 border-[#7C3AED] bg-[#FAF7FF] shadow-md shadow-purple-900/5 ring-1 ring-[#7C3AED]/20'
+                                  : 'border-[#E5E7EB] bg-white hover:border-purple-300 hover:bg-[#FAF7FF] shadow-xs'
                               }`}
                             >
-                              <div className="flex items-center justify-between sm:w-full shrink-0">
-                                <div className={`p-2 sm:p-2.5 rounded-xl transition-colors ${selected ? 'bg-purple-600 text-white' : 'bg-purple-50 text-purple-600 group-hover:bg-purple-100'}`}>
+                              <div className="flex items-center justify-between w-full">
+                                <div className={`p-2.5 sm:p-3 rounded-xl transition-colors ${selected ? 'bg-purple-600 text-white' : 'bg-purple-50 text-purple-600 group-hover:bg-purple-100'}`}>
                                   <c.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
+                                <div>
+                                  {selected ? (
+                                    <div className="w-5 h-5 rounded-full bg-[#7C3AED] flex items-center justify-center shadow-xs">
+                                      <Check className="w-3 h-3 text-white" />
+                                    </div>
+                                  ) : (
+                                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-purple-500 transition-colors" />
+                                  )}
+                                </div>
                               </div>
 
-                              <div className="flex-1 min-w-0 sm:mt-2">
-                                <div className={`font-semibold text-[15px] sm:text-[18px] font-bricolage leading-tight mb-0.5 ${selected ? 'text-purple-900' : 'text-[#111111]'}`}>
+                              <div className="w-full">
+                                <div className={`font-bold text-[15px] sm:text-[17px] font-bricolage leading-snug mb-1 ${selected ? 'text-purple-900' : 'text-[#111111]'}`}>
                                   {c.title}
                                 </div>
-                                <div className="text-xs sm:text-[14px] text-[#6B7280] leading-snug line-clamp-1">
+                                <div className="text-xs sm:text-[13.5px] text-[#6B7280] leading-relaxed">
                                   {c.desc}
                                 </div>
-                              </div>
-
-                              <div className="shrink-0 sm:absolute sm:top-6 sm:right-6">
-                                {selected ? (
-                                  <div className="w-5 h-5 rounded-full bg-[#7C3AED] flex items-center justify-center">
-                                    <Check className="w-3 h-3 text-white" />
-                                  </div>
-                                ) : (
-                                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-purple-500 transition-colors" />
-                                )}
                               </div>
                             </button>
                           );
