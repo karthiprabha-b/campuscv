@@ -1,4 +1,3 @@
-import { jsPDF } from 'jspdf';
 import { UserProfile } from './mockDb';
 
 export interface InvoiceTransactionData {
@@ -48,17 +47,67 @@ const loadImageDataUrl = (src: string): Promise<string> => {
           resolve(src);
         }
       } catch (err) {
-        // Fallback to src
         resolve(src);
       }
     };
     img.onerror = () => {
-      // Fallback
       resolve(src);
     };
     img.src = src;
   });
 };
+
+/**
+ * Dynamically loads the jsPDF library from bundle or CDN fallback
+ */
+async function getJsPdfInstance(): Promise<any> {
+  if (typeof window === 'undefined') {
+    throw new Error('PDF generation is only supported on the client side.');
+  }
+
+  // Check window global
+  if ((window as any).jspdf?.jsPDF) {
+    return (window as any).jspdf.jsPDF;
+  }
+
+  // Try dynamic import
+  try {
+    const jspdfModule = await import('jspdf');
+    return jspdfModule.jsPDF || (jspdfModule as any).default?.jsPDF || (jspdfModule as any).default;
+  } catch (e) {
+    // If not in node_modules on runtime, load via fast CDN
+    return new Promise((resolve, reject) => {
+      const existingScript = document.getElementById('jspdf-cdn-script');
+      if (existingScript) {
+        let retries = 0;
+        const interval = setInterval(() => {
+          if ((window as any).jspdf?.jsPDF) {
+            clearInterval(interval);
+            resolve((window as any).jspdf.jsPDF);
+          } else if (retries++ > 30) {
+            clearInterval(interval);
+            reject(new Error('Failed to load jsPDF library'));
+          }
+        }, 100);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'jspdf-cdn-script';
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.async = true;
+      script.onload = () => {
+        if ((window as any).jspdf?.jsPDF) {
+          resolve((window as any).jspdf.jsPDF);
+        } else {
+          reject(new Error('jsPDF loaded but constructor not found.'));
+        }
+      };
+      script.onerror = () => reject(new Error('Failed to load jsPDF from CDN.'));
+      document.body.appendChild(script);
+    });
+  }
+}
 
 /**
  * Generates and downloads a clean, professional PDF Tax Invoice for CampusCV users.
@@ -112,8 +161,9 @@ export async function downloadInvoicePdf(
     ? Number(tx.discountAmount) 
     : (originalPriceNum > paidPriceNum ? originalPriceNum - paidPriceNum : 0);
 
-  // 2. Initialize jsPDF (A4 portrait: 210mm x 297mm)
-  const doc = new jsPDF({
+  // 2. Initialize dynamic jsPDF (A4 portrait: 210mm x 297mm)
+  const JsPDFClass = await getJsPdfInstance();
+  const doc = new JsPDFClass({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4'
