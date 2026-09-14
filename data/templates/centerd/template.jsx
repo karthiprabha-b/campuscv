@@ -1,17 +1,19 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Education from './components/Education';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Skills from './components/Skills';
-import Certificates from './components/Certificates';
-import Contact from './components/Contact';
-import ScrollObserver from './components/ScrollObserver';
-import ProjectModal from './components/ProjectModal';
-import ServiceModal from './components/ServiceModal';
-import './styles/styles.css';
+import Sidebar from './src/components/Sidebar';
+import Hero from './src/components/Hero';
+import About from './src/components/About';
+import Education from './src/components/Education';
+import Experience from './src/components/Experience';
+import Projects from './src/components/Projects';
+import Skills from './src/components/Skills';
+import Certificates from './src/components/Certificates';
+import Contact from './src/components/Contact';
+import ScrollObserver from './src/components/ScrollObserver';
+import ProjectModal from './src/components/ProjectModal';
+import ServiceModal from './src/components/ServiceModal';
+import './src/styles/styles.css';
 
 export default function Template(props = {}) {
   const rawData =
@@ -24,7 +26,7 @@ export default function Template(props = {}) {
     {};
   const data = typeof rawData === 'object' && rawData !== null ? rawData : {};
 
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -66,35 +68,59 @@ export default function Template(props = {}) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const s = String(sectionName || '').toLowerCase().trim();
-    if (data[`${s}.visible`] === false) return false;
-    if (data[`${s}Visible`] === false) return false;
-    if (data[s] && typeof data[s] === 'object' && data[s].visible === false) return false;
-    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${s}`) || data.hiddenFields.includes(s))) {
+    const key = String(sectionName || '').toLowerCase().trim();
+
+    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
       return false;
     }
+    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
+      return false;
+    }
+    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
+      return false;
+    }
+
+    if (data[`${key}.visible`] !== undefined) return Boolean(data[`${key}.visible`]);
+    if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
+    if (data[`${key}Visible`] !== undefined) return Boolean(data[`${key}Visible`]);
+    if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
+
+    // If section array is explicitly empty in user's data, hide the section
+    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
+    if (Array.isArray(collection) && collection.length === 0) {
+      if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
+      return false;
+    }
+
     return true;
   };
 
   const handleNavigate = (sectionId) => {
-    setActiveSection(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      element.classList.add('in-view', 'aos-animate');
-      element.querySelectorAll('.reveal-on-scroll, .txt-fx, .letter').forEach((child) => {
-        child.classList.add('in-view', 'aos-animate');
-      });
+    const cleanId = String(sectionId || '').toLowerCase().trim();
+    setActiveSection(cleanId === 'home' ? 'hero' : cleanId);
+
+    const doc = document;
+    const targetElement =
+      doc.getElementById(cleanId) ||
+      doc.getElementById(sectionId) ||
+      doc.querySelector(`[data-cv-section="${cleanId}"]`) ||
+      doc.querySelector(`[data-cv-section="${sectionId}"]`) ||
+      doc.getElementById('home');
+
+    if (targetElement) {
+      try {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {}
     }
   };
 
   useEffect(() => {
-    const sections = ['home', 'about', 'education', 'experience', 'projects', 'skills', 'certificates', 'contact'];
+    const sections = ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certificates', 'contact'];
 
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 250;
       for (const sectionId of sections) {
-        const element = document.getElementById(sectionId);
+        const element = document.getElementById(sectionId) || (sectionId === 'hero' ? document.getElementById('home') : null);
         if (element) {
           const top = element.offsetTop;
           const height = element.offsetHeight;
@@ -111,6 +137,72 @@ export default function Template(props = {}) {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  const sectionComponentMap = {
+    hero: (
+      <Hero
+        key="hero"
+        data={data}
+        onNavigate={handleNavigate}
+        onSelectService={(service) => setSelectedService(service)}
+      />
+    ),
+    about: <About key="about" data={data} />,
+    education: <Education key="education" data={data} />,
+    experience: <Experience key="experience" data={data} />,
+    projects: (
+      <Projects
+        key="projects"
+        data={data}
+        onSelectProject={(project) => setSelectedProject(project)}
+      />
+    ),
+    skills: <Skills key="skills" data={data} />,
+    certificates: <Certificates key="certificates" data={data} />,
+    contact: <Contact key="contact" data={data} />,
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certificates',
+    'contact',
+  ];
+
+  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawId) => {
+    let id = String(rawId).toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'certifications') id = 'certificates';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech') id = 'skills';
+    if (id === 'footer' || id === 'sidebar') return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
 
   return (
     <div
@@ -137,31 +229,17 @@ export default function Template(props = {}) {
             activeSection={activeSection}
             onNavigate={handleNavigate}
             onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+            isSectionVisible={isSectionVisible}
           />
 
           {/* Right Main Content */}
           <main className="col-lg-10 p-0 main-content">
             <div className="container py-4 py-xl-5">
               <div className="justify-content-center px-1 mx-1 px-xl-5 mx-xl-5">
-                {isSectionVisible('hero') && (
-                  <Hero
-                    data={data}
-                    onNavigate={handleNavigate}
-                    onSelectService={(service) => setSelectedService(service)}
-                  />
-                )}
-                {isSectionVisible('about') && <About data={data} />}
-                {isSectionVisible('education') && <Education data={data} />}
-                {isSectionVisible('experience') && <Experience data={data} />}
-                {isSectionVisible('projects') && (
-                  <Projects
-                    data={data}
-                    onSelectProject={(project) => setSelectedProject(project)}
-                  />
-                )}
-                {isSectionVisible('skills') && <Skills data={data} />}
-                {isSectionVisible('certificates') && <Certificates data={data} />}
-                {isSectionVisible('contact') && <Contact data={data} />}
+                {mainSectionIds.map((secId) => {
+                  if (!isSectionVisible(secId)) return null;
+                  return sectionComponentMap[secId] || null;
+                })}
               </div>
             </div>
           </main>
