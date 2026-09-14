@@ -1290,8 +1290,9 @@ function executeUploadedPackage(
       const exp = requireModule(candKey, 'root');
       let comp = extractReactComponent(exp);
       if (comp) {
-        // If template contains Next.js root layout (layout.tsx), wrap PageComponent inside RootLayout
-        const layoutMatch = findInFiles(sectionFiles, 'src/app/layout.tsx') || findInFiles(sectionFiles, 'src/app/layout.jsx') || findInFiles(sectionFiles, 'app/layout.tsx');
+        // If candidate entry is a Next.js app page (page.tsx/jsx) and template contains root layout, wrap PageComponent inside RootLayout
+        const isAppPage = candKey.includes('/page.') || candKey.startsWith('page.') || candKey.endsWith('app/page.tsx') || candKey.endsWith('app/page.jsx');
+        const layoutMatch = isAppPage ? (findInFiles(sectionFiles, 'src/app/layout.tsx') || findInFiles(sectionFiles, 'src/app/layout.jsx') || findInFiles(sectionFiles, 'app/layout.tsx')) : null;
         if (layoutMatch && candKey !== layoutMatch.key) {
           try {
             const layoutExp = requireModule(layoutMatch.key, 'root');
