@@ -68,7 +68,7 @@ export default function Skills({ data = {} }) {
                     e.stopPropagation();
                     setActiveCategoryIndex(idx);
                   }}
-                  className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer select-none ${
+                  className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer select-none ${
                     isActive
                       ? 'bg-gradient-cyan-pill text-cyber-950 shadow-cyan-glow scale-105 ring-2 ring-cyan-400/50'
                       : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200/90 hover:text-slate-950 border border-slate-200'
@@ -85,11 +85,8 @@ export default function Skills({ data = {} }) {
           </div>
         )}
 
-        {/* Clean, Simple Skill Tiles Grid with smooth animation */}
-        <div 
-          key={`skills-grid-${activeCategoryIndex}`}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch transition-opacity duration-300"
-        >
+        {/* Stable Skill Tiles Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
           {currentSkills.map((skill, idx) => {
             const skillName = typeof skill === 'string' ? skill : (skill.name || skill.title || skill.skill || `Skill ${idx + 1}`);
             const skillLevel = typeof skill === 'object' ? (skill.level || skill.proficiency || 90) : 90;
@@ -101,7 +98,7 @@ export default function Skills({ data = {} }) {
                 data-node-id={`container:skills:card:${activeCategoryIndex}:${idx}`}
                 data-node-type="container"
                 data-cv={`skills[${idx}]`}
-                className="bg-slate-50 hover:bg-cyber-50/50 rounded-[24px] sm:rounded-[32px] p-5 sm:p-6 border border-slate-200/80 shadow-soft-elevation transition-all duration-300 hover:-translate-y-1 flex items-center justify-between gap-4 group"
+                className="bg-slate-50 hover:bg-cyber-50/50 rounded-[24px] sm:rounded-[32px] p-5 sm:p-6 border border-slate-200/80 shadow-soft-elevation transition-transform duration-200 hover:-translate-y-1 flex items-center justify-between gap-4 group"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className="w-10 h-10 rounded-2xl bg-cyber-950 group-hover:bg-gradient-cyan-pill group-hover:text-cyber-950 text-cyber-brightCyan flex items-center justify-center font-bold text-xs font-mono shrink-0 shadow-sm transition-colors">

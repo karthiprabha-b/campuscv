@@ -43,7 +43,7 @@ export default function Skills() {
             <button
               key={cat.title}
               onClick={() => setActiveCategoryIndex(idx)}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-colors duration-200 ${
                 activeCategoryIndex === idx
                   ? 'bg-gradient-cyan-pill text-cyber-950 shadow-cyan-glow scale-105'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -60,7 +60,7 @@ export default function Skills() {
           {activeCategory.skills.map((skill, idx) => (
             <div
               key={skill.name}
-              className="bg-slate-50 hover:bg-cyber-50/50 rounded-[28px] sm:rounded-[36px] p-5 sm:p-6 border border-slate-200/80 shadow-soft-elevation transition-all duration-300 hover:-translate-y-1 flex items-center justify-between gap-4 group"
+              className="bg-slate-50 hover:bg-cyber-50/50 rounded-[28px] sm:rounded-[36px] p-5 sm:p-6 border border-slate-200/80 shadow-soft-elevation transition-transform duration-200 hover:-translate-y-1 flex items-center justify-between gap-4 group"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="w-10 h-10 rounded-2xl bg-cyber-950 group-hover:bg-gradient-cyan-pill group-hover:text-cyber-950 text-cyber-brightCyan flex items-center justify-center font-bold text-xs font-mono shrink-0 shadow-sm transition-colors">
