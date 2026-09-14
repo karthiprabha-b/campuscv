@@ -208,6 +208,30 @@ async function main() {
         if (mf) manifest = JSON.parse(mf);
       } catch (e) {}
 
+      function getBestTemplateCode(files) {
+        const candidates = [
+          'src/template.jsx', 'src/template.tsx',
+          'src/index.jsx', 'src/index.tsx',
+          'src/App.tsx', 'src/App.jsx',
+          'src/app/page.tsx', 'src/app/page.jsx',
+          'template.jsx', 'template.tsx',
+          'index.jsx', 'index.tsx',
+          'App.jsx', 'App.tsx'
+        ];
+        for (const cand of candidates) {
+          const code = files[cand];
+          if (code && typeof code === 'string' && code.length > 200 && !code.trim().startsWith('export { default }') && !code.trim().startsWith('import Template from')) {
+            return code;
+          }
+        }
+        for (const cand of candidates) {
+          if (files[cand] && typeof files[cand] === 'string' && files[cand].length > 50) {
+            return files[cand];
+          }
+        }
+        return '';
+      }
+
       newRegistry[tmpl.id] = {
         id: tmpl.id,
         name: tmpl.name || manifest.name || tmpl.id,
@@ -224,7 +248,7 @@ async function main() {
         updatedAt: new Date().toISOString(),
         versions: [{ versionId: 'v1', version: manifest.version || '1.0.0', sourcePath: `data/templates/${tmpl.dir}`, createdAt: new Date().toISOString() }],
         sectionFiles: files,
-        templateCode: files['src/template.jsx'] || files['template.jsx'] || files['src/index.jsx'] || files['src/App.tsx'] || files['src/app/page.tsx'] || '',
+        templateCode: getBestTemplateCode(files),
         customCSS: files['src/styles/styles.css'] || files['src/styles/globals.css'] || files['src/index.css'] || files['src/globals.css'] || ''
       };
     }

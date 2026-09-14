@@ -35,7 +35,28 @@ export default function Sidebar({
     { id: 'contact', label: 'Contact', sectionKey: 'contact' },
   ];
 
-  const navItems = defaultNavItems.filter(item => {
+  const orderList = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0 
+    ? data.sectionOrder 
+    : (Array.isArray(data?.sections) && data.sections.length > 0 ? data.sections : null);
+
+  let sortedNavItems = [...defaultNavItems];
+  if (orderList) {
+    const norm = (s: any) => {
+      const val = typeof s === 'object' && s !== null ? (s.id || s.name || '') : s;
+      return String(val || '').toLowerCase().trim().replace(/^home$|^intro$/, 'hero').replace(/^certificates$|^awards$/, 'certifications').replace(/^timeline$|^work$/, 'experience').replace(/^academics$/, 'education').replace(/^portfolio$/, 'projects').replace(/^tech$/, 'skills');
+    };
+    const orderMap = new Map(orderList.map((id: any, idx: number) => [norm(id), idx]));
+    
+    sortedNavItems.sort((a, b) => {
+      const aNorm = norm(a.sectionKey);
+      const bNorm = norm(b.sectionKey);
+      const aIdx = orderMap.has(aNorm) ? orderMap.get(aNorm)! : 999;
+      const bIdx = orderMap.has(bNorm) ? orderMap.get(bNorm)! : 999;
+      return aIdx - bIdx;
+    });
+  }
+
+  const navItems = sortedNavItems.filter(item => {
     if (typeof isSectionVisible === 'function') {
       return isSectionVisible(item.sectionKey) || isSectionVisible(item.id);
     }

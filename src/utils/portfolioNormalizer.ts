@@ -605,7 +605,7 @@ export function normalizePortfolio(raw: any): PortfolioData {
       dataVersion: raw.dataVersion !== undefined ? raw.dataVersion : (raw._dataVersion || 1),
 
       // Explicitly preserve top-level editor states and customization:
-      sectionOrder: Array.isArray(raw.sectionOrder) && raw.sectionOrder.length > 0 ? raw.sectionOrder : (Array.isArray(raw.section_order) && raw.section_order.length > 0 ? raw.section_order : (Array.isArray(raw.sections) && raw.sections.length > 0 ? raw.sections : undefined)),
+      sectionOrder: Array.isArray(raw.sectionOrder) && raw.sectionOrder.length > 0 ? raw.sectionOrder : (Array.isArray(raw.section_order) && raw.section_order.length > 0 ? raw.section_order : undefined),
       sections: Array.isArray(raw.sections) && raw.sections.length > 0 ? raw.sections : (Array.isArray(raw.sectionOrder) && raw.sectionOrder.length > 0 ? raw.sectionOrder : undefined),
       deletedNodes: raw.deletedNodes || {},
       hiddenNodes: raw.hiddenNodes || {},

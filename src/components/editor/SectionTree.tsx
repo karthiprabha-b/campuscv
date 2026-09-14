@@ -427,11 +427,9 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
       return k;
     });
 
-    const activeTemplateSectionList = liveDomSections.length > 0
-      ? liveDomSections
-      : (normalizedManifest.length > 0
-        ? normalizedManifest
-        : (templateBuiltin || ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact']));
+    const baseTemplateSectionList = normalizedManifest.length > 0
+      ? normalizedManifest
+      : (templateBuiltin || ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact']);
 
     // If user has customized sectionOrder, order available template sections accordingly
     const userOrder = (Array.isArray(portfolio.sectionOrder) && portfolio.sectionOrder.length > 0)
@@ -448,14 +446,14 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
         if (cleanId === 'timeline') cleanId = 'experience';
         if (cleanId === 'home' || cleanId === 'intro') cleanId = 'hero';
 
-        if (activeTemplateSectionList.includes(cleanId) && !addedIds.has(cleanId)) {
+        if (baseTemplateSectionList.includes(cleanId) && !addedIds.has(cleanId)) {
           orderedSectionIds.push(cleanId);
           addedIds.add(cleanId);
         }
       });
     }
 
-    activeTemplateSectionList.forEach((id: string) => {
+    baseTemplateSectionList.forEach((id: string) => {
       let cleanId = id.toLowerCase().trim();
       if (cleanId === 'certificates' || cleanId === 'awards') cleanId = 'certifications';
       if (cleanId === 'timeline') cleanId = 'experience';
@@ -483,7 +481,7 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
     });
 
     return ordered.length > 0 ? ordered : Object.values(configMap);
-  }, [portfolio.sectionOrder, portfolio.sections, portfolio.templateId, (portfolio as any).layoutStyle, liveDomSections, detectedSections]);
+  }, [portfolio.sectionOrder, portfolio.sections, portfolio.templateId, (portfolio as any).layoutStyle, detectedSections]);
 
   const toggleVisibility = (id: string) => {
     const isCurrentlyHidden = !isVisible(id);
