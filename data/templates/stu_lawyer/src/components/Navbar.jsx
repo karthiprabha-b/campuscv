@@ -18,7 +18,6 @@ const SECTION_LABEL_MAP = {
 };
 
 export default function Navbar(props = {}) {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const incoming = props?.data || props?.portfolio || props || {};
@@ -28,22 +27,6 @@ export default function Navbar(props = {}) {
   const name = hero?.name || data?.name || data?.personalInfo?.name || "Alexander Vance";
   const rawTitle = hero?.title || data?.title || data?.personalInfo?.title || "Executive Legal Counsel";
   const title = String(rawTitle || "Executive Legal Counsel");
-
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const isScrolled = (window.scrollY || document.documentElement.scrollTop || 0) > 20;
-          setScrolled(prev => (prev !== isScrolled ? isScrolled : prev));
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const sectionList = Array.isArray(props?.visibleSections) && props.visibleSections.length > 0
     ? props.visibleSections
@@ -79,9 +62,7 @@ export default function Navbar(props = {}) {
 
   return (
     <header
-      className={`sticky top-0 left-0 right-0 z-50 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-shadow duration-300 ${
-        scrolled ? 'shadow-luxury' : 'shadow-sm'
-      }`}
+      className="sticky top-0 left-0 right-0 z-50 bg-[#FAF8F5] border-b border-stone-200/80 shadow-xs"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
         {/* Left: Branding & Logo */}

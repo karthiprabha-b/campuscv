@@ -58,8 +58,18 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
 }) => {
   const contentOverrides = data?.contentOverrides || {};
   const styleOverrides = data?.styleOverrides || {};
-  const rawCerts = data?.certifications || data?.certificates;
-  const certificationsList = Array.isArray(rawCerts) && rawCerts.length > 0 ? rawCerts : DEFAULT_CERTIFICATIONS;
+  const candidateList = Array.isArray(data?.certifications) && data.certifications.length > 0
+    ? data.certifications
+    : (Array.isArray(data?.certificates) && data.certificates.length > 0
+      ? data.certificates
+      : (Array.isArray(data?.awards) && data.awards.length > 0
+        ? data.awards
+        : (Array.isArray(data?.credentials) && data.credentials.length > 0 ? data.credentials : null)));
+
+  const isExplicitEmpty = (Array.isArray(data?.certifications) && data.certifications.length === 0) ||
+    (Array.isArray(data?.certificates) && data.certificates.length === 0);
+
+  const certificationsList = candidateList || (isExplicitEmpty ? [] : DEFAULT_CERTIFICATIONS);
   const { accentClass } = useTheme();
 
   const title =
@@ -101,10 +111,12 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = React.memo(
         </div>
 
         <div className="text-xs text-zinc-400 font-mono">
-          Verified Credentials
+          {certificationsList.length} Verified Credential{certificationsList.length === 1 ? '' : 's'}
         </div>
-      </div>      {/* Certifications Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto" data-cv-section="certifications" data-cv-collection="certifications.items">
+      </div>
+
+      {/* Certifications Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto max-h-[58vh] overflow-y-auto pr-1" data-cv-section="certifications" data-cv-collection="certifications.items">
         {certificationsList.map((cert: any, idx: number) => {
           const skills = Array.isArray(cert.skills) ? cert.skills : [];
           const certUrl = cert.credentialUrl || (cert as any).url || (cert as any).link || '#';
