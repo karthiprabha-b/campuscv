@@ -39,13 +39,14 @@ try {
   const stat = fs.statSync(zipFile);
   console.log(`ZIP_SUCCESS: Size = ${(stat.size / 1024 / 1024).toFixed(2)} MB`);
 
+  fs.copyFileSync(zipFile, path.resolve(__dirname, '../data/templates/photography-portfolio.zip'));
   // Copy to public/templates
   const publicDir = path.resolve(__dirname, '../public/templates');
   if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
   fs.copyFileSync(zipFile, path.join(publicDir, 'photography.zip'));
   fs.copyFileSync(zipFile, path.join(publicDir, 'photography-template.zip'));
   fs.copyFileSync(zipFile, path.join(publicDir, 'photography-portfolio.zip'));
-  console.log('Copied to public/templates successfully!');
+  console.log('Copied to public/templates & data/templates successfully!');
 } finally {
   if (fs.existsSync(psPath)) fs.unlinkSync(psPath);
 }
