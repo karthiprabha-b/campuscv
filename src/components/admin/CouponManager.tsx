@@ -38,7 +38,7 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
   const [expiresDays, setExpiresDays] = useState(30);
   const [selectedPlanIds, setSelectedPlanIds] = useState<string[]>([]); // empty means All Plans
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) return;
 
@@ -56,25 +56,54 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
       createdAt: new Date().toISOString(),
     };
 
+    try {
+      await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCoupon),
+      });
+    } catch (err) {
+      console.warn('[CouponManager] API create failed:', err);
+    }
+
     mockDb.saveCoupon(newCoupon);
-    setCoupons(mockDb.getCoupons());
+    const updated = await mockDb.syncCouponsFromServer();
+    setCoupons(updated);
     setIsCreating(false);
     setCode('');
     setSelectedPlanIds([]);
     onUpdate?.();
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Delete coupon code?')) return;
-    mockDb.deleteCoupon(id);
-    setCoupons(mockDb.getCoupons());
+  const handleDelete = async (coupon: CouponCode) => {
+    if (!confirm(`Delete coupon code "${coupon.code}"?`)) return;
+    try {
+      await fetch(`/api/coupons?id=${encodeURIComponent(coupon.id)}&code=${encodeURIComponent(coupon.code)}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      console.warn('[CouponManager] API delete failed:', err);
+    }
+    mockDb.deleteCoupon(coupon.id, coupon.code);
+    const updated = await mockDb.syncCouponsFromServer();
+    setCoupons(updated);
     onUpdate?.();
   };
 
-  const handleToggleActive = (coupon: CouponCode) => {
-    const updated = { ...coupon, isActive: !coupon.isActive };
-    mockDb.saveCoupon(updated);
-    setCoupons(mockDb.getCoupons());
+  const handleToggleActive = async (coupon: CouponCode) => {
+    const updatedCoupon = { ...coupon, isActive: !coupon.isActive };
+    try {
+      await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedCoupon),
+      });
+    } catch (err) {
+      console.warn('[CouponManager] API toggle failed:', err);
+    }
+    mockDb.saveCoupon(updatedCoupon);
+    const updated = await mockDb.syncCouponsFromServer();
+    setCoupons(updated);
     onUpdate?.();
   };
 
@@ -301,7 +330,7 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
                 </button>
 
                 <button
-                  onClick={() => handleDelete(c.id)}
+                  onClick={() => handleDelete(c)}
                   className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                   title="Delete coupon"
                 >

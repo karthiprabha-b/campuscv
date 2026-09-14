@@ -126,14 +126,19 @@ export async function DELETE(req: NextRequest) {
     }
 
     const coupons = readCoupons();
+    const cleanId = id ? id.trim() : '';
+    const cleanCode = code ? code.trim().toUpperCase() : '';
+
     const filtered = coupons.filter((c: any) => {
-      if (id && c.id === id) return false;
-      if (code && (c.code || '').trim().toUpperCase() === code) return false;
+      const cId = String(c.id || '').trim();
+      const cCode = String(c.code || '').trim().toUpperCase();
+      if (cleanId && (cId === cleanId || cCode === cleanId.toUpperCase())) return false;
+      if (cleanCode && (cCode === cleanCode || cId === cleanCode)) return false;
       return true;
     });
 
     writeCoupons(filtered);
-    return NextResponse.json({ success: true, count: filtered.length });
+    return NextResponse.json({ success: true, count: filtered.length, coupons: filtered });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to delete coupon' }, { status: 500 });
   }

@@ -1,18 +1,1 @@
-[
-  {
-    "id": "cpn-campus100",
-    "code": "CAMPUS100",
-    "discountType": "percent",
-    "discountValue": 100,
-    "discountPercent": 100,
-    "maxUses": 20,
-    "usedCount": 0,
-    "expiresAt": "2028-10-09T00:00:00.000Z",
-    "isActive": true,
-    "applicablePlanIds": [
-      "plan-monthly"
-    ],
-    "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-09T00:00:00.000Z"
-  }
-]
+[]

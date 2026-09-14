@@ -1053,12 +1053,23 @@ export const mockDb = {
       }).catch(err => console.warn('[MOCKDB] Failed to save coupon to server API:', err));
     }
   },
-  deleteCoupon: (id: string) => {
-    const list = mockDb.getCoupons().filter(c => c.id !== id);
+  deleteCoupon: (id: string, code?: string) => {
+    const cleanCode = code ? code.trim().toUpperCase() : '';
+    const cleanId = id ? id.trim() : '';
+    const list = mockDb.getCoupons().filter(c => {
+      const cId = String(c.id || '').trim();
+      const cCode = String(c.code || '').trim().toUpperCase();
+      if (cleanId && (cId === cleanId || cCode === cleanId.toUpperCase())) return false;
+      if (cleanCode && (cCode === cleanCode || cId === cleanCode)) return false;
+      return true;
+    });
     localStorage.setItem('portly_coupons', JSON.stringify(list));
 
     if (typeof window !== 'undefined') {
-      fetch(`/api/coupons?id=${encodeURIComponent(id)}`, {
+      const query = cleanId
+        ? `id=${encodeURIComponent(cleanId)}${cleanCode ? `&code=${encodeURIComponent(cleanCode)}` : ''}`
+        : `code=${encodeURIComponent(cleanCode)}`;
+      fetch(`/api/coupons?${query}`, {
         method: 'DELETE',
       }).catch(err => console.warn('[MOCKDB] Failed to delete coupon from server API:', err));
     }
