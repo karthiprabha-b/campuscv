@@ -111,7 +111,6 @@ async function getJsPdfInstance(): Promise<any> {
       script.onerror = () => reject(new Error('Failed to load jsPDF from CDN.'));
       document.body.appendChild(script);
     });
-  }
 }
 
 /**
