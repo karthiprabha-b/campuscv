@@ -43,12 +43,12 @@ export default function Navbar({ data = {} }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
-  const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+  const defaultOrder: string[] = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
+  const dynamicSections: any[] = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
     ? data.sectionOrder
     : defaultOrder;
 
-  const navLinks = dynamicSections
+  const navLinks: Array<{ name: string; href: string; id: string }> = dynamicSections
     .filter((sec: any) => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
       return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
