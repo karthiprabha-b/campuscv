@@ -18,6 +18,7 @@ import {
 import { PortfolioData, mockDb, mockAuth, checkTemplateAccess } from '../../utils/mockDb';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { resolveInstalledTemplateSync, resolveInstalledTemplateAsync } from '../../utils/installedTemplateResolver';
+import { getCanonicalTemplateId } from '../../utils/templateResolver';
 import { useEditorContext } from '../../context/EditorContext';
 import { normalizeUsername } from '../../utils/urlHelper';
 import SectionTree from './SectionTree';
@@ -233,9 +234,26 @@ function DesignPanel({
 
   const availableTemplates = useMemo(() => {
     const TIER_ORDER: Record<string, number> = { 'free': 0, 'trial': 1, 'monthly': 1, 'quarterly': 2, 'yearly': 3, 'pro': 3 };
-    const currentTmplId = portfolio?.templateId || portfolio?.layoutStyle || '';
-    return syncedTemplates
-      .filter(t => (t.status || 'active') === 'active')
+    const currentTmplId = getCanonicalTemplateId(portfolio?.templateId || portfolio?.layoutStyle || '');
+    
+    // Deduplicate syncedTemplates by canonical ID and normalized name
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
+    const uniqueTemplates: any[] = [];
+
+    for (const t of syncedTemplates) {
+      if ((t.status || 'active') !== 'active') continue;
+      const canonicalId = getCanonicalTemplateId(t.id);
+      const normalizedName = (t.name || '').toLowerCase().trim();
+
+      if (seenIds.has(canonicalId) || (normalizedName && seenNames.has(normalizedName))) continue;
+      seenIds.add(canonicalId);
+      if (normalizedName) seenNames.add(normalizedName);
+
+      uniqueTemplates.push({ ...t, id: canonicalId });
+    }
+
+    return uniqueTemplates
       .filter(t => {
         // If current portfolio is actively using this template, show it
         if (currentTmplId && t.id === currentTmplId) return true;

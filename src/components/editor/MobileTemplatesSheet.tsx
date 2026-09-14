@@ -6,6 +6,7 @@ import { X, LayoutTemplate, Check, Sparkles, Lock } from 'lucide-react';
 import { PortfolioData, mockAuth, checkTemplateAccess } from '../../utils/mockDb';
 import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { resolveInstalledTemplateSync, resolveInstalledTemplateAsync } from '../../utils/installedTemplateResolver';
+import { getCanonicalTemplateId } from '../../utils/templateResolver';
 import UpgradePlanModal from '../common/UpgradePlanModal';
 
 interface MobileTemplatesSheetProps {
@@ -15,13 +16,29 @@ interface MobileTemplatesSheetProps {
   onPortfolioChange: (p: PortfolioData) => void;
 }
 
+function deduplicateTemplateList(list: any[]): any[] {
+  const seenIds = new Set<string>();
+  const seenNames = new Set<string>();
+  const unique: any[] = [];
+  for (const t of list) {
+    if ((t.status || 'active') !== 'active') continue;
+    const canonicalId = getCanonicalTemplateId(t.id);
+    const normName = (t.name || '').toLowerCase().trim();
+    if (seenIds.has(canonicalId) || (normName && seenNames.has(normName))) continue;
+    seenIds.add(canonicalId);
+    if (normName) seenNames.add(normName);
+    unique.push({ ...t, id: canonicalId });
+  }
+  return unique;
+}
+
 export default function MobileTemplatesSheet({
   isOpen,
   onClose,
   portfolio,
   onPortfolioChange,
 }: MobileTemplatesSheetProps) {
-  const [templates, setTemplates] = useState<any[]>(() => adminTemplateDb.getActiveTemplates());
+  const [templates, setTemplates] = useState<any[]>(() => deduplicateTemplateList(adminTemplateDb.getActiveTemplates()));
   const [currentUser, setCurrentUser] = useState<any>(() => mockAuth.getCurrentUser());
   const [upgradeModal, setUpgradeModal] = useState<any | null>(null);
 
@@ -29,7 +46,7 @@ export default function MobileTemplatesSheet({
     if (isOpen) {
       setCurrentUser(mockAuth.getCurrentUser());
       adminTemplateDb.syncWithServerRegistryAsync(false).then(list => {
-        setTemplates(list.filter(t => (t.status || 'active') === 'active'));
+        setTemplates(deduplicateTemplateList(list));
       });
     }
   }, [isOpen]);

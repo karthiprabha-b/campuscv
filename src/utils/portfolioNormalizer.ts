@@ -322,11 +322,12 @@ export function normalizePortfolio(raw: any): PortfolioData {
         description: desc,
         summary: desc,
         achievements,
-        description,
-        details: description,
-        coursework,
-        courses: coursework,
-        highlights: coursework
+        highlights: achievements,
+        details: achievements,
+        techStack,
+        technologies: techStack,
+        skills: techStack,
+        tags: techStack
       };
     });
 

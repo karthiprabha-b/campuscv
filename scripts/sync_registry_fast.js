@@ -1,8 +1,30 @@
 const fs = require('fs');
 const path = require('path');
+const JSZip = require('jszip');
 
 const DATA_TEMPLATES_DIR = path.join(__dirname, '..', 'data', 'templates');
+const PUBLIC_TEMPLATES_DIR = path.join(__dirname, '..', 'public', 'templates');
 const REGISTRY_PATH = path.join(DATA_TEMPLATES_DIR, 'registry.json');
+
+async function extractZipIfDirMissing(zipPath, targetDir) {
+  if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) {
+    return;
+  }
+  if (!fs.existsSync(zipPath)) {
+    return;
+  }
+  console.log(`Extracting ${path.basename(zipPath)} to ${targetDir}...`);
+  fs.mkdirSync(targetDir, { recursive: true });
+  const data = fs.readFileSync(zipPath);
+  const zip = await JSZip.loadAsync(data);
+  for (const [filename, file] of Object.entries(zip.files)) {
+    if (file.dir) continue;
+    const destPath = path.join(targetDir, filename);
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    const content = await file.async('nodebuffer');
+    fs.writeFileSync(destPath, content);
+  }
+}
 
 function walkTemplateDir(baseDir) {
   const files = {};
@@ -58,92 +80,158 @@ function walkTemplateDir(baseDir) {
   return files;
 }
 
-let registry = {};
-if (fs.existsSync(REGISTRY_PATH)) {
-  try {
-    registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'));
-  } catch (e) {
-    registry = {};
+// 13 Unique Canonical Templates (One real entry each)
+const canonicalTemplates = [
+  {
+    id: 'cs-portfolio',
+    dir: 'cs-portfolio',
+    name: 'Computer Science & Developer',
+    category: 'Developer',
+    planTier: 'monthly',
+    thumbnail: '/templates/cs/thumbnail.png'
+  },
+  {
+    id: 'designer-portfolio',
+    dir: 'Designer portfolio',
+    name: 'Product Designer & UI',
+    category: 'Designer',
+    planTier: 'monthly',
+    thumbnail: '/templates/designer/thumbnail.png'
+  },
+  {
+    id: 'stu-creative-bold',
+    dir: 'stu-creative-bold',
+    zipPath: path.join(PUBLIC_TEMPLATES_DIR, 'stu-creative-bold.zip'),
+    name: 'Creative Bold Student',
+    category: 'Student',
+    planTier: 'monthly',
+    thumbnail: '/templates/student/thumbnail.png'
+  },
+  {
+    id: 'doctor-portfolio',
+    dir: 'Doctor',
+    name: 'Consultant Physician & Medical',
+    category: 'Medical',
+    planTier: 'monthly',
+    thumbnail: '/templates/doctor/thumbnail.png'
+  },
+  {
+    id: 'slash-model',
+    dir: 'slash model',
+    name: 'Slash Model Portfolio',
+    category: 'Developer',
+    planTier: 'monthly',
+    thumbnail: '/templates/slash/thumbnail.png'
+  },
+  {
+    id: 'static-panel',
+    dir: 'Static Panel',
+    name: 'Static Panel Portfolio',
+    category: 'Student',
+    planTier: 'quarterly',
+    thumbnail: '/templates/static-panel/thumbnail.png'
+  },
+  {
+    id: 'centerd',
+    dir: 'centerd',
+    name: 'Centered Minimal Portfolio',
+    category: 'Minimalist',
+    planTier: 'monthly',
+    thumbnail: '/templates/centerd/thumbnail.png'
+  },
+  {
+    id: 'card',
+    dir: 'Card',
+    name: 'Card Deck Portfolio',
+    category: 'Developer',
+    planTier: 'monthly',
+    thumbnail: '/templates/card/thumbnail.png'
+  },
+  {
+    id: 'stu_lawyer',
+    dir: 'stu_lawyer',
+    name: 'Executive Legal & Corporate',
+    category: 'Legal & Executive',
+    planTier: 'yearly',
+    thumbnail: '/templates/lawyer/thumbnail.png'
+  },
+  {
+    id: 'photography-portfolio',
+    dir: 'photography',
+    name: 'Editorial & Visual Photography',
+    category: 'Photography',
+    planTier: 'yearly',
+    thumbnail: '/templates/photography/thumbnail.png'
+  },
+  {
+    id: 'agri-student',
+    dir: 'Agri Student',
+    name: 'Agronomy & Precision Agriculture',
+    category: 'Agriculture',
+    planTier: 'yearly',
+    thumbnail: '/templates/agri/thumbnail.png'
+  },
+  {
+    id: 'beautician-portfolio',
+    dir: 'Beautician',
+    name: 'Beautician & Aesthetician',
+    category: 'Beauty & Wellness',
+    planTier: 'yearly',
+    thumbnail: '/templates/beautician/thumbnail.png'
+  },
+  {
+    id: 'engineering-portfolio',
+    dir: 'Engineering',
+    name: 'Engineering & Systems Architect',
+    category: 'Developer & Engineering',
+    planTier: 'yearly',
+    thumbnail: '/templates/engineering/thumbnail.png'
   }
-}
+];
 
-const templateMapping = {
-  'cs-portfolio': 'cs-portfolio',
-  'designer-portfolio': 'Designer portfolio',
-  'Designer portfolio': 'Designer portfolio',
-  'stu-creative-bold': 'stu-creative-bold',
-  'stu_creative_bold': 'stu-creative-bold',
-  'Stu_creative_bold': 'stu-creative-bold',
-  'student-portfolio': 'stu-creative-bold',
-  'doctor-portfolio': 'Doctor',
-  'Doctor': 'Doctor',
-  'slash-model': 'slash model',
-  'slash model': 'slash model',
-  'static-panel': 'Static Panel',
-  'Static Panel': 'Static Panel',
-  'centerd': 'centerd',
-  'Centered': 'centerd',
-  'card': 'Card',
-  'Card': 'Card',
-  'stu_lawyer': 'stu_lawyer',
-  'stu-lawyer': 'stu_lawyer',
-  'stu lawyer': 'stu_lawyer',
-  'executive-lawyer-portfolio': 'stu_lawyer',
-  'executive lawyer': 'stu_lawyer',
-  'executive lawyer portfolio': 'stu_lawyer',
-  'lawyer': 'stu_lawyer',
-  'photography-portfolio': 'photography',
-  'photography': 'photography',
-  'agri-student': 'Agri Student',
-  'agri_student': 'Agri Student',
-  'agri student': 'Agri Student',
-  'Agri Student': 'Agri Student',
-  'beautician-portfolio': 'Beautician',
-  'beautician': 'Beautician',
-  'Beautician': 'Beautician',
-  'engineering': 'Engineering',
-  'Engineering': 'Engineering',
-  'engineering-portfolio': 'Engineering',
-  'Engineering Portfolio': 'Engineering'
-};
+async function main() {
+  const newRegistry = {};
 
-for (const [regKey, dirName] of Object.entries(templateMapping)) {
-  const dirPath = path.join(DATA_TEMPLATES_DIR, dirName);
-  if (fs.existsSync(dirPath)) {
-    const files = walkTemplateDir(dirPath);
-    console.log(`Updating ${regKey} from ${dirName} with ${Object.keys(files).length} files...`);
-    if (!registry[regKey]) {
+  for (const tmpl of canonicalTemplates) {
+    const dirPath = path.join(DATA_TEMPLATES_DIR, tmpl.dir);
+    if (!fs.existsSync(dirPath) && tmpl.zipPath) {
+      await extractZipIfDirMissing(tmpl.zipPath, dirPath);
+    }
+
+    if (fs.existsSync(dirPath)) {
+      const files = walkTemplateDir(dirPath);
+      console.log(`Registering canonical template "${tmpl.id}" from "${tmpl.dir}" with ${Object.keys(files).length} files...`);
+
       let manifest = {};
       try {
         const mf = files['manifest.json'] || files['src/manifest.json'];
         if (mf) manifest = JSON.parse(mf);
       } catch (e) {}
-      registry[regKey] = {
-        id: regKey,
-        name: manifest.name || dirName,
-        category: manifest.category || 'Professional',
+
+      newRegistry[tmpl.id] = {
+        id: tmpl.id,
+        name: tmpl.name || manifest.name || tmpl.id,
+        category: tmpl.category || manifest.category || 'Developer',
+        planTier: tmpl.planTier || 'monthly',
         version: manifest.version || '1.0.0',
         currentVersionId: 'v1',
         status: 'active',
-        thumbnail: manifest.thumbnail || 'thumbnail.png',
+        thumbnail: manifest.thumbnail || tmpl.thumbnail || 'thumbnail.png',
         preview: manifest.preview || 'preview.png',
-        description: manifest.description || 'Portfolio template',
-        sections: ['hero', 'about', 'projects', 'skills', 'experience', 'education', 'certifications', 'contact'],
+        description: manifest.description || tmpl.name,
+        sections: manifest.sections || ['hero', 'about', 'projects', 'skills', 'experience', 'education', 'certifications', 'contact'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        versions: [{ versionId: 'v1', version: manifest.version || '1.0.0', sourcePath: `data/templates/${dirName}`, createdAt: new Date().toISOString() }],
+        versions: [{ versionId: 'v1', version: manifest.version || '1.0.0', sourcePath: `data/templates/${tmpl.dir}`, createdAt: new Date().toISOString() }],
         sectionFiles: files,
         templateCode: files['src/template.jsx'] || files['template.jsx'] || files['src/index.jsx'] || files['src/App.tsx'] || files['src/app/page.tsx'] || '',
         customCSS: files['src/styles/styles.css'] || files['src/styles/globals.css'] || files['src/index.css'] || files['src/globals.css'] || ''
       };
-    } else {
-      registry[regKey].sectionFiles = files;
-      registry[regKey].templateCode = files['src/template.jsx'] || files['template.jsx'] || files['src/index.jsx'] || files['src/App.tsx'] || files['src/app/page.tsx'] || '';
-      registry[regKey].customCSS = files['src/styles/styles.css'] || files['src/styles/globals.css'] || files['src/index.css'] || files['src/globals.css'] || '';
-      registry[regKey].updatedAt = new Date().toISOString();
     }
   }
+
+  fs.writeFileSync(REGISTRY_PATH, JSON.stringify(newRegistry, null, 2), 'utf-8');
+  console.log(`\nSUCCESS: Template registry cleanly rebuilt with ${Object.keys(newRegistry).length} unique canonical templates!`);
 }
 
-fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf-8');
-console.log('Template registry updated successfully in registry.json!');
+main().catch(console.error);

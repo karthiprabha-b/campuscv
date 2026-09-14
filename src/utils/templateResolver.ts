@@ -100,6 +100,12 @@ const TEMPLATE_ALIASES: Record<string, string> = {
   'beauty portfolio': 'beautician-portfolio',
   'makeup-artist': 'beautician-portfolio',
   'aesthetician': 'beautician-portfolio',
+  'engineering': 'engineering-portfolio',
+  'engineering portfolio': 'engineering-portfolio',
+  'engineering-portfolio': 'engineering-portfolio',
+  'engineering_portfolio': 'engineering-portfolio',
+  'systems architect': 'engineering-portfolio',
+  'systems-architect': 'engineering-portfolio',
 };
 
 export function getCanonicalTemplateId(rawId?: string): string {

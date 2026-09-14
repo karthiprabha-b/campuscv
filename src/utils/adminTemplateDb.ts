@@ -33,10 +33,19 @@ class AdminTemplateDatabase {
   }
 
   /**
-   * Returns only ACTIVE templates available for new user selection.
+   * Returns only ACTIVE templates available for new user selection (deduplicated).
    */
   public getActiveTemplates(): AdminTemplateRecord[] {
-    return this.templates.filter(t => (t.status || 'active') === 'active');
+    const list = this.templates.filter(t => (t.status || 'active') === 'active');
+    const seen = new Set<string>();
+    const unique: AdminTemplateRecord[] = [];
+    for (const t of list) {
+      const norm = (t.name || t.id).toLowerCase().replace(/[\s_-]+/g, '');
+      if (seen.has(norm)) continue;
+      seen.add(norm);
+      unique.push(t);
+    }
+    return unique;
   }
 
   /**

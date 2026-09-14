@@ -558,7 +558,13 @@ export function listAllDiskTemplates(options: { includeDisabled?: boolean; inclu
       const dirs = fs.readdirSync(DATA_TEMPLATES_DIR);
       for (const dirName of dirs) {
         if (junkPatterns.includes(dirName) || dirName.startsWith('.')) continue;
-        if (registry[dirName]) continue; // Already in registry
+        // Check canonical template alias to prevent duplicate registrations
+        const normDir = dirName.toLowerCase().replace(/[\s_-]+/g, '');
+        const alreadyRegistered = Object.keys(registry).some(k => {
+          const normKey = k.toLowerCase().replace(/[\s_-]+/g, '');
+          return normKey === normDir || normKey.replace(/portfolio$/, '') === normDir.replace(/portfolio$/, '');
+        });
+        if (alreadyRegistered) continue;
 
         const fullPath = path.join(DATA_TEMPLATES_DIR, dirName);
         if (fs.statSync(fullPath).isDirectory()) {
@@ -632,7 +638,17 @@ export function listAllDiskTemplates(options: { includeDisabled?: boolean; inclu
     return true; // active
   });
 
-  return list;
+  // Deduplicate by normalized name or canonical identifier
+  const seen = new Set<string>();
+  const deduplicated: PersistentTemplateRecord[] = [];
+  for (const item of list) {
+    const norm = (item.name || item.id).toLowerCase().replace(/[\s_-]+/g, '');
+    if (seen.has(norm)) continue;
+    seen.add(norm);
+    deduplicated.push(item);
+  }
+
+  return deduplicated;
 }
 
 /**
