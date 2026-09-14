@@ -1848,15 +1848,13 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
       });
     }
 
-    // Clear all legacy inline outlines on template DOM
+    // Clear previous selected element attribute without full-DOM style mutation
     const docToClear = target.ownerDocument || document;
-    docToClear.querySelectorAll('.canvas-selected-element, [data-node-selected], [style*="outline"]').forEach(el => {
-      if ((el as HTMLElement).style?.outline) {
-        (el as HTMLElement).style.outline = '';
-      }
-      el.classList.remove('canvas-selected-element');
-      el.removeAttribute('data-node-selected');
-    });
+    const prevSelected = docToClear.querySelector('[data-node-selected="true"], .canvas-selected-element');
+    if (prevSelected) {
+      prevSelected.removeAttribute('data-node-selected');
+      prevSelected.classList.remove('canvas-selected-element');
+    }
 
     let nodeEl: HTMLElement | null = target.hasAttribute('data-node-id') ? target : (target.closest('[data-node-id]') as HTMLElement | null);
     let targetEl: HTMLElement = nodeEl || target;
