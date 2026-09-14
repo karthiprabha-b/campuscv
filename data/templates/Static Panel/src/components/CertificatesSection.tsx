@@ -36,12 +36,7 @@ interface CertificatesSectionProps {
 }
 
 export default function CertificatesSection({ data = {}, onSelectCert }: CertificatesSectionProps) {
-  // If user explicitly provided an empty array, return null
-  if (Array.isArray(data?.certifications) && data.certifications.length === 0) {
-    return null;
-  }
-
-  const rawCerts = (Array.isArray(data?.certifications) && data.certifications.length > 0)
+  const candidateList = (Array.isArray(data?.certifications) && data.certifications.length > 0)
     ? data.certifications
     : ((Array.isArray(data?.certificates) && data.certificates.length > 0)
         ? data.certificates
@@ -49,7 +44,13 @@ export default function CertificatesSection({ data = {}, onSelectCert }: Certifi
             ? data.awards
             : ((Array.isArray(data?.credentials) && data.credentials.length > 0)
                 ? data.credentials
-                : DEFAULT_CERTS)));
+                : null)));
+
+  if (candidateList === null && (Array.isArray(data?.certifications) || Array.isArray(data?.certificates))) {
+    return null;
+  }
+
+  const rawCerts = candidateList || DEFAULT_CERTS;
 
   const badgeBgs = ["bg-amber-50", "bg-blue-50", "bg-purple-50", "bg-emerald-50", "bg-rose-50"];
   const badgeColors = ["text-amber-600", "text-blue-600", "text-purple-600", "text-emerald-600", "text-rose-600"];

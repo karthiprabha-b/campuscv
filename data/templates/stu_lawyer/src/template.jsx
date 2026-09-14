@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 
 import Hero from './sections/Hero';
 import Achievements from './sections/Achievements';
+import Certificates from './sections/Certificates';
 import About from './sections/About';
 import Skills from './sections/Skills';
 import Projects from './sections/Projects';
@@ -80,7 +81,9 @@ export default function Template(props = {}) {
       services: ['services', 'specialties', 'offerings', 'practice'],
       experience: ['experience', 'timeline', 'work', 'history'],
       education: ['education', 'academics'],
-      achievements: ['achievements', 'metrics', 'awards', 'certificates', 'certifications'],
+      achievements: ['achievements', 'metrics', 'stats'],
+      certificates: ['certificates', 'certifications', 'awards', 'credentials'],
+      certifications: ['certifications', 'certificates', 'awards', 'credentials'],
       testimonials: ['testimonials', 'reviews', 'testimonial', 'endorsements'],
       contact: ['contact'],
       footer: ['footer']
@@ -111,6 +114,21 @@ export default function Template(props = {}) {
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
+    // Empty array visibility logic
+    if (key === 'testimonials' || key === 'reviews') {
+      if (Array.isArray(data?.testimonials) && data.testimonials.length === 0) return false;
+      if (Array.isArray(data?.reviews) && data.reviews.length === 0) return false;
+    }
+
+    if (key === 'certificates' || key === 'certifications') {
+      const hasCerts = (Array.isArray(data?.certifications) && data.certifications.length > 0) ||
+        (Array.isArray(data?.certificates) && data.certificates.length > 0) ||
+        (Array.isArray(data?.awards) && data.awards.length > 0);
+      const isExplicitEmpty = (Array.isArray(data?.certifications) && data.certifications.length === 0) ||
+        (Array.isArray(data?.certificates) && data.certificates.length === 0);
+      if (isExplicitEmpty && !hasCerts) return false;
+    }
+
     return true;
   };
 
@@ -123,6 +141,8 @@ export default function Template(props = {}) {
     services: <Services key="services" data={data} />,
     experience: <Experience key="experience" data={data} />,
     education: <Education key="education" data={data} />,
+    certificates: <Certificates key="certificates" data={data} />,
+    certifications: <Certificates key="certifications" data={data} />,
     testimonials: <Testimonials key="testimonials" data={data} />,
     contact: <Contact key="contact" data={data} />
   };
@@ -136,6 +156,7 @@ export default function Template(props = {}) {
     'services',
     'experience',
     'education',
+    'certificates',
     'testimonials',
     'contact'
   ];
@@ -153,7 +174,8 @@ export default function Template(props = {}) {
     const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
     let id = String(rawVal || '').toLowerCase().trim();
     if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'certificates' || id === 'awards' || id === 'certifications' || id === 'metrics') id = 'achievements';
+    if (id === 'metrics' || id === 'stats') id = 'achievements';
+    if (id === 'certificates' || id === 'awards' || id === 'certifications') id = 'certificates';
     if (id === 'timeline' || id === 'work' || id === 'history') id = 'experience';
     if (id === 'academics') id = 'education';
     if (id === 'portfolio' || id === 'casestudies') id = 'projects';

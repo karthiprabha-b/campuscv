@@ -30,24 +30,57 @@ async function packDirectory(srcDir, zipPath) {
 
 async function main() {
   const root = path.join(__dirname, '..');
-  
-  // 1. Pack Engineering
-  const engSrc = path.join(root, 'data', 'templates', 'Engineering');
-  if (fs.existsSync(engSrc)) {
-    await packDirectory(engSrc, path.join(root, 'data', 'templates', 'Engineering.zip'));
-    await packDirectory(engSrc, path.join(root, 'data', 'templates', 'engineering-build.zip'));
-    await packDirectory(engSrc, path.join(root, 'public', 'templates', 'engineering.zip'));
-    await packDirectory(engSrc, path.join(root, 'public', 'templates', 'engineering-template.zip'));
+  const templatesDir = path.join(root, 'data', 'templates');
+  const publicTemplatesDir = path.join(root, 'public', 'templates');
+
+  if (!fs.existsSync(publicTemplatesDir)) {
+    fs.mkdirSync(publicTemplatesDir, { recursive: true });
   }
 
-  // 2. Pack stu_lawyer
-  const lawyerSrc = path.join(root, 'data', 'templates', 'stu_lawyer');
+  const dirs = fs.readdirSync(templatesDir).filter(f => {
+    const full = path.join(templatesDir, f);
+    return fs.statSync(full).isDirectory() && !f.startsWith('.') && !f.startsWith('v_');
+  });
+
+  for (const dirName of dirs) {
+    const src = path.join(templatesDir, dirName);
+    const slug = dirName.toLowerCase().replace(/\s+/g, '-');
+    const underSlug = dirName.toLowerCase().replace(/\s+/g, '_');
+
+    // Pack to data/templates
+    await packDirectory(src, path.join(templatesDir, `${dirName}.zip`));
+    if (slug !== dirName) {
+      await packDirectory(src, path.join(templatesDir, `${slug}.zip`));
+    }
+    if (underSlug !== slug && underSlug !== dirName) {
+      await packDirectory(src, path.join(templatesDir, `${underSlug}.zip`));
+    }
+
+    // Pack to public/templates
+    await packDirectory(src, path.join(publicTemplatesDir, `${dirName}.zip`));
+    await packDirectory(src, path.join(publicTemplatesDir, `${slug}.zip`));
+    await packDirectory(src, path.join(publicTemplatesDir, `${slug}-template.zip`));
+    if (underSlug !== slug) {
+      await packDirectory(src, path.join(publicTemplatesDir, `${underSlug}.zip`));
+    }
+  }
+
+  // Specific aliases
+  const lawyerSrc = path.join(templatesDir, 'stu_lawyer');
   if (fs.existsSync(lawyerSrc)) {
-    await packDirectory(lawyerSrc, path.join(root, 'data', 'templates', 'stu_lawyer.zip'));
-    await packDirectory(lawyerSrc, path.join(root, 'data', 'templates', 'executive-lawyer-portfolio.zip'));
-    await packDirectory(lawyerSrc, path.join(root, 'public', 'templates', 'stu_lawyer.zip'));
-    await packDirectory(lawyerSrc, path.join(root, 'public', 'templates', 'stu_lawyer-template.zip'));
-    await packDirectory(lawyerSrc, path.join(root, 'public', 'templates', 'executive-lawyer-portfolio.zip'));
+    await packDirectory(lawyerSrc, path.join(templatesDir, 'executive-lawyer-portfolio.zip'));
+    await packDirectory(lawyerSrc, path.join(publicTemplatesDir, 'executive-lawyer-portfolio.zip'));
+  }
+
+  const engSrc = path.join(templatesDir, 'Engineering');
+  if (fs.existsSync(engSrc)) {
+    await packDirectory(engSrc, path.join(templatesDir, 'engineering-build.zip'));
+  }
+
+  const photoSrc = path.join(templatesDir, 'photography');
+  if (fs.existsSync(photoSrc)) {
+    await packDirectory(photoSrc, path.join(templatesDir, 'photography-portfolio.zip'));
+    await packDirectory(photoSrc, path.join(publicTemplatesDir, 'photography-portfolio.zip'));
   }
 
   console.log('All template zip archives successfully refreshed!');

@@ -113,11 +113,17 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
   const filteredProjects = useMemo(() => {
     return projectList.filter((proj: any) => {
       const matchesCategory = activeCategory === 'All' || proj?.category === activeCategory;
-      const tags = Array.isArray(proj?.tags) ? proj.tags : (Array.isArray(proj?.technologies) ? proj.technologies : []);
-      const title = proj?.title || '';
-      const desc = proj?.description || proj?.tagline || '';
+      const tags = Array.isArray(proj?.tags)
+        ? proj.tags
+        : (Array.isArray(proj?.technologies)
+          ? proj.technologies
+          : (Array.isArray(proj?.techStack)
+            ? proj.techStack
+            : (Array.isArray(proj?.skills) ? proj.skills : [])));
+      const pTitle = (proj?.title || proj?.name || proj?.projectName || '').toString().trim();
+      const desc = (proj?.tagline || proj?.description || proj?.desc || proj?.summary || '').toString().trim();
       const matchesSearch =
-        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tags.some((t: any) => (typeof t === 'string' ? t : (t?.name || '')).toLowerCase().includes(searchQuery.toLowerCase())) ||
         desc.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
@@ -138,7 +144,7 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
       />
 
       {/* Card Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-2xl bg-white/[0.05] border border-white/10 ${accentClass.text}`}>
             <FolderGit2 className="w-4 h-4" />
@@ -170,7 +176,7 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
       </div>
 
       {/* Category Filter Pills */}
-      <div className="flex flex-wrap gap-1.5 mb-4 max-w-full overflow-x-auto no-scrollbar">
+      <div className="flex flex-wrap gap-1.5 mb-4 max-w-full overflow-x-auto no-scrollbar shrink-0">
         {categories.map((cat: string) => (
           <button
             key={cat}
@@ -186,13 +192,19 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
         ))}
       </div>
 
-      {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto" data-cv-section="projects" data-cv-collection="projects.items">
-        {filteredProjects.slice(0, 4).map((proj: any, idx: number) => {
-          const tags = Array.isArray(proj.tags) ? proj.tags : (Array.isArray((proj as any).technologies) ? (proj as any).technologies : []);
-          const image = proj.image || (proj as any).thumbnail || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80";
-          const projTitle = proj.title || 'Project Name';
-          const projDesc = proj.tagline || proj.description || 'Project description';
+      {/* Projects Grid with Smooth Scroll */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto overflow-y-auto max-h-[58vh] pr-1.5 scroll-smooth" data-cv-section="projects" data-cv-collection="projects.items">
+        {filteredProjects.map((proj: any, idx: number) => {
+          const tags = Array.isArray(proj.tags)
+            ? proj.tags
+            : (Array.isArray((proj as any).technologies)
+              ? (proj as any).technologies
+              : (Array.isArray((proj as any).techStack)
+                ? (proj as any).techStack
+                : (Array.isArray((proj as any).skills) ? (proj as any).skills : [])));
+          const image = proj.image || proj.imageUrl || (proj as any).thumbnail || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80";
+          const projTitle = proj.title || proj.name || proj.projectName || `Project #${idx + 1}`;
+          const projDesc = proj.tagline || proj.description || proj.desc || proj.summary || 'Project description';
 
           return (
             <div
@@ -266,6 +278,8 @@ export const ProjectsCard: React.FC<ProjectsCardProps> = React.memo(({
                     {projDesc}
                   </p>
                 </div>
+
+                {/* Tech Stack Pills */}
 
                 {/* Tech Stack Pills */}
                 {tags.length > 0 && (

@@ -4,7 +4,9 @@ import { Scale, Briefcase, Menu, X } from 'lucide-react';
 const SECTION_LABEL_MAP = {
   hero: 'Home',
   achievements: 'Achievements',
-  certifications: 'Achievements',
+  certifications: 'Credentials',
+  certificates: 'Credentials',
+  awards: 'Awards',
   about: 'About',
   skills: 'Skills',
   projects: 'Projects',
@@ -28,10 +30,18 @@ export default function Navbar(props = {}) {
   const title = String(rawTitle || "Executive Legal Counsel");
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isScrolled = (window.scrollY || document.documentElement.scrollTop || 0) > 20;
+          setScrolled(prev => (prev !== isScrolled ? isScrolled : prev));
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -41,7 +51,7 @@ export default function Navbar(props = {}) {
       ? data.sectionOrder
       : (Array.isArray(data?.sections) && data.sections.length > 0
         ? data.sections
-        : ['hero', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'contact']));
+        : ['hero', 'about', 'skills', 'projects', 'services', 'experience', 'education', 'certificates', 'contact']));
 
   const navLinks = sectionList
     .map(sec => {
@@ -53,7 +63,7 @@ export default function Navbar(props = {}) {
       if (normalizedId === 'academics') normalizedId = 'education';
       if (normalizedId === 'portfolio') normalizedId = 'projects';
       if (normalizedId === 'tech' || normalizedId === 'stack') normalizedId = 'skills';
-      if (normalizedId === 'awards' || normalizedId === 'certificates' || normalizedId === 'certifications') normalizedId = 'achievements';
+      if (normalizedId === 'awards' || normalizedId === 'certifications') normalizedId = 'certificates';
       if (normalizedId === 'reviews') normalizedId = 'testimonials';
 
       const label = SECTION_LABEL_MAP[normalizedId] || (typeof sec === 'object' && sec?.label ? sec.label : (cleanId.charAt(0).toUpperCase() + cleanId.slice(1)));

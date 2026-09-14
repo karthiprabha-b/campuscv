@@ -4,8 +4,17 @@ import { Star, Quote, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 export default function Testimonials(props = {}) {
   const incoming = props?.data || props?.portfolio || props?.testimonials || props || {};
   const data = (incoming && typeof incoming === 'object') ? incoming : {};
-  const rawTestimonials = Array.isArray(incoming) ? incoming : (Array.isArray(data?.testimonials) ? data.testimonials : (Array.isArray(data?.reviews) ? data.reviews : null));
-  const testimonials = rawTestimonials && rawTestimonials.length > 0 ? rawTestimonials : [
+  const rawTestimonials = Array.isArray(incoming)
+    ? incoming
+    : (Array.isArray(data?.testimonials)
+      ? data.testimonials
+      : (Array.isArray(data?.reviews) ? data.reviews : null));
+
+  if (rawTestimonials !== null && rawTestimonials.length === 0) {
+    return null;
+  }
+
+  const testimonials = (rawTestimonials && rawTestimonials.length > 0) ? rawTestimonials : [
     {
       id: "t1",
       name: "Marcus Sterling",

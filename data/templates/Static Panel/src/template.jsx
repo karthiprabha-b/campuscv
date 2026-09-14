@@ -57,24 +57,41 @@ export default function Template(props = {}) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const key = String(sectionName).toLowerCase();
+    const rawKey = String(sectionName).toLowerCase().trim();
+    let key = rawKey;
+    if (rawKey === 'certifications' || rawKey === 'awards') key = 'certificates';
+    if (rawKey === 'timeline' || rawKey === 'work') key = 'experience';
+    if (rawKey === 'academics') key = 'education';
+    if (rawKey === 'portfolio') key = 'projects';
+    if (rawKey === 'tech') key = 'skills';
     
-    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
+    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true || data?.deletedNodes?.[rawKey] === true) {
       return false;
     }
-    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
+    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true || data?.hiddenNodes?.[rawKey] === true) {
       return false;
     }
-    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
+    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key) || data.hiddenFields.includes(rawKey))) {
+      return false;
+    }
+    if (Array.isArray(data?.hiddenSections) && (data.hiddenSections.includes(key) || data.hiddenSections.includes(rawKey))) {
       return false;
     }
 
     if (data[`${key}.visible`] !== undefined) return Boolean(data[`${key}.visible`]);
+    if (data[`${rawKey}.visible`] !== undefined) return Boolean(data[`${rawKey}.visible`]);
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
+    // If certificates/certifications is checked:
+    if (key === 'certificates') {
+      const cList = data.certificates || data.certifications || data.awards || data?.data?.certificates || data?.data?.certifications;
+      if (Array.isArray(cList) && cList.length === 0) return false;
+      return true;
+    }
+
     // If section array is explicitly empty in user's data, hide the section
-    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
+    const collection = data[key] || data?.[rawKey] || data?.[sectionName] || data?.data?.[key];
     if (Array.isArray(collection) && collection.length === 0) {
       if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
       return false;

@@ -402,7 +402,25 @@ export function createUniversalCollectionObject(collectionKey: string, existingL
     };
   }
 
-  // 5. Skills (Object form)
+  // 5. Testimonials / Reviews / Endorsements
+  if (keyLower.includes('testimonial') || keyLower.includes('review') || keyLower.includes('endorsement')) {
+    return {
+      id: `test-${timestamp}-${random}`,
+      name: 'Marcus Sterling',
+      author: 'Marcus Sterling',
+      role: 'Managing Director & General Partner',
+      position: 'Managing Director & General Partner',
+      company: 'Sterling Peak Capital',
+      organization: 'Sterling Peak Capital',
+      review: 'Outstanding execution and strategic depth. Delivered transformative results ahead of schedule.',
+      content: 'Outstanding execution and strategic depth. Delivered transformative results ahead of schedule.',
+      quote: 'Outstanding execution and strategic depth. Delivered transformative results ahead of schedule.',
+      rating: 5,
+      photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
+    };
+  }
+
+  // 6. Skills (Object form)
   if (keyLower === 'skills' || keyLower === 'skill') {
     return {
       id: `skill-${timestamp}-${random}`,
@@ -416,7 +434,7 @@ export function createUniversalCollectionObject(collectionKey: string, existingL
     };
   }
 
-  // 6. Generic schema from sample object if available
+  // 7. Generic schema from sample object if available
   if (sample && typeof sample === 'object') {
     const cloned = { ...sample, id: `${prefix}-${timestamp}-${random}` };
     Object.keys(cloned).forEach((k) => {
@@ -539,7 +557,26 @@ export function reflectObjectProperties(obj: Record<string, any>, collectionKey?
     ];
   }
 
-  // 6. Generic reflection without alias duplication
+  // 6. CANONICAL TESTIMONIAL SCHEMA
+  if (keyLower.includes('testimonial') || keyLower.includes('review') || keyLower.includes('endorsement')) {
+    const authorVal = obj.name || obj.author || obj.clientName || '';
+    const roleVal = obj.role || obj.position || obj.title || '';
+    const compVal = obj.company || obj.organization || '';
+    const quoteVal = obj.review || obj.quote || obj.content || obj.feedback || obj.text || '';
+    const photoVal = obj.photoUrl || obj.avatar || obj.image || '';
+    const ratingVal = typeof obj.rating === 'number' ? obj.rating : 5;
+
+    return [
+      { key: 'name', label: 'Client / Author Name', type: 'text', value: authorVal },
+      { key: 'role', label: 'Role / Designation', type: 'text', value: roleVal },
+      { key: 'company', label: 'Company / Organization', type: 'text', value: compVal },
+      { key: 'review', label: 'Testimonial / Review Text', type: 'longtext', value: quoteVal },
+      { key: 'rating', label: 'Rating (1-5)', type: 'number', value: ratingVal },
+      { key: 'photoUrl', label: 'Photo URL (optional)', type: 'image', value: photoVal },
+    ];
+  }
+
+  // 7. Generic reflection without alias duplication
   const seenCanonicalLabels = new Set<string>();
   const result: ReflectedProperty[] = [];
   const entries = Object.entries(obj).filter(([k]) => !['id', '__type', 'key'].includes(k));

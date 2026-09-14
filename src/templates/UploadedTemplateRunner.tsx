@@ -850,7 +850,19 @@ function executeUploadedPackage(
       if (live && prop in live) {
         return (live as any)[prop];
       }
-      return Reflect.get(target, prop, receiver);
+      if (
+        prop === 'photographyProfile' ||
+        prop === 'profile' ||
+        prop === 'portfolioProfile' ||
+        prop === 'lawyerData' ||
+        prop === 'default' ||
+        prop === 'initialPortfolioData' ||
+        prop === 'DEFAULT_ENGINEERING_DATA' ||
+        prop === 'portfolioData'
+      ) {
+        return live || target;
+      }
+      return Reflect.get(target, prop, receiver) || (live as any)?.[prop];
     }
   });
 
