@@ -1,7 +1,7 @@
 /**
  * parseCertifications.ts — Robust Certifications Section Parser
  *
- * Handles both multi-line certification blocks and single-line certification records.
+ * Handles bulleted items, single-line certificates, multi-line blocks, and various issuer formats.
  */
 
 import { CertificationEntry } from '../../types/canonicalProfile';
@@ -12,7 +12,7 @@ export function parseCertificationsSection(sectionText: string): CertificationEn
   const rawLines = sectionText
     .split('\n')
     .map(s => s.trim())
-    .filter(l => Boolean(l) && !/^(Certifications|Certificates|Licenses|Courses)$/i.test(l));
+    .filter(l => Boolean(l) && !/^(?:Certifications?|Certificates?|Licenses?|Courses?|Credentials?|Awards?)$/i.test(l));
 
   if (rawLines.length === 0) return [];
 
@@ -20,26 +20,34 @@ export function parseCertificationsSection(sectionText: string): CertificationEn
   let currentBlock: string[] = [];
 
   rawLines.forEach(line => {
-    const isUrl = /^https?:\/\//i.test(line) || /^Credential\s*:/i.test(line);
-    const isPureDateLine = /^(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?\s*\d{4}\s*[-–—to]*/i.test(line) && line.length < 30;
+    const isBullet = /^[•●▪◦·*–—\-]\s+/.test(line) || /^\d+\.\s+/.test(line);
+    const isUrl = /^https?:\/\//i.test(line) || /^Credential\s*:/i.test(line) || /^Certificate\s*URL\s*:/i.test(line);
+    const isPureDateLine = /^(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*)?\d{4}(?:\s*[-–—to]+\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*)?(?:\d{4}|Present|Current))?$/i.test(line);
 
     if ((isUrl || isPureDateLine) && currentBlock.length > 0) {
       currentBlock.push(line);
       return;
     }
 
-    const isSingleLineCertWithYear = /\b(20\d{2}|19\d{2})\b/.test(line)
-      && line.length >= 15
-      && !/Grade\s*:/i.test(line)
-      && !isPureDateLine;
-
-    if (isSingleLineCertWithYear) {
+    if (isBullet) {
       if (currentBlock.length > 0) {
         blocks.push(currentBlock);
       }
       currentBlock = [line];
     } else {
-      currentBlock.push(line);
+      // If line contains a year and currentBlock is already multi-line, start a new block
+      const hasYear = /\b(20\d{2}|19\d{2})\b/.test(line);
+      if (hasYear && currentBlock.length >= 2) {
+        blocks.push(currentBlock);
+        currentBlock = [line];
+      } else if (currentBlock.length === 0) {
+        currentBlock = [line];
+      } else if (currentBlock.length >= 3) {
+        blocks.push(currentBlock);
+        currentBlock = [line];
+      } else {
+        currentBlock.push(line);
+      }
     }
   });
 
@@ -53,14 +61,15 @@ export function parseCertificationsSection(sectionText: string): CertificationEn
     if (blockLines.length === 0) return;
 
     const blockStr = blockLines.join('\n');
-    let title = blockLines[0].replace(/^[•●▪◦·*–—\-]\s*/, '').trim();
+    let title = blockLines[0].replace(/^[•●▪◦·*–—\-]\s*/, '').replace(/^\d+\.\s*/, '').trim();
 
     let organization = '';
     let issueDate = '';
     let credentialUrl = '';
     let grade = '';
 
-    const dateMatch = blockStr.match(/\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?\s*20\d{2}|19\d{2})\s*[-–—to]*\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?\s*20\d{2}|19\d{2}|Present|Current)?\b/i);
+    // Date extraction
+    const dateMatch = blockStr.match(/\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*20\d{2}|19\d{2})\s*[-–—to]*\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*20\d{2}|19\d{2}|Present|Current)?\b/i) || blockStr.match(/\b(20\d{2}|19\d{2})\b/);
     if (dateMatch) {
       issueDate = dateMatch[0].trim();
     }
@@ -75,9 +84,21 @@ export function parseCertificationsSection(sectionText: string): CertificationEn
       credentialUrl = urlMatch[0];
     }
 
-    // Organization extraction
-    if (/[-–—|]/.test(title) && !organization) {
-      const parts = title.split(/[-–—|]/).map(p => p.trim());
+    // Organization extraction patterns: "Course Name - Organization", "Course Name | Organization", "Course Name by Organization"
+    if (/\s+[-–—|]\s+/.test(title) && !organization) {
+      const parts = title.split(/\s+[-–—|]\s+/).map(p => p.trim());
+      if (parts.length >= 2) {
+        title = parts[0];
+        organization = parts[1].replace(/\s*\(\d{4}\)$/, '').trim();
+      }
+    } else if (/\s+by\s+/i.test(title) && !organization) {
+      const parts = title.split(/\s+by\s+/i).map(p => p.trim());
+      if (parts.length >= 2) {
+        title = parts[0];
+        organization = parts[1].replace(/\s*\(\d{4}\)$/, '').trim();
+      }
+    } else if (/\s+from\s+/i.test(title) && !organization) {
+      const parts = title.split(/\s+from\s+/i).map(p => p.trim());
       if (parts.length >= 2) {
         title = parts[0];
         organization = parts[1].replace(/\s*\(\d{4}\)$/, '').trim();
@@ -86,28 +107,34 @@ export function parseCertificationsSection(sectionText: string): CertificationEn
 
     if (!organization) {
       blockLines.forEach(l => {
-        if (l === title) return;
-        if (/\b(20\d{2}|19\d{2})\b/.test(l) && !l.includes('College') && !l.includes('CSC')) return;
+        if (l === title || l.startsWith(title)) return;
         if (/Grade\s*:/i.test(l)) return;
+        if (/^https?:\/\//i.test(l)) return;
 
-        if (/CSC|Computer Software College|University|Institute|School|Coursera|Udemy|edX|NPTEL|DeepLearning\.AI|Oracle|Cisco|Meta|Google|Microsoft|AWS|Amazon Web Services/i.test(l) && !organization) {
-          organization = l;
+        if (/Coursera|Udemy|edX|NPTEL|DeepLearning\.AI|Oracle|Cisco|Meta|Google|Microsoft|AWS|Amazon|IBM|HackerRank|freeCodeCamp|LinkedIn|Simplilearn|Great Learning|Stanford|Harvard|MIT|University|College|Institute|Academy/i.test(l) && !organization) {
+          organization = l.replace(/^[•●▪◦·*–—\-]\s*/, '').trim();
         }
       });
     }
 
     if (!organization && blockLines.length > 1) {
-      organization = blockLines[1];
+      const candidateOrg = blockLines[1].replace(/^[•●▪◦·*–—\-]\s*/, '').trim();
+      if (!candidateOrg.startsWith('http') && !candidateOrg.startsWith('Grade')) {
+        organization = candidateOrg;
+      }
     }
 
-    if (title && title.length >= 3) {
+    // Strip date suffix from title if present (e.g., "Python for Everybody (2023)")
+    title = title.replace(/\s*\((?:19|20)\d{2}\)$/, '').trim();
+
+    if (title && title.length >= 2) {
       entries.push({
         id: `cert-${Date.now()}-${idx + 1}`,
         name: title,
-        organization: organization || 'Issuing Organization',
-        issueDate,
+        organization: organization || 'Certified',
+        issueDate: issueDate || '',
         credentialId: grade ? `Grade: ${grade}` : '',
-        credentialUrl
+        credentialUrl: credentialUrl || ''
       });
     }
   });

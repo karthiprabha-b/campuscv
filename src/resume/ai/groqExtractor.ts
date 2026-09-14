@@ -26,7 +26,8 @@ CRITICAL EXTRACTION RULES:
 4. Extract skills as concise individual skill names (e.g., "Python", "Next.js", "PostgreSQL"), NOT long sentences or phrases.
 5. In "personal", extract the candidate's exact full name and their headline/tagline. In "summary", provide a crisp, punchy, professional summary of STRICTLY a small paragraph (1 to 2 short sentences, 25–40 words max). Focus directly on their core domain, major skills, and career goal. NEVER output huge, vague, repetitive, or rambling walls of text.
 6. In "education", extract institution, degree, and field of study / specialization.
-7. Return ONLY a valid JSON object matching the requested schema. No markdown formatting, no commentary.
+7. In "certifications", extract EVERY certificate, online course completion, license, accreditation, and award listed in the resume (including title/name, issuer/organization, issue date, and credential URL if available). DO NOT omit any certifications.
+8. Return ONLY a valid JSON object matching the requested schema. No markdown formatting, no commentary.
 
 SCHEMA DEFINITION:
 {

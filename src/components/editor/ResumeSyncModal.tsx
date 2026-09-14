@@ -288,17 +288,25 @@ export default function ResumeSyncModal({
         id: cert.id || `cert-${Date.now()}-${idx}`,
         name: cert.name || cert.title || '',
         title: cert.name || cert.title || '',
-        issuer: cert.issuer || cert.organization || '',
+        issuer: cert.issuer || cert.organization || 'Issuing Organization',
+        organization: cert.organization || cert.issuer || 'Issuing Organization',
         date: cert.date || cert.issueDate || '',
-        url: cert.url || cert.link || ''
+        issueDate: cert.issueDate || cert.date || '',
+        credentialId: cert.credentialId || '',
+        url: cert.url || cert.link || cert.credentialUrl || '',
+        credentialUrl: cert.credentialUrl || cert.url || cert.link || ''
       }));
 
       if (replaceMode === 'replace' || !Array.isArray(current.certifications) || current.certifications.length === 0) {
         updated.certifications = formattedCerts;
+        updated.certificates = formattedCerts;
+        updated.awards = formattedCerts;
       } else {
         updated.certifications = [...formattedCerts, ...(current.certifications || [])];
+        updated.certificates = [...formattedCerts, ...(current.certificates || current.certifications || [])];
+        updated.awards = [...formattedCerts, ...(current.awards || current.certifications || [])];
       }
-      updated.profile = { ...(updated.profile || {}), certifications: updated.certifications };
+      updated.profile = { ...(updated.profile || {}), certifications: updated.certifications, certificates: updated.certificates };
     }
 
     // 7. Contact Info
@@ -356,6 +364,9 @@ export default function ResumeSyncModal({
         if (selectedSections.projects && kLower.includes('proj')) {
           delete cleanOverrides[k];
         }
+        if (selectedSections.certifications && (kLower.includes('cert') || kLower.includes('award') || kLower.includes('credential') || kLower.includes('license'))) {
+          delete cleanOverrides[k];
+        }
       });
       updated.contentOverrides = cleanOverrides;
     }
@@ -369,7 +380,7 @@ export default function ResumeSyncModal({
           (selectedSections.education && k.includes('education')) ||
           (selectedSections.projects && k.includes('project')) ||
           (selectedSections.skills && k.includes('skill')) ||
-          (selectedSections.certifications && k.includes('cert'))
+          (selectedSections.certifications && (k.includes('cert') || k.includes('award')))
         ) {
           delete cleanDeleted[k];
         }
@@ -513,7 +524,7 @@ export default function ResumeSyncModal({
                       {extractedData.fileName || 'Resume parsed successfully!'}
                     </h4>
                     <p className="text-[10px] text-emerald-700 font-medium">
-                      Found {skillsCount} skills, {expCount} jobs, {projCount} projects, {eduCount} degrees
+                      Found {skillsCount} skills, {expCount} jobs, {projCount} projects, {eduCount} degrees{certCount > 0 ? `, ${certCount} certifications` : ''}
                     </p>
                   </div>
                 </div>
@@ -663,6 +674,26 @@ export default function ResumeSyncModal({
                       </p>
                       <p className="text-[10px] text-zinc-500 truncate max-w-[170px]">
                         {eduCount > 0 ? `${p.education[0]?.institution || p.education[0]?.school || 'Degree'}` : 'No education found'}
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Certifications */}
+                  <label className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                    selectedSections.certifications ? 'border-violet-300 bg-violet-50/40' : 'border-zinc-200 bg-zinc-50/30 text-zinc-400'
+                  }`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedSections.certifications}
+                      onChange={(e) => setSelectedSections({ ...selectedSections, certifications: e.target.checked })}
+                      className="mt-0.5 rounded text-violet-600 focus:ring-violet-500"
+                    />
+                    <div className="text-xs">
+                      <p className="font-bold text-zinc-900 flex items-center gap-1.5">
+                        <Award className="w-3.5 h-3.5 text-amber-500" /> Certifications ({certCount})
+                      </p>
+                      <p className="text-[10px] text-zinc-500 truncate max-w-[170px]">
+                        {certCount > 0 ? (p.certifications[0]?.name || p.certifications[0]?.title || 'Certificates & Awards') : 'No certifications found'}
                       </p>
                     </div>
                   </label>
