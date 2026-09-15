@@ -552,4 +552,6 @@ export function normalizeEngineeringData(rawPortfolio) {
     certificates: certificates || activeDef?.certificates || [],
     contact: contact || activeDef?.contact || {},
   };
+}
+
 export default normalizeEngineeringData;
