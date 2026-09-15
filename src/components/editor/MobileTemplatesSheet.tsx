@@ -128,27 +128,25 @@ export default function MobileTemplatesSheet({
                   <div
                     key={tpl.id}
                     onClick={() => handleSelectTemplate(tpl.id)}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                      isActive
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${isActive
                         ? 'border-violet-600 bg-violet-50/40 shadow-md'
                         : isLocked
                           ? 'border-zinc-200 bg-zinc-50/50 hover:border-amber-300'
                           : 'border-zinc-200 hover:border-violet-300 bg-white'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-sm text-zinc-900">{tpl.name}</h4>
-                          <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${
-                            planTier === 'free'
+                          <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${planTier === 'free'
                               ? 'bg-emerald-100 text-emerald-700'
                               : planTier === 'monthly'
                                 ? 'bg-sky-100 text-sky-700'
                                 : planTier === 'quarterly'
                                   ? 'bg-indigo-100 text-indigo-700'
                                   : 'bg-violet-100 text-violet-700'
-                          }`}>
+                            }`}>
                             {planTier}
                           </span>
                         </div>

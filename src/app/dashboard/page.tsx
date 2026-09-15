@@ -61,6 +61,7 @@ import { adminTemplateDb } from '../../utils/adminTemplateDb';
 import { TemplateRecord } from '../../types/adminTemplate';
 import { getPortfolios, savePortfolio, deletePortfolio } from '../../lib/portfolioStore';
 import UpgradePlanModal from '../../components/common/UpgradePlanModal';
+import { resolveInstalledTemplateAsync } from '../../utils/installedTemplateResolver';
 
 export default function DashboardPage() {
   return (
@@ -738,14 +739,16 @@ function DashboardContent() {
 
   const handleApplyTemplateToPortfolio = async (tplId: string) => {
     if (!selectedPortfolio) {
-      alert("Please select a portfolio first!");
+      router.push(`/onboarding?templateId=${encodeURIComponent(tplId)}`);
       return;
     }
-    const updated = { ...selectedPortfolio, templateId: tplId, layoutStyle: tplId };
+    const resolvedTmpl = await resolveInstalledTemplateAsync(tplId, selectedPortfolio);
+    const sectionFiles = (resolvedTmpl.sectionFiles && Object.keys(resolvedTmpl.sectionFiles).length > 0) ? resolvedTmpl.sectionFiles : selectedPortfolio.sectionFiles;
+    const updated = { ...selectedPortfolio, templateId: tplId, layoutStyle: tplId, sectionFiles };
     await savePortfolio(updated);
     setSelectedPortfolio(updated);
     setUserPortfolios(await getPortfolios());
-    alert(`Template "${tplId}" applied to portfolio "${selectedPortfolio.name}"!`);
+    alert(`Template applied to portfolio "${selectedPortfolio.name}"!`);
   };
 
   const handleForceExpire = () => {
@@ -1417,13 +1420,11 @@ function DashboardContent() {
                                 }
                                 handleApplyTemplateToPortfolio(t.id);
                               }}
-                              disabled={isCurrentlyUsed || !selectedPortfolio}
+                              disabled={isCurrentlyUsed}
                               className={`w-full h-9 rounded-xl text-xs font-bold transition-all ${
                                 isCurrentlyUsed
                                   ? 'bg-zinc-100 text-zinc-400 cursor-default'
-                                  : selectedPortfolio
-                                    ? 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm cursor-pointer'
-                                    : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                                  : 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm cursor-pointer'
                               }`}
                             >
                               {isCurrentlyUsed ? 'Active Template' : 'Use Template'}

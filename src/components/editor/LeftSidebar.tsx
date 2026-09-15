@@ -56,11 +56,10 @@ export default function LeftSidebar({
       data-tour={`${key}-tab`}
       onClick={() => setActiveTab(prev => prev === key ? null : key)}
       title={label}
-      className={`w-12 h-12 flex flex-col items-center justify-center gap-1 rounded-xl transition-all cursor-pointer ${
-        activeTab === key
+      className={`w-12 h-12 flex flex-col items-center justify-center gap-1 rounded-xl transition-all cursor-pointer ${activeTab === key
           ? 'bg-[#f3f1ff] text-[#7448e8] border border-[#ddd6fe] shadow-xs font-bold'
           : 'text-[#666674] hover:text-[#1f1f26] hover:bg-[#f7f8fc]'
-      }`}
+        }`}
     >
       {icon}
       <span className="text-[8px] font-bold uppercase tracking-wide leading-none">{label}</span>
@@ -235,7 +234,7 @@ function DesignPanel({
   const availableTemplates = useMemo(() => {
     const TIER_ORDER: Record<string, number> = { 'free': 0, 'trial': 1, 'monthly': 1, 'quarterly': 2, 'yearly': 3, 'pro': 3 };
     const currentTmplId = getCanonicalTemplateId(portfolio?.templateId || portfolio?.layoutStyle || '');
-    
+
     // Deduplicate syncedTemplates by canonical ID and normalized name
     const seenIds = new Set<string>();
     const seenNames = new Set<string>();
@@ -312,7 +311,7 @@ function DesignPanel({
     };
 
     const targetVersionId = targetTemplate?.currentVersionId || (targetTemplate as any)?.versionId;
-    
+
     // Resolve full package files asynchronously (from API / cache / disk)
     const resolvedTmpl = await resolveInstalledTemplateAsync(selectedTemplateId, portfolio);
 
@@ -459,7 +458,7 @@ function DesignPanel({
 
   return (
     <div className="p-4 space-y-6">
-      
+
       {/* 1. Theme Accent Color Palette & Custom Picker */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -480,9 +479,8 @@ function DesignPanel({
               <button
                 key={c.value}
                 onClick={() => handleColorApply(c.value)}
-                className={`w-7 h-7 rounded-full transition-all cursor-pointer flex items-center justify-center relative ${
-                  isSelected ? 'scale-110 ring-2 ring-offset-2 ring-violet-600 shadow-sm' : 'hover:scale-105 border border-black/10'
-                }`}
+                className={`w-7 h-7 rounded-full transition-all cursor-pointer flex items-center justify-center relative ${isSelected ? 'scale-110 ring-2 ring-offset-2 ring-violet-600 shadow-sm' : 'hover:scale-105 border border-black/10'
+                  }`}
                 style={{ backgroundColor: c.value }}
                 title={c.name}
               >
@@ -572,11 +570,10 @@ function DesignPanel({
                 <button
                   key={preset.size}
                   onClick={() => handleFontSizeChange(preset.size)}
-                  className={`py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
-                    isSelected
+                  className={`py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${isSelected
                       ? 'bg-violet-600 text-white border-violet-600 shadow-xs'
                       : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
-                  }`}
+                    }`}
                 >
                   {preset.label} ({preset.size})
                 </button>
@@ -600,7 +597,7 @@ function DesignPanel({
               <p className="text-[9px] text-zinc-500 font-medium">Click to select from 25+ styles</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-violet-700 bg-violet-100/80 px-2 py-0.5 rounded-md border border-violet-200 truncate max-w-[100px]">
               {currentFontName}
@@ -636,11 +633,10 @@ function DesignPanel({
                     <button
                       key={cat.id}
                       onClick={() => setSelectedFontCategory(cat.id)}
-                      className={`px-2 py-1 rounded-md text-[10px] font-bold whitespace-nowrap transition-all cursor-pointer ${
-                        isSelected
+                      className={`px-2 py-1 rounded-md text-[10px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
                           ? 'bg-zinc-900 text-white shadow-xs'
                           : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-                      }`}
+                        }`}
                     >
                       {cat.label}
                     </button>
@@ -659,11 +655,10 @@ function DesignPanel({
                   <div
                     key={font.id}
                     onClick={() => handleFontSelect(font)}
-                    className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                      isSelected
+                    className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
                         ? 'border-violet-500 bg-violet-50/50 ring-1 ring-violet-500 shadow-xs'
                         : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/75 bg-white'
-                    }`}
+                      }`}
                   >
                     <div className="min-w-0 flex-1 pr-2">
                       <div className="flex items-center gap-2 mb-0.5">
@@ -721,13 +716,12 @@ function DesignPanel({
               <div
                 key={tmpl.id}
                 onClick={() => handleSelectTemplate(tmpl.id)}
-                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                  isSelected
+                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
                     ? 'border-violet-500 bg-violet-50/50 ring-1 ring-violet-500 shadow-xs'
                     : isLocked
                       ? 'border-zinc-200 bg-zinc-50/50 hover:border-amber-300 opacity-90'
                       : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/75 bg-white'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative w-10 h-10 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 overflow-hidden">
@@ -740,15 +734,14 @@ function DesignPanel({
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="text-xs font-bold text-zinc-900 truncate">{tmpl.name}</p>
-                      <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${
-                        planTier === 'free'
+                      <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${planTier === 'free'
                           ? 'bg-emerald-100 text-emerald-700'
                           : planTier === 'monthly'
                             ? 'bg-sky-100 text-sky-700'
                             : planTier === 'quarterly'
                               ? 'bg-indigo-100 text-indigo-700'
                               : 'bg-violet-100 text-violet-700'
-                      }`}>
+                        }`}>
                         {planTier}
                       </span>
                     </div>
@@ -823,7 +816,7 @@ function PublishPanel({ portfolio }: { portfolio: PortfolioData }) {
             setCustomDomainInput(data.domain.domain);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
     return () => {
       mounted = false;
@@ -831,14 +824,14 @@ function PublishPanel({ portfolio }: { portfolio: PortfolioData }) {
   }, [portfolio?.id]);
 
   const activeHost = typeof window !== 'undefined' ? window.location.host : 'portfolio.campuscv.com';
-  
+
   // Resolve effective public link (prefers custom domain if active/set)
   const activeCustomDomain = customDomainRecord?.normalized_domain || portfolio.customDomain || '';
-  const effectivePublicUrl = activeCustomDomain 
+  const effectivePublicUrl = activeCustomDomain
     ? `https://${activeCustomDomain}`
     : (typeof window !== 'undefined'
-        ? `${window.location.origin}/${usernameInput || portfolio.username}`
-        : `https://portfolio.campuscv.com/${usernameInput || portfolio.username}`);
+      ? `${window.location.origin}/${usernameInput || portfolio.username}`
+      : `https://portfolio.campuscv.com/${usernameInput || portfolio.username}`);
 
   const checkUsername = async (val: string) => {
     const clean = normalizeUsername(val);
