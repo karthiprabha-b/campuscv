@@ -272,7 +272,7 @@ export async function loadTemplateFilesAsync(portfolio: any): Promise<ResolvedTe
           isUploaded: true,
           sectionFiles: json.files,
           customCSS: discovered.combinedCSS || '',
-          templateCode: json.files['src/template.jsx'] || json.files['template.jsx'] || '',
+          templateCode: json.files['src/template.jsx'] || json.files['template.jsx'] || json.files['src/index.jsx'] || json.files['index.jsx'] || '',
           source: 'api'
         };
       }

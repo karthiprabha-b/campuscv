@@ -207,7 +207,7 @@ export async function resolveInstalledTemplateAsync(templateId: string, portfoli
           manifest: json.manifest || {},
           sectionFiles: json.files,
           customCSS: discovered.combinedCSS || '',
-          templateCode: json.files['src/template.jsx'] || json.files['template.jsx'] || json.files['src/App.jsx'] || '',
+          templateCode: json.files['src/template.jsx'] || json.files['template.jsx'] || json.files['src/index.jsx'] || json.files['index.jsx'] || json.files['src/App.jsx'] || '',
           source: 'api',
           status: 'ACTIVE'
         };
