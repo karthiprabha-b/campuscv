@@ -42,6 +42,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   BarChart2,
+  Eye,
 } from 'lucide-react';
 import { 
   initializeMockDb, 
@@ -62,6 +63,7 @@ import { TemplateRecord } from '../../types/adminTemplate';
 import { getPortfolios, savePortfolio, deletePortfolio } from '../../lib/portfolioStore';
 import UpgradePlanModal from '../../components/common/UpgradePlanModal';
 import { resolveInstalledTemplateAsync } from '../../utils/installedTemplateResolver';
+import UserPortfolioPreviewModal from '../../components/dashboard/UserPortfolioPreviewModal';
 
 export default function DashboardPage() {
   return (
@@ -473,6 +475,10 @@ function DashboardContent() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBillingSection, setShowBillingSection] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [previewModalConfig, setPreviewModalConfig] = useState<{ isOpen: boolean; overrideTemplateId?: string | null }>({
+    isOpen: false,
+    overrideTemplateId: null
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const templatesRef = useRef<HTMLDivElement>(null);
   const billingRef = useRef<HTMLDivElement>(null);
@@ -1140,7 +1146,7 @@ function DashboardContent() {
                       </div>
                     </div>
 
-                    {/* Action buttons */}
+                      {/* Action buttons */}
                     <div className="space-y-2.5 pt-2">
                       <div className="grid grid-cols-2 gap-2 sm:gap-3">
                         {isExpired ? (
@@ -1178,31 +1184,42 @@ function DashboardContent() {
                           <span className="truncate">View Live</span>
                         </a>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+
+                      {/* Second row: Full Live Preview, QR code, Copy link */}
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                        <button
+                          onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
+                          className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-violet-50 hover:bg-violet-100 border border-violet-200/80 text-[#7C3AED] rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-1.5 sm:px-2"
+                          title="Interactive Device Preview"
+                        >
+                          <Eye className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">Preview</span>
+                        </button>
                         <button
                           onClick={() => setShowQrModal(true)}
-                          className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-purple-50 hover:bg-purple-100 border border-purple-200/80 text-[#7C3AED] rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-2 sm:px-3"
+                          className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-1.5 sm:px-2"
                         >
                           <QrCode className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">QR &amp; Share</span>
+                          <span className="truncate">QR Code</span>
                         </button>
                         <button
                           onClick={handleCopyLink}
-                          className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-2 sm:px-3"
+                          className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-1.5 sm:px-2"
                         >
                           {copiedLink ? (
                             <>
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span className="text-emerald-600 font-bold truncate">Link Copied!</span>
+                              <span className="text-emerald-600 font-bold truncate">Copied!</span>
                             </>
                           ) : (
                             <>
                               <Copy className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-                              <span className="truncate">Copy Link</span>
+                              <span className="truncate">Copy</span>
                             </>
                           )}
                         </button>
                       </div>
+
                       <div className="pt-1 flex justify-start">
                         <button
                           onClick={(e) => handleDeletePortfolio(selectedPortfolio.id, e)}
@@ -1227,10 +1244,21 @@ function DashboardContent() {
                       <div className="flex-1 bg-zinc-100 rounded-md px-2.5 py-1 text-[11px] sm:text-xs font-mono text-zinc-500 text-center truncate ml-2">
                         {getPublicPortfolioUrl(selectedPortfolio.username).replace(/^https?:\/\//, '')}
                       </div>
+                      <button
+                        onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
+                        className="p-1 rounded-md text-zinc-400 hover:text-[#7C3AED] hover:bg-violet-50 transition-colors"
+                        title="Open Fullscreen Preview"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    {/* Static Aspect Ratio Preview container */}
+
+                    {/* Interactive Aspect Ratio Preview container */}
                     <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-zinc-100/60 p-3 sm:p-6 lg:p-8">
-                      <div className="w-full max-w-[520px] aspect-[16/10] relative rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-zinc-200 bg-white">
+                      <div 
+                        onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
+                        className="w-full max-w-[520px] aspect-[16/10] relative rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-zinc-200 bg-white cursor-pointer group transition-all duration-300 hover:-translate-y-0.5"
+                      >
                         {activeTemplate?.thumbnail ? (
                           <img
                             src={activeTemplate.thumbnail}
@@ -1246,7 +1274,7 @@ function DashboardContent() {
                                 (e.currentTarget as HTMLImageElement).src = '/templates/designer/thumbnail.png';
                               }
                             }}
-                            className="w-full h-full object-cover object-top"
+                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-[#7C3AED]/10 via-white to-[#A78BFA]/10 flex flex-col items-center justify-center gap-3 p-6 text-center">
@@ -1259,6 +1287,19 @@ function DashboardContent() {
                             </div>
                           </div>
                         )}
+
+                        {/* Interactive Hover Overlay */}
+                        <div className="absolute inset-0 bg-zinc-950/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 text-white">
+                          <div className="w-10 h-10 rounded-full bg-[#7C3AED] flex items-center justify-center shadow-lg shadow-purple-600/50 transform group-hover:scale-110 transition-transform">
+                            <Eye className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-xs font-bold tracking-wide drop-shadow-sm font-bricolage">
+                            Click for Full Live Preview
+                          </span>
+                          <span className="text-[10px] text-zinc-300 font-mono">
+                            Desktop • Tablet • Mobile
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1392,7 +1433,19 @@ function DashboardContent() {
                         </div>
 
                         {/* Action buttons pinned to bottom */}
-                        <div className="pt-3 border-t border-zinc-100 flex items-center">
+                        <div className="pt-3 border-t border-zinc-100 flex items-center gap-2">
+                          {selectedPortfolio && (
+                            <button
+                              type="button"
+                              onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: t.id })}
+                              className="h-9 px-2.5 rounded-xl border border-zinc-200 hover:border-violet-300 hover:bg-violet-50 text-zinc-600 hover:text-[#7C3AED] text-xs font-bold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer shadow-xs"
+                              title={`Preview ${t.name} with your portfolio content`}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Preview</span>
+                            </button>
+                          )}
+
                           {isLocked ? (
                             <button
                               onClick={() => {
@@ -1405,9 +1458,9 @@ function DashboardContent() {
                                   planLimit: access.planLimit,
                                 });
                               }}
-                              className="w-full h-9 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                              className="flex-1 h-9 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                             >
-                              <Lock className="w-3.5 h-3.5" />
+                              <Lock className="w-3.5 h-3.5 shrink-0" />
                               <span>Upgrade to Unlock</span>
                             </button>
                           ) : (
@@ -1421,7 +1474,7 @@ function DashboardContent() {
                                 handleApplyTemplateToPortfolio(t.id);
                               }}
                               disabled={isCurrentlyUsed}
-                              className={`w-full h-9 rounded-xl text-xs font-bold transition-all ${
+                              className={`flex-1 h-9 rounded-xl text-xs font-bold transition-all ${
                                 isCurrentlyUsed
                                   ? 'bg-zinc-100 text-zinc-400 cursor-default'
                                   : 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm cursor-pointer'
@@ -2135,6 +2188,20 @@ function DashboardContent() {
           onUpgradeSuccess={(upgradedPlan) => {
             setUser(mockAuth.getCurrentUser());
             alert(`🎉 Successfully upgraded to ${upgradedPlan.name}! You can now use all templates in your new tier.`);
+          }}
+        />
+      )}
+
+      {/* Live Real Portfolio Preview Modal */}
+      {selectedPortfolio && (
+        <UserPortfolioPreviewModal
+          isOpen={previewModalConfig.isOpen}
+          onClose={() => setPreviewModalConfig({ isOpen: false, overrideTemplateId: null })}
+          portfolio={selectedPortfolio}
+          overrideTemplateId={previewModalConfig.overrideTemplateId}
+          onOpenEditor={() => {
+            setPreviewModalConfig({ isOpen: false, overrideTemplateId: null });
+            router.push(`/editor/${selectedPortfolio.id}`);
           }}
         />
       )}
