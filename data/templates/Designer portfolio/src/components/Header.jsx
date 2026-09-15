@@ -61,7 +61,7 @@ export default function Header(props = {}) {
   const hasCertifications = isSectionVisible('certifications') && !isDeleted('container:certifications:section:0', 'section:certifications:root:section:0') && certList.length > 0;
   const hasContact = isSectionVisible('contact') && !isDeleted('section:contact:root:section:0');
 
-  const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certifications', 'Contact'];
+  const defaultOrder = ['hero', 'about', 'projects', 'process', 'experience', 'skills', 'education', 'certifications', 'testimonial', 'contact'];
   const dynamicSections = Array.isArray(props?.visibleSections) && props.visibleSections.length > 0
     ? props.visibleSections
     : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
@@ -74,25 +74,55 @@ export default function Header(props = {}) {
       const sLower = sName.toLowerCase();
       if (sLower === 'header' || sLower === 'footer' || sLower === 'navbar') return false;
       if (props?.visibleSections) return true;
-      if (sLower === 'projects' || sLower === 'work') return hasProjects;
-      if (sLower === 'about') return hasAbout;
-      if (sLower === 'experience') return hasExperience;
-      if (sLower === 'education') return hasEducation;
-      if (sLower === 'skills') return hasSkills;
-      if (sLower === 'certifications' || sLower === 'certificates') return hasCertifications;
-      if (sLower === 'process') return hasProcess;
-      if (sLower === 'contact') return hasContact;
+      if (sLower.includes('proj') || sLower.includes('work')) return hasProjects;
+      if (sLower.includes('about')) return hasAbout;
+      if (sLower.includes('exp')) return hasExperience;
+      if (sLower.includes('edu')) return hasEducation;
+      if (sLower.includes('skill')) return hasSkills;
+      if (sLower.includes('cert')) return hasCertifications;
+      if (sLower.includes('process') || sLower.includes('approach')) return hasProcess;
+      if (sLower.includes('contact')) return hasContact;
       return true;
     })
     .map(sec => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
-      const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);
-      const id = sName.toLowerCase().replace(/\s+/g, '-');
-      const href = id === 'home' || id === 'hero' ? '#hero' : `#${id}`;
-      return {
-        label: cleanName === 'Hero' ? 'Home' : cleanName === 'Projects' ? 'Work' : cleanName,
-        href
-      };
+      const sLower = sName.toLowerCase();
+      let label = sName.charAt(0).toUpperCase() + sName.slice(1);
+      let href = `#${sLower.replace(/\s+/g, '-')}`;
+
+      if (sLower.includes('hero') || sLower.includes('home')) {
+        label = 'Home';
+        href = '#hero';
+      } else if (sLower.includes('about')) {
+        label = 'About';
+        href = '#about';
+      } else if (sLower.includes('proj') || sLower.includes('work')) {
+        label = 'Work';
+        href = '#projects';
+      } else if (sLower.includes('process') || sLower.includes('approach')) {
+        label = 'Process';
+        href = '#process';
+      } else if (sLower.includes('exp')) {
+        label = 'Experience';
+        href = '#experience';
+      } else if (sLower.includes('skill') || sLower.includes('tool')) {
+        label = 'Skills';
+        href = '#skills';
+      } else if (sLower.includes('edu')) {
+        label = 'Education';
+        href = '#education';
+      } else if (sLower.includes('cert')) {
+        label = 'Certifications';
+        href = '#certifications';
+      } else if (sLower.includes('testim')) {
+        label = 'Testimonials';
+        href = '#testimonial';
+      } else if (sLower.includes('contact')) {
+        label = 'Contact';
+        href = '#contact';
+      }
+
+      return { label, href };
     });
 
   const handleNavClick = (href) => {

@@ -152,28 +152,32 @@ export default function Template(props = {}) {
 
   rawOrder.forEach((rawItem) => {
     const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
-    let id = String(rawVal || '').toLowerCase().trim();
-    if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'certifications') id = 'certificates';
-    if (id === 'timeline' || id === 'work') id = 'experience';
-    if (id === 'academics') id = 'education';
-    if (id === 'portfolio') id = 'projects';
-    if (id === 'tech') id = 'skills';
-    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    let s = String(rawVal || '').toLowerCase().trim();
+    if (!s || s === 'header' || s === 'footer' || s === 'navbar') return;
+    
+    let id = s;
+    if (s.includes('subhero') || s.includes('ticker') || s.includes('marquee')) id = 'subhero';
+    else if (s.includes('hero') || s.includes('home') || s.includes('intro') || s === 'banner') id = 'hero';
+    else if (s.includes('about') || s.includes('bio') || s.includes('summary')) id = 'about';
+    else if (s.includes('edu') || s.includes('acad') || s.includes('school') || s.includes('degree')) id = 'education';
+    else if (s.includes('exp') || s.includes('career') || s.includes('timeline') || s.includes('job') || s.includes('history')) id = 'experience';
+    else if (s.includes('proj') || s.includes('work') || s.includes('portfolio') || s.includes('featured')) id = 'projects';
+    else if (s.includes('skill') || s.includes('tech') || s.includes('tool') || s.includes('stack')) id = 'skills';
+    else if (s.includes('cert') || s.includes('award') || s.includes('recogni') || s.includes('license')) id = 'certificates';
+    else if (s.includes('contact') || s.includes('touch') || s.includes('connect') || s.includes('message')) id = 'contact';
+
     if (sectionComponentMap[id] && !added.has(id)) {
       mainSectionIds.push(id);
       added.add(id);
     }
   });
 
-  if (!hasCustomOrder) {
-    defaultMainSections.forEach((id) => {
-      if (!added.has(id)) {
-        mainSectionIds.push(id);
-        added.add(id);
-      }
-    });
-  }
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id) && sectionComponentMap[id]) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
 
   const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 

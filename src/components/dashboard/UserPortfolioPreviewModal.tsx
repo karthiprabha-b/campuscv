@@ -108,13 +108,14 @@ export default function UserPortfolioPreviewModal({
   const idLower = (template.id || '').toLowerCase();
   const nameLower = (template.name || '').toLowerCase();
 
-  const isDesigner = categoryLower.includes('design') || idLower.includes('design') || nameLower.includes('design') || categoryLower.includes('creative');
-  const isDataOrML = categoryLower.includes('data') || idLower.includes('data') || categoryLower.includes('ai') || idLower.includes('ml');
-  const isDoctor = categoryLower.includes('doctor') || idLower.includes('doctor') || idLower.includes('medic') || nameLower.includes('doctor');
-  const isAgri = categoryLower.includes('agri') || idLower.includes('agri') || nameLower.includes('agri');
-  const isBeautician = categoryLower.includes('beauty') || idLower.includes('beautician') || nameLower.includes('beautician');
-  const isLawyer = categoryLower.includes('law') || idLower.includes('lawyer') || nameLower.includes('lawyer');
+  const isDesigner = categoryLower.includes('design') || idLower.includes('design') || nameLower.includes('design') || categoryLower.includes('creative') || idLower.includes('creative');
   const isPhotography = categoryLower.includes('photo') || idLower.includes('photo') || nameLower.includes('photo');
+  const isDoctor = categoryLower.includes('doctor') || idLower.includes('doctor') || idLower.includes('medic') || nameLower.includes('doctor') || idLower.includes('health');
+  const isAgri = categoryLower.includes('agri') || idLower.includes('agri') || nameLower.includes('agri');
+  const isBeautician = categoryLower.includes('beauty') || idLower.includes('beautician') || nameLower.includes('beauty') || nameLower.includes('beautician');
+  const isLawyer = categoryLower.includes('law') || idLower.includes('lawyer') || nameLower.includes('lawyer') || idLower.includes('legal');
+
+  const canonicalSectionsList = ['hero', 'about', 'projects', 'process', 'experience', 'skills', 'education', 'certifications', 'testimonial', 'contact'];
 
   const realTemplateSampleData: PortfolioData = embeddedData ? {
     ...embeddedData,
@@ -123,6 +124,8 @@ export default function UserPortfolioPreviewModal({
     templateId: template.id,
     layoutStyle: template.id,
     isDarkMode: themeMode === 'dark',
+    sections: canonicalSectionsList,
+    sectionOrder: canonicalSectionsList,
     published: true,
   } : isDesigner ? {
     id: `preview-${template.id}`,
@@ -132,77 +135,157 @@ export default function UserPortfolioPreviewModal({
     layoutStyle: template.id,
     title: `${template.name} • Official Design Showcase`,
     name: 'Sara Chen',
+    fullName: 'Sara Chen',
     tagline: 'Lead Product & UI/UX Designer',
     headline: 'Designing intuitive digital products & scalable design systems',
+    role: 'Lead Product Designer',
+    location: 'Bengaluru, India',
+    email: 'sara.chen@designstudio.io',
+    phone: '+91 98765 43210',
     profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
     projectThumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
     fontPack: 'sans',
     isDarkMode: themeMode === 'dark',
     published: true,
     stats: [
-      { label: 'Experience', value: '6+ Years' },
+      { label: 'Years Experience', value: '6+' },
       { label: 'Products Shipped', value: '24+' },
       { label: 'Design Awards', value: '4' }
     ],
+    hero: {
+      name: 'Sara Chen',
+      role: 'Lead Product Designer',
+      title: 'Designing intuitive digital products & scalable design systems',
+      subtitle: 'Product designer focused on turning complex enterprise problems into simple, thoughtful digital experiences with meticulous craft.',
+      headline: 'Designing intuitive digital products & scalable design systems',
+      description: 'Product designer focused on turning complex enterprise problems into simple, thoughtful digital experiences with meticulous craft.',
+      location: 'Bengaluru, India',
+      availability: 'Available for select projects & full-time roles',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      ctaText: 'View Selected Work',
+      primaryButton: { label: 'View Selected Work', url: '#projects' },
+      secondaryButton: { label: 'About Me', url: '#about' }
+    },
+    about: {
+      title: 'I design at the intersection of people, products and technology.',
+      headline: 'I design at the intersection of people, products and technology.',
+      description: "Over the last 6+ years, I've collaborated with fast-growing tech startups and global engineering teams to transform ambiguous product requirements into clean, delightful digital experiences.\n\nMy design approach is anchored in deep user inquiry, robust information architecture, and obsessive visual precision.",
+      bio: "Over the last 6+ years, I've collaborated with fast-growing tech startups and global engineering teams to transform ambiguous product requirements into clean, delightful digital experiences.\n\nMy design approach is anchored in deep user inquiry, robust information architecture, and obsessive visual precision.",
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      stats: [
+        { label: 'Years Experience', value: '6+' },
+        { label: 'Products Shipped', value: '24+' },
+        { label: 'Product Users', value: '12M+' }
+      ]
+    },
     skills: ['Product Design', 'UI/UX Design', 'Design Systems', 'User Research', 'Prototyping', 'Framer', 'Interaction Design', 'Wireframing'],
     tools: ['Figma', 'FigJam', 'Framer', 'Adobe Illustrator', 'Photoshop', 'Principle'],
     certifications: [
-      { name: 'NN/g UX Master Certified (UXMC)', issuer: 'Nielsen Norman Group', year: '2024', issueDate: '2024' },
-      { name: 'Enterprise Design Thinking Leader', issuer: 'IBM Design', year: '2023', issueDate: '2023' }
+      { name: 'NN/g UX Master Certified (UXMC)', issuer: 'Nielsen Norman Group', year: '2024', issueDate: '2024', link: '#' },
+      { name: 'Enterprise Design Thinking Leader', issuer: 'IBM Design', year: '2023', issueDate: '2023', link: '#' }
     ],
     experience: [
       {
         id: "exp-1",
         role: "Lead Product Designer",
+        title: "Lead Product Designer",
         company: "Stripe & Co (Fintech)",
         period: "2022 — Present",
         startDate: "2022",
         endDate: "Present",
         current: true,
-        description: "Directing the global design system team and leading UX strategy for self-serve merchant portals."
+        description: "Directing the global design system team and leading UX strategy for self-serve merchant portals serving 400k+ global businesses."
       },
       {
         id: "exp-2",
         role: "Senior UI/UX Designer",
+        title: "Senior UI/UX Designer",
         company: "Studio Craft Labs",
         period: "2020 — 2022",
         startDate: "2020",
         endDate: "2022",
         current: false,
-        description: "Partnered with Series A-C founders to ship 0-to-1 enterprise SaaS products and design component libraries."
+        description: "Partnered with Series A-C founders to ship 0-to-1 enterprise SaaS products and scalable multi-brand component libraries."
       }
     ],
     education: [
       {
         id: "edu-1",
         degree: "Master of Design (M.Des) in Interaction Design",
+        title: "Master of Design (M.Des) in Interaction Design",
         institution: "National Institute of Design (NID)",
+        school: "National Institute of Design (NID)",
         period: "2016 — 2018",
         startYear: "2016",
         endYear: "2018",
-        description: "Specialized in human-computer interaction and cognitive design systems."
+        description: "Specialized in human-computer interaction, cognitive design systems, and qualitative usability testing."
       }
     ],
     projects: [
       {
         id: "proj-1",
         title: "Fintech Mobile Banking Experience",
-        description: "End-to-end design for a next-gen investment app focusing on zero-friction onboarding and micro-interactions.",
+        name: "Fintech Mobile Banking Experience",
+        description: "End-to-end design for a next-gen investment app focusing on zero-friction onboarding, live portfolio telemetry, and micro-interactions.",
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
         tags: ["Figma", "UI/UX", "Design Systems"],
         technologies: ["Figma", "Design Systems", "Prototyping"],
+        category: "Fintech & Mobile UX",
+        year: "2024",
         link: "https://dribbble.com"
       },
       {
         id: "proj-2",
         title: "Aura Design System (200+ Components)",
-        description: "A comprehensive multi-brand accessible component library with dark mode support and Figma auto-layout 5.0.",
+        name: "Aura Design System (200+ Components)",
+        description: "A comprehensive multi-brand accessible component library with dark mode tokens, Figma auto-layout 5.0, and Storybook documentation.",
         image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
         tags: ["Design System", "WCAG 2.1", "Tokens"],
         technologies: ["Figma", "Tokens", "Storybook"],
+        category: "Enterprise System",
+        year: "2023",
         link: "https://behance.net"
       }
     ],
+    process: [
+      { step: "01", number: "01", title: "Discovery & User Inquiries", description: "Deep qualitative interviews and competitive landscape mapping to isolate real user pain points." },
+      { step: "02", number: "02", title: "Information Architecture", description: "Mapping core mental models, user journeys, and wireframe prototypes for frictionless flow." },
+      { step: "03", number: "03", title: "High-Fidelity UI & Systems", description: "Crafting scalable component tokens, accessibility guidelines, and pixel-precise interfaces." },
+      { step: "04", number: "04", title: "Validation & Engineering Handoff", description: "Usability testing rounds and pixel-perfect developer handoff with interactive specs." }
+    ],
+    approachSteps: [
+      { step: "01", number: "01", title: "Discovery & User Inquiries", description: "Deep qualitative interviews and competitive landscape mapping to isolate real user pain points." },
+      { step: "02", number: "02", title: "Information Architecture", description: "Mapping core mental models, user journeys, and wireframe prototypes for frictionless flow." },
+      { step: "03", number: "03", title: "High-Fidelity UI & Systems", description: "Crafting scalable component tokens, accessibility guidelines, and pixel-precise interfaces." },
+      { step: "04", number: "04", title: "Validation & Engineering Handoff", description: "Usability testing rounds and pixel-perfect developer handoff with interactive specs." }
+    ],
+    testimonials: [
+      {
+        quote: "Sara is one of the rare designers who seamlessly balances deep product strategy with exquisite visual craft. She leveled up our entire design culture.",
+        author: "Marcus Vance",
+        name: "Marcus Vance",
+        role: "VP of Product, Stripe & Co",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"
+      }
+    ],
+    contact: {
+      title: "Have an interesting product problem? Let's design something worth using.",
+      description: "Currently open for select freelance visual projects, product design consulting, and full-time product design leadership roles.",
+      email: 'sara.chen@designstudio.io',
+      phone: '+91 98765 43210',
+      location: 'Bengaluru, India',
+      socials: {
+        linkedin: 'https://linkedin.com',
+        dribbble: 'https://dribbble.com',
+        behance: 'https://behance.net',
+        twitter: 'https://twitter.com'
+      }
+    },
     social: {
       linkedin: 'https://linkedin.com',
       dribbble: 'https://dribbble.com',
@@ -210,9 +293,8 @@ export default function UserPortfolioPreviewModal({
       twitter: 'https://twitter.com'
     },
     aboutMe: 'Lead Product Designer passionate about crafting user-centric interfaces, robust design systems, and delightful digital experiences that solve real-world problems.',
-    sections: Array.isArray(template.sections)
-      ? template.sections.map((sec: any) => typeof sec === 'string' ? sec : (sec?.name || sec?.id || sec?.component || 'Section'))
-      : ['hero', 'about', 'experience', 'skills', 'education', 'projects', 'contact'],
+    sections: canonicalSectionsList,
+    sectionOrder: canonicalSectionsList,
     seo: { title: 'Sara Chen | Product & UI/UX Designer', description: 'Product Designer portfolio preview', keywords: 'design, ui, ux, portfolio' }
   } : isPhotography ? {
     id: `preview-${template.id}`,
@@ -222,9 +304,15 @@ export default function UserPortfolioPreviewModal({
     layoutStyle: template.id,
     title: `${template.name} • Visual Storytelling`,
     name: 'Elena Rostova',
+    fullName: 'Elena Rostova',
     tagline: 'Visual Storyteller & Editorial Photographer',
     headline: 'Capturing raw emotions, cinematic landscapes, and timeless human stories',
+    role: 'Editorial & Commercial Photographer',
+    location: 'Berlin, Germany',
+    email: 'elena@rostovaphoto.com',
+    phone: '+49 170 1234567',
     profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
     projectThumbnail: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1200&q=80',
     fontPack: 'serif',
     isDarkMode: themeMode === 'dark',
@@ -234,34 +322,90 @@ export default function UserPortfolioPreviewModal({
       { label: 'Magazine Covers', value: '28' },
       { label: 'Countries Captured', value: '34' }
     ],
+    hero: {
+      name: 'Elena Rostova',
+      role: 'Editorial Photographer',
+      title: 'Capturing raw emotions, cinematic landscapes, and timeless human stories',
+      subtitle: 'Editorial and commercial photographer with over 8 years of experience working with global publications, architectural firms, and fashion brands.',
+      headline: 'Capturing raw emotions, cinematic landscapes, and timeless human stories',
+      description: 'Editorial and commercial photographer with over 8 years of experience working with global publications, architectural firms, and fashion brands.',
+      location: 'Berlin, Germany',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80'
+    },
+    about: {
+      title: 'Visual stories that transcend language and borders.',
+      description: 'Editorial and commercial photographer with over 8 years of experience working with global publications, architectural firms, and fashion brands across Europe and Asia.',
+      bio: 'Editorial and commercial photographer with over 8 years of experience working with global publications, architectural firms, and fashion brands across Europe and Asia.',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80'
+    },
     skills: ['Editorial Photography', 'Portraiture', 'Color Grading', 'Lighting Architecture', 'Photojournalism', 'Adobe Lightroom', 'Capture One'],
     projects: [
       {
         id: "proj-1",
         title: "Echoes of the Arctic (Editorial Collection)",
+        name: "Echoes of the Arctic (Editorial Collection)",
         description: "A 3-month photographic expedition documenting indigenous communities and disappearing glacial landscapes.",
         image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80",
         tags: ["Editorial", "Landscape", "National Geographic"],
+        category: "Expedition & Nature",
         link: "https://unsplash.com"
       },
       {
         id: "proj-2",
         title: "Urban Monochromes — Tokyo & Berlin",
+        name: "Urban Monochromes — Tokyo & Berlin",
         description: "High-contrast architectural and street portraiture celebrating modern minimalism.",
         image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
         tags: ["Street", "Black & White", "Exhibition"],
+        category: "Street & Architecture",
         link: "https://unsplash.com"
       }
     ],
+    experience: [
+      {
+        id: "exp-1",
+        role: "Senior Editorial Photographer",
+        title: "Senior Editorial Photographer",
+        company: "Vanguard Magazine & Media",
+        period: "2021 — Present",
+        startDate: "2021",
+        endDate: "Present",
+        current: true,
+        description: "Directing high-profile cover shoots, fashion week editorials, and international feature assignments."
+      }
+    ],
+    education: [
+      {
+        id: "edu-1",
+        degree: "B.A. in Fine Art Photography",
+        title: "B.A. in Fine Art Photography",
+        institution: "Berlin University of the Arts",
+        period: "2014 — 2018",
+        description: "Specialized in analog film processing, lighting techniques, and documentary storytelling."
+      }
+    ],
+    certifications: [
+      { name: 'Sony Alpha Imaging Master', issuer: 'Sony Professional', year: '2023', link: '#' }
+    ],
+    contact: {
+      title: "Let's capture something extraordinary together.",
+      description: "Available for worldwide editorial assignments, brand campaigns, and gallery exhibitions.",
+      email: 'elena@rostovaphoto.com',
+      phone: '+49 170 1234567',
+      location: 'Berlin, Germany'
+    },
     social: {
       instagram: 'https://instagram.com',
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com'
     },
     aboutMe: 'Editorial and commercial photographer with over 8 years of experience working with global publications, architectural firms, and fashion brands.',
-    sections: Array.isArray(template.sections)
-      ? template.sections.map((sec: any) => typeof sec === 'string' ? sec : (sec?.name || sec?.id || sec?.component || 'Section'))
-      : ['hero', 'about', 'projects', 'skills', 'experience', 'contact'],
+    sections: canonicalSectionsList,
+    sectionOrder: canonicalSectionsList,
     seo: { title: 'Elena Rostova | Photography Portfolio', description: 'Photography Portfolio Showcase', keywords: 'photo, editorial, portraits' }
   } : {
     id: `preview-${template.id}`,
@@ -271,9 +415,15 @@ export default function UserPortfolioPreviewModal({
     layoutStyle: template.id,
     title: `${template.name} • Official Template Showcase`,
     name: 'Alex Rivera',
+    fullName: 'Alex Rivera',
     tagline: 'Full-Stack Software Engineer & Solutions Architect',
     headline: 'Engineering Scalable Cloud Architectures & Intelligent Web Platforms',
+    role: 'Senior Full-Stack Engineer & Architect',
+    location: 'San Francisco, CA',
+    email: 'alex.rivera@devcloud.io',
+    phone: '+1 (555) 234-5678',
     profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
     projectThumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80',
     fontPack: 'sans',
     isDarkMode: themeMode === 'dark',
@@ -281,75 +431,145 @@ export default function UserPortfolioPreviewModal({
     stats: [
       { label: 'Repositories', value: '45+' },
       { label: 'Production Apps', value: '18+' },
-      { label: 'Years Code', value: '5+' }
+      { label: 'Years Active', value: '6+' }
     ],
+    hero: {
+      name: 'Alex Rivera',
+      role: 'Full-Stack Software Engineer & Solutions Architect',
+      title: 'Engineering Scalable Cloud Architectures & Intelligent Web Platforms',
+      subtitle: 'Specializing in high-throughput distributed backends, TypeScript microservices, and high-performance React frontends.',
+      headline: 'Engineering Scalable Cloud Architectures & Intelligent Web Platforms',
+      description: 'Specializing in high-throughput distributed backends, TypeScript microservices, and high-performance React frontends.',
+      location: 'San Francisco, CA',
+      availability: 'Available for high-impact engineering roles & advisory',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+      primaryButton: { label: 'Explore Projects', url: '#projects' },
+      secondaryButton: { label: 'Get in Touch', url: '#contact' }
+    },
+    about: {
+      title: 'Building resilient systems that power modern software experiences.',
+      headline: 'Building resilient systems that power modern software experiences.',
+      description: 'Senior Software Engineer with 6+ years of expertise spanning distributed cloud microservices, real-time streaming architectures, and modern responsive web applications.',
+      bio: 'Senior Software Engineer with 6+ years of expertise spanning distributed cloud microservices, real-time streaming architectures, and modern responsive web applications.',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+      profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+      stats: [
+        { label: 'Repositories', value: '45+' },
+        { label: 'Production Apps', value: '18+' },
+        { label: 'Uptime SLA', value: '99.99%' }
+      ]
+    },
     skills: ['React', 'Next.js', 'TypeScript', 'Node.js', 'Python', 'PostgreSQL', 'Docker', 'AWS', 'GraphQL', 'TailwindCSS'],
+    tools: ['Docker', 'Kubernetes', 'AWS', 'PostgreSQL', 'Redis', 'Kafka', 'Git', 'Terraform'],
     certifications: [
-      { name: 'AWS Certified Solutions Architect - Associate', issuer: 'Amazon Web Services', year: '2024', issueDate: '2024' },
-      { name: 'Certified Kubernetes Administrator (CKA)', issuer: 'Linux Foundation', year: '2023', issueDate: '2023' }
+      { name: 'AWS Certified Solutions Architect - Associate', issuer: 'Amazon Web Services', year: '2024', issueDate: '2024', link: '#' },
+      { name: 'Certified Kubernetes Administrator (CKA)', issuer: 'Linux Foundation', year: '2023', issueDate: '2023', link: '#' }
     ],
     experience: [
       {
         id: "exp-1",
         role: "Senior Full-Stack Engineer",
+        title: "Senior Full-Stack Engineer",
         company: "Vanguard Cloud Systems",
         period: "2023 — Present",
         startDate: "2023",
         endDate: "Present",
         current: true,
-        description: "Spearheading backend microservices architecture and real-time distributed telemetry dashboards serving 200k+ daily queries."
+        description: "Spearheading backend microservices architecture and real-time distributed telemetry dashboards serving 200k+ daily active users."
       },
       {
         id: "exp-2",
         role: "Software Engineer",
+        title: "Software Engineer",
         company: "Nexus Labs",
         period: "2021 — 2023",
         startDate: "2021",
         endDate: "2023",
         current: false,
-        description: "Built modular React component architectures and high-throughput PostgreSQL query pipelines with 99.9% uptime."
+        description: "Built modular React component architectures and high-throughput PostgreSQL query pipelines with 99.99% system reliability."
       }
     ],
     education: [
       {
         id: "edu-1",
         degree: "B.S. in Computer Science & Engineering",
-        institution: "Institute of Technology",
+        title: "B.S. in Computer Science & Engineering",
+        institution: "California Institute of Technology",
+        school: "California Institute of Technology",
         period: "2017 — 2021",
         startYear: "2017",
         endYear: "2021",
-        description: "Graduated with Honors. Focus on Distributed Systems, Network Security, and Algorithms."
+        description: "Graduated with Honors. Focus on Distributed Systems, Cloud Infrastructure, and Algorithms."
       }
     ],
     projects: [
       {
         id: "proj-1",
         title: "OmniFlow Distributed Streaming Engine",
+        name: "OmniFlow Distributed Streaming Engine",
         description: "High-throughput event aggregation platform processing over 50,000 events/second with sub-10ms Redis latency.",
         image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
         tags: ["Node.js", "Redis", "Docker", "Kafka"],
         technologies: ["Node.js", "Redis", "Docker", "Kafka"],
+        category: "Cloud Infrastructure",
+        year: "2024",
         link: "https://github.com"
       },
       {
         id: "proj-2",
         title: "CloudPulse Serverless Analytics",
+        name: "CloudPulse Serverless Analytics",
         description: "Real-time edge performance monitoring SDK with automated anomaly detection alerts and WebSocket live charts.",
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
         tags: ["Next.js", "TypeScript", "TailwindCSS"],
         technologies: ["Next.js", "TypeScript", "TailwindCSS"],
+        category: "Developer Tools",
+        year: "2023",
         link: "https://github.com"
       }
     ],
+    process: [
+      { step: "01", number: "01", title: "System Architecture Design", description: "Evaluating scale, database schemas, and microservice boundaries before code is written." },
+      { step: "02", number: "02", title: "Test-Driven Development", description: "Writing end-to-end integration tests and clean, typed modular components." },
+      { step: "03", number: "03", title: "Automated CI/CD & Deploy", description: "Zero-downtime containerized deployment pipelines with canary releases." }
+    ],
+    approachSteps: [
+      { step: "01", number: "01", title: "System Architecture Design", description: "Evaluating scale, database schemas, and microservice boundaries before code is written." },
+      { step: "02", number: "02", title: "Test-Driven Development", description: "Writing end-to-end integration tests and clean, typed modular components." },
+      { step: "03", number: "03", title: "Automated CI/CD & Deploy", description: "Zero-downtime containerized deployment pipelines with canary releases." }
+    ],
+    testimonials: [
+      {
+        quote: "Alex is an engineering powerhouse. He built our streaming pipeline from scratch and scaled it to handle millions of requests without a hitch.",
+        author: "Sarah Lin",
+        name: "Sarah Lin",
+        role: "CTO, Vanguard Systems",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+      }
+    ],
+    contact: {
+      title: "Have a project or technical opportunity in mind?",
+      description: "Feel free to reach out for high-impact software engineering roles, technical advisory, or cloud architecture consulting.",
+      email: 'alex.rivera@devcloud.io',
+      phone: '+1 (555) 234-5678',
+      location: 'San Francisco, CA',
+      socials: {
+        github: 'https://github.com',
+        linkedin: 'https://linkedin.com',
+        twitter: 'https://twitter.com'
+      }
+    },
     social: {
       github: 'https://github.com',
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com'
     },
     aboutMe: 'Passionate software engineer focused on building robust, scalable web products, resilient backend architectures, and elegant user experiences.',
-    sections: Array.isArray(template.sections)
-      ? template.sections.map((sec: any) => typeof sec === 'string' ? sec : (sec?.name || sec?.id || sec?.component || 'Section'))
-      : ['hero', 'about', 'skills', 'experience', 'education', 'projects', 'contact'],
+    sections: canonicalSectionsList,
+    sectionOrder: canonicalSectionsList,
     seo: { title: 'Alex Rivera | Software Engineer Portfolio', description: 'Sample software engineer portfolio showcase', keywords: 'developer, software engineer, nextjs' }
   };
 

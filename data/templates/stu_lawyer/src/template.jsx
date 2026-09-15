@@ -188,31 +188,34 @@ export default function Template(props = {}) {
 
   rawOrder.forEach((rawItem) => {
     const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
-    let id = String(rawVal || '').toLowerCase().trim();
-    if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'metrics' || id === 'stats') id = 'achievements';
-    if (id === 'certificates' || id === 'awards' || id === 'certifications') id = 'certificates';
-    if (id === 'timeline' || id === 'work' || id === 'history') id = 'experience';
-    if (id === 'academics') id = 'education';
-    if (id === 'portfolio' || id === 'casestudies') id = 'projects';
-    if (id === 'tech' || id === 'stack' || id === 'capabilities') id = 'skills';
-    if (id === 'specialties' || id === 'offerings' || id === 'practice') id = 'services';
-    if (id === 'reviews' || id === 'endorsements') id = 'testimonials';
-    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    let s = String(rawVal || '').toLowerCase().trim();
+    if (!s || s === 'header' || s === 'footer' || s === 'navbar') return;
+    
+    let id = s;
+    if (s.includes('hero') || s.includes('home') || s.includes('intro') || s === 'banner') id = 'hero';
+    else if (s.includes('achieve') || s.includes('metric') || s.includes('stat')) id = 'achievements';
+    else if (s.includes('about') || s.includes('bio') || s.includes('summary')) id = 'about';
+    else if (s.includes('skill') || s.includes('tech') || s.includes('tool') || s.includes('capability') || s.includes('stack')) id = 'skills';
+    else if (s.includes('proj') || s.includes('work') || s.includes('portfolio') || s.includes('case')) id = 'projects';
+    else if (s.includes('service') || s.includes('practice') || s.includes('specialt') || s.includes('offering')) id = 'services';
+    else if (s.includes('exp') || s.includes('career') || s.includes('timeline') || s.includes('history')) id = 'experience';
+    else if (s.includes('edu') || s.includes('acad') || s.includes('school') || s.includes('degree')) id = 'education';
+    else if (s.includes('cert') || s.includes('award') || s.includes('recogni') || s.includes('license')) id = 'certificates';
+    else if (s.includes('testim') || s.includes('review') || s.includes('feedback') || s.includes('endorse')) id = 'testimonials';
+    else if (s.includes('contact') || s.includes('touch') || s.includes('connect') || s.includes('message')) id = 'contact';
+
     if (sectionComponentMap[id] && !added.has(id)) {
       mainSectionIds.push(id);
       added.add(id);
     }
   });
 
-  if (!hasCustomOrder) {
-    defaultMainSections.forEach((id) => {
-      if (!added.has(id)) {
-        mainSectionIds.push(id);
-        added.add(id);
-      }
-    });
-  }
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id) && sectionComponentMap[id]) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
 
   // Calculate visible sections for Navbar and Footer to dynamically reflect layer ordering & visibility
   const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));

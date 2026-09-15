@@ -266,6 +266,96 @@ export default function Template(props: TemplateProps = {}) {
       : {})
   };
 
+  const sectionComponentMap: Record<string, React.ReactNode> = {
+    hero: hasHero ? <Hero key="hero" data={data} hero={data.hero} /> : null,
+    about: hasAbout ? <About key="about" data={data} about={data.about} /> : null,
+    approach: hasApproach ? <Approach key="approach" data={data} approachSteps={data.approachSteps} /> : null,
+    education: hasEducation ? <Education key="education" data={data} education={data.education} /> : null,
+    skills: hasSkills ? <Skills key="skills" data={data} skills={data.skills} /> : null,
+    certifications: hasCertifications ? <Certifications key="certifications" data={data} certifications={data.certifications} /> : null,
+    projects: hasProjects ? <Projects key="projects" data={data} projects={data.projects} /> : null,
+    experience: hasExperience ? <Experience key="experience" data={data} experiences={data.experiences || data.experience} /> : null,
+    testimonials: hasTestimonials ? (
+      <section
+        key="testimonials"
+        id="testimonials"
+        data-section="testimonials"
+        data-cv-section="testimonials"
+        className="py-24 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-[#111111]/10 relative z-10 bg-[#111111]/[0.02]"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col mb-16 items-center text-center space-y-3">
+            <span className="text-xs font-black tracking-widest text-[#FFC107] uppercase">
+              Feedback
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-wide leading-tight text-[#111111]">
+              WHAT PEOPLE SAY
+            </h2>
+            <div className="w-12 h-1 bg-[#FFC107] mt-2" />
+          </div>
+          <TestimonialCarousel data={data} testimonials={data.testimonials} />
+        </div>
+      </section>
+    ) : null,
+    achievements: hasAchievements ? <Achievements key="achievements" data={data} achievements={data.achievements} /> : null,
+    contact: hasContact ? <Contact key="contact" data={data} contact={data.contact} /> : null,
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'approach',
+    'education',
+    'skills',
+    'certifications',
+    'projects',
+    'experience',
+    'testimonials',
+    'achievements',
+    'contact'
+  ];
+
+  const hasCustomOrder = Array.isArray((data as any)?.sectionOrder) && (data as any).sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
+    ? (data as any).sectionOrder
+    : ((Array.isArray((data as any)?.sections) && (data as any).sections.length > 0)
+      ? (data as any).sections
+      : defaultMainSections);
+
+  const mainSectionIds: string[] = [];
+  const added = new Set<string>();
+
+  rawOrder.forEach((rawItem: any) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let s = String(rawVal || '').toLowerCase().trim();
+    if (!s || s === 'header' || s === 'footer' || s === 'navbar') return;
+    
+    let id = s;
+    if (s.includes('hero') || s.includes('home') || s.includes('intro') || s === 'banner') id = 'hero';
+    else if (s.includes('approach') || s.includes('workflow') || s.includes('process') || s.includes('step')) id = 'approach';
+    else if (s.includes('about') || s.includes('bio') || s.includes('summary')) id = 'about';
+    else if (s.includes('edu') || s.includes('acad') || s.includes('school') || s.includes('degree')) id = 'education';
+    else if (s.includes('exp') || s.includes('career') || s.includes('timeline') || s.includes('job') || s.includes('history')) id = 'experience';
+    else if (s.includes('proj') || s.includes('work') || s.includes('portfolio') || s.includes('featured')) id = 'projects';
+    else if (s.includes('skill') || s.includes('tech') || s.includes('tool') || s.includes('stack')) id = 'skills';
+    else if (s.includes('cert') || s.includes('award') || s.includes('license')) id = 'certifications';
+    else if (s.includes('achieve') || s.includes('metric') || s.includes('stat') || s.includes('recogni')) id = 'achievements';
+    else if (s.includes('testim') || s.includes('review') || s.includes('feedback') || s.includes('endorse')) id = 'testimonials';
+    else if (s.includes('contact') || s.includes('touch') || s.includes('connect') || s.includes('message')) id = 'contact';
+
+    if (sectionComponentMap[id] !== undefined && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  defaultMainSections.forEach((id) => {
+    if (!added.has(id) && sectionComponentMap[id] !== undefined) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
   return (
     <div
       id="template-root"
@@ -281,58 +371,7 @@ export default function Template(props: TemplateProps = {}) {
       <Navbar data={data} navLinks={activeNavLinks} name={data.name} />
 
       <main className="relative z-10">
-        {/* 1. Hero Section */}
-        {hasHero && <Hero data={data} hero={data.hero} />}
-
-        {/* 2. About Section */}
-        {hasAbout && <About data={data} about={data.about} />}
-
-        {/* 3. My Approach (Workflow) Section */}
-        {hasApproach && <Approach data={data} approachSteps={data.approachSteps} />}
-
-        {/* 4. Education History Section */}
-        {hasEducation && <Education data={data} education={data.education} />}
-
-        {/* 5. Skills & Proficiency Section */}
-        {hasSkills && <Skills data={data} skills={data.skills} />}
-
-        {/* 6. Certifications Section */}
-        {hasCertifications && <Certifications data={data} certifications={data.certifications} />}
-
-        {/* 7. Featured Projects Section */}
-        {hasProjects && <Projects data={data} projects={data.projects} />}
-
-        {/* 8. Career Work Experience Section */}
-        {hasExperience && <Experience data={data} experiences={data.experiences} />}
-
-        {/* 9. Testimonials Section */}
-        {hasTestimonials && (
-          <section
-            id="testimonials"
-            data-section="testimonials"
-            data-cv-section="testimonials"
-            className="py-24 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-[#111111]/10 relative z-10 bg-[#111111]/[0.02]"
-          >
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col mb-16 items-center text-center space-y-3">
-                <span className="text-xs font-black tracking-widest text-[#FFC107] uppercase">
-                  Feedback
-                </span>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-wide leading-tight text-[#111111]">
-                  WHAT PEOPLE SAY
-                </h2>
-                <div className="w-12 h-1 bg-[#FFC107] mt-2" />
-              </div>
-              <TestimonialCarousel data={data} testimonials={data.testimonials} />
-            </div>
-          </section>
-        )}
-
-        {/* 10. Achievements / Awards Section */}
-        {hasAchievements && <Achievements data={data} achievements={data.achievements} />}
-
-        {/* 11. Contact Section */}
-        {hasContact && <Contact data={data} contact={data.contact} />}
+        {mainSectionIds.map((secId) => sectionComponentMap[secId] || null)}
       </main>
 
       <Footer data={data} contact={data.contact} navLinks={activeNavLinks} name={data.name} />

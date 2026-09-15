@@ -113,10 +113,10 @@ export default function Template(props = {}) {
   const defaultMainSections = [
     'hero',
     'about',
-    'education',
-    'experience',
     'projects',
+    'experience',
     'skills',
+    'education',
     'certificates',
     'contact'
   ];
@@ -132,13 +132,17 @@ export default function Template(props = {}) {
 
   rawOrder.forEach((rawItem) => {
     const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
-    let id = String(rawVal || '').toLowerCase().trim();
-    if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'certifications') id = 'certificates';
-    if (id === 'timeline' || id === 'work') id = 'experience';
-    if (id === 'academics') id = 'education';
-    if (id === 'portfolio') id = 'projects';
-    if (id === 'tech') id = 'skills';
+    let s = String(rawVal || '').toLowerCase().trim();
+    let id = s;
+    if (s.includes('hero') || s.includes('intro') || s.includes('home')) id = 'hero';
+    else if (s.includes('about') || s.includes('bio')) id = 'about';
+    else if (s.includes('proj') || s.includes('work') || s.includes('portfolio') || s.includes('field') || s.includes('research')) id = 'projects';
+    else if (s.includes('exp') || s.includes('career') || s.includes('timeline')) id = 'experience';
+    else if (s.includes('skill') || s.includes('tech') || s.includes('tool') || s.includes('crop')) id = 'skills';
+    else if (s.includes('edu') || s.includes('academic')) id = 'education';
+    else if (s.includes('cert') || s.includes('award') || s.includes('achieve') || s.includes('recogn')) id = 'certificates';
+    else if (s.includes('contact') || s.includes('touch') || s.includes('collab') || s.includes('social')) id = 'contact';
+
     if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
     if (sectionComponentMap[id] && !added.has(id)) {
       mainSectionIds.push(id);

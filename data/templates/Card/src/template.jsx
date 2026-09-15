@@ -38,12 +38,15 @@ const ALL_SECTION_DEFS = [
 
 const normalizeKey = (k) => {
   let s = String(k || '').toLowerCase().replace(/^(card-|section:)/, '').trim();
-  if (s === 'home' || s === 'intro') return 'hero';
-  if (s === 'certificates' || s === 'awards') return 'certifications';
-  if (s === 'timeline' || s === 'work') return 'experience';
-  if (s === 'academics') return 'education';
-  if (s === 'portfolio') return 'projects';
-  if (s === 'tech' || s === 'technologies' || s === 'tools') return 'skills';
+  if (!s || s === 'header' || s === 'footer' || s === 'navbar') return '';
+  if (s.includes('hero') || s.includes('home') || s.includes('intro') || s === 'banner') return 'hero';
+  if (s.includes('about') || s.includes('bio') || s.includes('summary')) return 'about';
+  if (s.includes('edu') || s.includes('acad') || s.includes('school') || s.includes('degree')) return 'education';
+  if (s.includes('exp') || s.includes('career') || s.includes('timeline') || s.includes('job') || s.includes('history')) return 'experience';
+  if (s.includes('proj') || s.includes('work') || s.includes('portfolio') || s.includes('featured')) return 'projects';
+  if (s.includes('skill') || s.includes('tech') || s.includes('tool') || s.includes('stack')) return 'skills';
+  if (s.includes('cert') || s.includes('award') || s.includes('recogni') || s.includes('license')) return 'certifications';
+  if (s.includes('contact') || s.includes('touch') || s.includes('connect') || s.includes('message')) return 'contact';
   return s;
 };
 
