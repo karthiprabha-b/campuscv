@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Cpu, ArrowUpRight, Github, Linkedin } from 'lucide-react';
+import { Menu, X, Cpu, Github, Linkedin } from 'lucide-react';
 import { normalizeEngineeringData } from '../utils/normalizeData';
 
 const SECTION_LABEL_MAP = {
@@ -29,7 +29,7 @@ export default function Header(props = {}) {
         ? data.sections
         : ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certificates', 'contact']));
 
-  const navLinks = sectionList
+  const navLinks = (sectionList || [])
     .map(sec => {
       const rawId = typeof sec === 'string' ? sec : (sec?.id || sec?.name || '');
       let normalizedId = String(rawId).toLowerCase().trim();
@@ -55,7 +55,7 @@ export default function Header(props = {}) {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
 
-      const sections = navLinks.map(link => link.href.substring(1));
+      const sections = (navLinks || []).map(link => link.href.substring(1));
       const scrollPosition = window.scrollY + 250;
 
       for (const section of sections) {
@@ -76,17 +76,17 @@ export default function Header(props = {}) {
   }, [navLinks]);
 
   return (
-    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 lg:px-8">
+    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pointer-events-none">
       <div 
-        className={`mx-auto max-w-6xl rounded-full transition-all duration-300 ${
+        className={`mx-auto max-w-7xl rounded-full transition-all duration-300 pointer-events-auto ${
           isScrolled 
             ? 'bg-[#030712]/95 backdrop-blur-xl border border-slate-700/60 shadow-deep-float py-2.5 sm:py-3 px-4 sm:px-6' 
-            : 'bg-[#030712]/80 backdrop-blur-md border border-white/20 py-3 sm:py-3.5 px-4 sm:px-8'
+            : 'bg-[#030712]/85 backdrop-blur-md border border-white/20 py-3 sm:py-3.5 px-4 sm:px-6'
         }`}
         style={{ backgroundColor: isScrolled ? 'rgba(3, 7, 18, 0.95)' : 'rgba(3, 7, 18, 0.85)' }}
       >
         <div className="flex items-center justify-between">
-          {/* Logo & Brand */}
+          {/* Logo & Clean Brand Name */}
           <a href="#home" className="flex items-center gap-2.5 group">
             <div 
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold shadow-sm group-hover:scale-105 transition-transform shrink-0"
@@ -110,8 +110,8 @@ export default function Header(props = {}) {
           </a>
 
           {/* Desktop & Tablet Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 bg-[#0f172a]/90 p-1.5 rounded-full border border-slate-700/50">
-            {navLinks.map((link) => {
+          <nav className="hidden lg:flex items-center gap-1 bg-[#0f172a]/90 p-1.5 rounded-full border border-slate-700/50">
+            {(navLinks || []).map((link) => {
               const isActive = activeSection === link.href.substring(1);
               return (
                 <a
@@ -119,7 +119,7 @@ export default function Header(props = {}) {
                   href={link.href}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
                     isActive
-                      ? 'font-bold'
+                      ? 'font-bold text-slate-950'
                       : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`}
                   style={isActive ? {
@@ -134,7 +134,7 @@ export default function Header(props = {}) {
             })}
           </nav>
 
-          {/* Actions */}
+          {/* Social Icons & Mobile Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
             {profile.github && (
               <a
@@ -163,7 +163,7 @@ export default function Header(props = {}) {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-full bg-slate-900 text-slate-300 hover:text-white border border-slate-700 focus:outline-none"
+              className="lg:hidden p-2 rounded-full bg-slate-900 text-slate-300 hover:text-white border border-slate-700 focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -173,8 +173,8 @@ export default function Header(props = {}) {
 
         {/* Mobile Dropdown Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="xl:hidden mt-3 pt-4 pb-3 border-t border-slate-800 flex flex-col gap-2">
-            {navLinks.map((link) => (
+          <div className="lg:hidden mt-3 pt-4 pb-3 border-t border-slate-800 flex flex-col gap-2">
+            {(navLinks || []).map((link) => (
               <a
                 key={link.id + link.label}
                 href={link.href}
