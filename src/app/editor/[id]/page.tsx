@@ -27,6 +27,7 @@ import MobileBottomNav from '../../../components/editor/MobileBottomNav';
 import MobileInspectorSheet from '../../../components/editor/MobileInspectorSheet';
 import MobileLayersSheet from '../../../components/editor/MobileLayersSheet';
 import MobileTemplatesSheet from '../../../components/editor/MobileTemplatesSheet';
+import MobileUrlSheet from '../../../components/editor/MobileUrlSheet';
 import { sanitizePreviewDevice } from '../../../utils/responsiveRules';
 import { EditorSchema } from '../../../types/schema';
 import TemplateRuntime from '../../../templates/TemplateRuntime';
@@ -77,7 +78,7 @@ function EditorInner({ id }: { id: string }) {
   const [zoom, setZoom] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isResumeSyncOpen, setIsResumeSyncOpen] = useState(false);
-  const [activeMobileSheet, setActiveMobileSheet] = useState<'none' | 'layers' | 'templates' | 'add' | 'inspector'>('none');
+  const [activeMobileSheet, setActiveMobileSheet] = useState<'none' | 'layers' | 'templates' | 'add' | 'inspector' | 'url'>('none');
   const [appScreenWidth, setAppScreenWidth] = useState<number>(1440);
 
   useEffect(() => {
@@ -872,6 +873,8 @@ function EditorInner({ id }: { id: string }) {
         onPublish={handlePublish}
         publishingInProgress={publishingInProgress}
         onOpenAddModal={() => setIsAddModalOpen(true)}
+        onOpenUrlSheet={() => setActiveMobileSheet(s => s === 'url' ? 'none' : 'url')}
+        onOpenResumeSync={() => setIsResumeSyncOpen(true)}
         onSave={handleSave}
         onStartTour={() => setIsTourOpen(true)}
         editorWidth={appScreenWidth}
@@ -978,6 +981,12 @@ function EditorInner({ id }: { id: string }) {
           />
           <MobileTemplatesSheet
             isOpen={activeMobileSheet === 'templates'}
+            onClose={() => setActiveMobileSheet('none')}
+            portfolio={portfolio}
+            onPortfolioChange={handlePortfolioChange}
+          />
+          <MobileUrlSheet
+            isOpen={activeMobileSheet === 'url'}
             onClose={() => setActiveMobileSheet('none')}
             portfolio={portfolio}
             onPortfolioChange={handlePortfolioChange}

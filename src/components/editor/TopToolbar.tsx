@@ -41,6 +41,8 @@ interface TopToolbarProps {
   onPublish: () => void;
   publishingInProgress: boolean;
   onOpenAddModal?: () => void;
+  onOpenUrlSheet?: () => void;
+  onOpenResumeSync?: () => void;
   onSave?: () => void;
   onStartTour?: () => void;
   editorWidth: number;
@@ -67,6 +69,8 @@ export default function TopToolbar({
   onPublish,
   publishingInProgress,
   onOpenAddModal,
+  onOpenUrlSheet,
+  onOpenResumeSync,
   onSave,
   onStartTour,
   editorWidth,
@@ -364,6 +368,9 @@ export default function TopToolbar({
         onZoomReset={onZoomReset}
         onZoomSet={onZoomSet}
         onFitToScreen={onFitToScreen}
+        onOpenUrlSheet={onOpenUrlSheet}
+        onOpenResumeSync={onOpenResumeSync}
+        onStartTour={onStartTour}
       />
     </header>
   );
