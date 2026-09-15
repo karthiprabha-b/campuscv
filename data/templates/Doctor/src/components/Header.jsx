@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Phone, Menu, X, ShieldCheck, Mail } from 'lucide-react';
 import doctorProfile from '../data/doctorProfile';
 
-export default function Header({ data = {} }) {
+export default function Header(props = {}) {
+  const data = props?.data || props || {};
   const doctor = data?.doctor || data?.personal || data || {};
   const clinic = data?.clinic || doctor?.clinic || {};
 
@@ -20,14 +21,30 @@ export default function Header({ data = {} }) {
   const [activeSection, setActiveSection] = useState('hero');
 
   const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certifications', 'Contact'];
-  const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
-    ? data.sectionOrder
-    : defaultOrder;
+  const dynamicSections = Array.isArray(props?.visibleSections) && props.visibleSections.length > 0
+    ? props.visibleSections
+    : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : defaultOrder);
+
+  const hasCerts = Array.isArray(data?.certifications) ? data.certifications.length > 0 : (Array.isArray(data?.certificates) && data.certificates.length > 0);
+  const hasEdu = Array.isArray(data?.education) ? data.education.length > 0 : (data.education !== undefined ? false : true);
+  const hasExp = Array.isArray(data?.experience) ? data.experience.length > 0 : (data.experience !== undefined ? false : true);
+  const hasProj = Array.isArray(data?.projects) ? data.projects.length > 0 : (data.projects !== undefined ? false : true);
+  const hasSkills = Array.isArray(data?.skills) ? data.skills.length > 0 : (data.skills !== undefined ? false : true);
 
   const navLinks = dynamicSections
     .filter(sec => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
-      return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
+      const sLower = sName.toLowerCase().trim();
+      if (sLower === 'header' || sLower === 'footer' || sLower === 'navbar' || !sLower) return false;
+      if (props?.visibleSections) return true;
+      if (sLower === 'certifications' || sLower === 'certificates') return hasCerts;
+      if (sLower === 'education') return hasEdu;
+      if (sLower === 'experience') return hasExp;
+      if (sLower === 'projects') return hasProj;
+      if (sLower === 'skills') return hasSkills;
+      return true;
     })
     .map(sec => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');

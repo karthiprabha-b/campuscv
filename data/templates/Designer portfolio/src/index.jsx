@@ -39,22 +39,76 @@ export default function Template(props = {}) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const directVal = data[`${sectionName}.visible`];
-    if (directVal !== undefined) return Boolean(directVal);
-    if (data[sectionName] && typeof data[sectionName] === 'object' && data[sectionName].visible !== undefined) {
-      return Boolean(data[sectionName].visible);
-    }
-    if (data[`${sectionName}Visible`] !== undefined) {
-      return Boolean(data[`${sectionName}Visible`]);
-    }
-    // If user explicitly has an empty array for a collection section (0 items), hide the section
-    const collectionData = data[sectionName] || data?.data?.[sectionName] || data?.content?.[sectionName] || data?.resume?.[sectionName];
-    if (Array.isArray(collectionData) && collectionData.length === 0) {
-      if (sectionName === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) {
-        return true;
+    const key = String(sectionName).toLowerCase().trim();
+    
+    const aliasMap = {
+      hero: ['hero', 'intro', 'home', 'header'],
+      about: ['about', 'bio'],
+      skills: ['skills', 'tech', 'stack', 'tools'],
+      projects: ['projects', 'portfolio', 'work'],
+      experience: ['experience', 'timeline', 'work'],
+      education: ['education', 'academics'],
+      certifications: ['certificates', 'certifications', 'awards', 'achievements'],
+      process: ['process', 'workflow', 'methodology'],
+      testimonial: ['testimonial', 'testimonials', 'reviews'],
+      contact: ['contact', 'socials']
+    };
+
+    const keysToCheck = aliasMap[key] || [key];
+
+    for (const k of keysToCheck) {
+      if (data?.deletedNodes?.[`section:${k}:root:section:0`] === true || data?.deletedNodes?.[k] === true) {
+        return false;
       }
-      return false;
+      if (data?.hiddenNodes?.[`section:${k}:root:section:0`] === true || data?.hiddenNodes?.[k] === true) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${k}`) || data.hiddenFields.includes(k))) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenSections) && (data.hiddenSections.includes(k) || data.hiddenSections.includes(`sections.${k}`))) {
+        return false;
+      }
+      if (data?.styleOverrides?.[k]?.display === 'none' || data?.styleOverrides?.[`section:${k}:root:section:0`]?.display === 'none') {
+        return false;
+      }
+      if (data[`${k}.visible`] !== undefined && !data[`${k}.visible`]) return false;
+      if (data[`${k}Visible`] !== undefined && !data[`${k}Visible`]) return false;
     }
+
+    if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
+    if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
+
+    // If explicit collection array is empty, hide section
+    if (key === 'certifications' || key === 'certificates') {
+      const certs = data?.certifications || data?.certificates || data?.awards;
+      if (Array.isArray(certs) && certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = data?.education || data?.academics;
+      if (Array.isArray(edu) && edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = data?.experience || data?.timeline;
+      if (Array.isArray(exp) && exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = data?.projects || data?.portfolio;
+      if (Array.isArray(proj) && proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = data?.skills || data?.tech || data?.tools;
+      if (Array.isArray(sk) && sk.length === 0) return false;
+    }
+    if (key === 'process') {
+      const proc = data?.process || data?.workflow;
+      if (Array.isArray(proc) && proc.length === 0) return false;
+    }
+    if (key === 'testimonial') {
+      const test = data?.testimonials || data?.testimonial;
+      if (Array.isArray(test) && test.length === 0) return false;
+    }
+
     return true;
   };
 
@@ -84,7 +138,8 @@ export default function Template(props = {}) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -111,12 +166,16 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
+
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
     <div
@@ -124,14 +183,14 @@ export default function Template(props = {}) {
       data-campuscv-template="designer-portfolio"
       className="campuscv-template-root min-h-screen bg-[var(--campuscv-background,#FAF8F5)] text-[var(--campuscv-foreground,#111111)] font-sans overflow-x-hidden"
     >
-      <Header data={data} />
+      <Header data={data} visibleSections={visibleSectionList} />
       <main>
         {mainSectionIds.map((secId) => {
           if (!isSectionVisible(secId)) return null;
           return sectionComponentMap[secId] || null;
         })}
       </main>
-      {isSectionVisible('footer') && <Footer data={data} />}
+      {isSectionVisible('footer') && <Footer data={data} visibleSections={visibleSectionList} />}
     </div>
   );
 }

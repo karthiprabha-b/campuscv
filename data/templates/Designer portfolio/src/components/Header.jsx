@@ -62,23 +62,26 @@ export default function Header(props = {}) {
   const hasContact = isSectionVisible('contact') && !isDeleted('section:contact:root:section:0');
 
   const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certifications', 'Contact'];
-  const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
-    ? data.sectionOrder
-    : defaultOrder;
+  const dynamicSections = Array.isArray(props?.visibleSections) && props.visibleSections.length > 0
+    ? props.visibleSections
+    : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : defaultOrder);
 
   const navLinks = dynamicSections
     .filter(sec => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
       const sLower = sName.toLowerCase();
       if (sLower === 'header' || sLower === 'footer' || sLower === 'navbar') return false;
-      if (sLower === 'projects' || sLower === 'work') return hasProjects || true;
-      if (sLower === 'about') return hasAbout || true;
-      if (sLower === 'experience') return hasExperience || true;
-      if (sLower === 'education') return hasEducation || true;
-      if (sLower === 'skills') return hasSkills || true;
-      if (sLower === 'certifications') return hasCertifications || true;
-      if (sLower === 'process') return hasProcess || true;
-      if (sLower === 'contact') return hasContact || true;
+      if (props?.visibleSections) return true;
+      if (sLower === 'projects' || sLower === 'work') return hasProjects;
+      if (sLower === 'about') return hasAbout;
+      if (sLower === 'experience') return hasExperience;
+      if (sLower === 'education') return hasEducation;
+      if (sLower === 'skills') return hasSkills;
+      if (sLower === 'certifications' || sLower === 'certificates') return hasCertifications;
+      if (sLower === 'process') return hasProcess;
+      if (sLower === 'contact') return hasContact;
       return true;
     })
     .map(sec => {

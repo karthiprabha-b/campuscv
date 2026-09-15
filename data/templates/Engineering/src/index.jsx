@@ -148,9 +148,25 @@ export default function Template(props = {}) {
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
     // If explicit collection array is empty, hide section
-    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
-    if (Array.isArray(collection) && collection.length === 0) {
-      return false;
+    if (key === 'certificates' || key === 'certifications') {
+      const certs = normalizedData?.certificates || data?.certificates || data?.certifications;
+      if (!Array.isArray(certs) || certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = normalizedData?.education || data?.education;
+      if (!Array.isArray(edu) || edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = normalizedData?.experience || data?.experience;
+      if (!Array.isArray(exp) || exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = normalizedData?.projects || data?.projects;
+      if (!Array.isArray(proj) || proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = normalizedData?.skills || data?.skills;
+      if (!Array.isArray(sk) || sk.length === 0) return false;
     }
 
     return true;
@@ -178,7 +194,8 @@ export default function Template(props = {}) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -203,12 +220,14 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
 
   const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 

@@ -165,7 +165,8 @@ export default function Template(props) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -190,20 +191,18 @@ export default function Template(props) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
 
-  const dynamicSections = mainSectionIds;
+  const visibleSectionList = mainSectionIds.filter((secId) => Boolean(sectionComponentMap[secId]));
 
-  const navLinks = dynamicSections
-    .filter(sec => {
-      const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
-      return sName.toLowerCase() !== 'header' && sName.toLowerCase() !== 'footer' && sName.toLowerCase() !== 'navbar';
-    })
+  const navLinks = visibleSectionList
     .map(sec => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
       const cleanName = sName.charAt(0).toUpperCase() + sName.slice(1);

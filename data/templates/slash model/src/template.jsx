@@ -140,7 +140,8 @@ export default function Template(props = {}) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -165,12 +166,16 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
+
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
     <div 
@@ -180,7 +185,7 @@ export default function Template(props = {}) {
       data-campuscv-template="slash-model"
     >
       {/* Sticky Navigation */}
-      {isSectionVisible('navbar') && <Navbar data={data} />}
+      {isSectionVisible('navbar') && <Navbar data={{ ...data, visibleSections: visibleSectionList }} />}
 
       {/* Main Flow */}
       <main>
@@ -191,7 +196,7 @@ export default function Template(props = {}) {
       </main>
 
       {/* Footer */}
-      {isSectionVisible('footer') && <Footer data={data} />}
+      {isSectionVisible('footer') && <Footer data={{ ...data, visibleSections: visibleSectionList }} />}
 
       {/* Universal Case Study / Certificate Modal */}
       <Modal

@@ -366,8 +366,19 @@ export function normalizeEngineeringData(rawPortfolio) {
     handwrittenNote: rawNote
   };
 
+  const hasUserSignal = Boolean(
+    p.name || p.fullName || p.profile?.name || p.personal?.name || p.personalInfo?.name || p.email || p.profile?.email ||
+    (Array.isArray(p.experience) && p.experience.length > 0) ||
+    (Array.isArray(p.projects) && p.projects.length > 0) ||
+    (Array.isArray(p.education) && p.education.length > 0) ||
+    (Array.isArray(p.skills) && p.skills.length > 0) ||
+    (Array.isArray(p.certificates) && p.certificates.length > 0) ||
+    (Array.isArray(p.certifications) && p.certifications.length > 0) ||
+    p.sectionOrder || p.sections || p.bio || p.about?.story || p.about?.description || p.personalInfo || p.personal
+  );
+
   // 4. Resolve Education (100% user data preserved)
-  let education = activeDef.education;
+  let education = hasUserSignal ? [] : activeDef.education;
   if (Array.isArray(p.education) && p.education.length > 0) {
     education = p.education.map((edu, idx) => {
       const sYear = edu.startDate || edu.startYear || edu.from || '';
@@ -403,7 +414,7 @@ export function normalizeEngineeringData(rawPortfolio) {
   }
 
   // 5. Resolve Experience (100% user data preserved)
-  let experience = activeDef.experience;
+  let experience = hasUserSignal ? [] : activeDef.experience;
   if (Array.isArray(p.experience) && p.experience.length > 0) {
     experience = p.experience.map((exp, idx) => {
       const sYear = exp.startDate || exp.startYear || exp.from || '';
@@ -446,7 +457,7 @@ export function normalizeEngineeringData(rawPortfolio) {
   }
 
   // 6. Resolve Projects (100% user data preserved)
-  let projects = activeDef.projects;
+  let projects = hasUserSignal ? [] : activeDef.projects;
   if (Array.isArray(p.projects) && p.projects.length > 0) {
     projects = p.projects.map((proj, idx) => {
       const tags = Array.isArray(proj.tags) && proj.tags.length > 0
@@ -485,7 +496,7 @@ export function normalizeEngineeringData(rawPortfolio) {
   }
 
   // 7. Resolve Skills (Group ALL user skills dynamically without losing categories)
-  let skills = activeDef.skills;
+  let skills = hasUserSignal ? [] : activeDef.skills;
   if (Array.isArray(p.skills) && p.skills.length > 0) {
     if (p.skills[0]?.category && Array.isArray(p.skills[0]?.skills)) {
       skills = p.skills;
@@ -553,10 +564,7 @@ export function normalizeEngineeringData(rawPortfolio) {
                 ? p.credentials
                 : null)));
 
-  const isExplicitEmptyCerts = (Array.isArray(p.certificates) && p.certificates.length === 0) ||
-    (Array.isArray(p.certifications) && p.certifications.length === 0);
-
-  const rawCerts = candidateCerts || (isExplicitEmptyCerts ? [] : (activeDef.certificates || []));
+  const rawCerts = candidateCerts || (hasUserSignal ? [] : (activeDef.certificates || []));
 
   const certificates = (rawCerts || []).map((cert, idx) => ({
     id: cert.id || `cert-${idx + 1}`,
@@ -580,12 +588,12 @@ export function normalizeEngineeringData(rawPortfolio) {
     profile: profile || activeDef?.profile || {},
     stats: stats || activeDef?.stats || [],
     about: about || activeDef?.about || {},
-    education: education || activeDef?.education || [],
-    experience: experience || activeDef?.experience || [],
-    projects: projects || activeDef?.projects || [],
-    skills: skills || activeDef?.skills || [],
-    skillCategories: skills || activeDef?.skills || [],
-    certificates: certificates || activeDef?.certificates || [],
+    education: education || [],
+    experience: experience || [],
+    projects: projects || [],
+    skills: skills || [],
+    skillCategories: skills || [],
+    certificates: certificates || [],
     contact: contact || activeDef?.contact || {},
   };
 }

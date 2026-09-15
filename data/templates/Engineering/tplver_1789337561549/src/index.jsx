@@ -70,31 +70,129 @@ export default function Template(props = {}) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const key = String(sectionName).toLowerCase();
+    const key = String(sectionName).toLowerCase().trim();
     
-    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
-      return false;
-    }
-    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
-      return false;
-    }
-    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
-      return false;
+    // Check aliases
+    const aliasMap = {
+      hero: ['hero', 'intro', 'home', 'header'],
+      about: ['about', 'bio'],
+      skills: ['skills', 'tech', 'stack'],
+      projects: ['projects', 'portfolio', 'work'],
+      experience: ['experience', 'timeline', 'work'],
+      education: ['education', 'academics'],
+      certificates: ['certificates', 'certifications', 'awards', 'achievements'],
+      certifications: ['certificates', 'certifications', 'awards', 'achievements'],
+      contact: ['contact', 'socials']
+    };
+
+    const keysToCheck = aliasMap[key] || [key];
+
+    for (const k of keysToCheck) {
+      if (data?.deletedNodes?.[`section:${k}:root:section:0`] === true || data?.deletedNodes?.[k] === true) {
+        return false;
+      }
+      if (data?.hiddenNodes?.[`section:${k}:root:section:0`] === true || data?.hiddenNodes?.[k] === true) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${k}`) || data.hiddenFields.includes(k))) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenSections) && (data.hiddenSections.includes(k) || data.hiddenSections.includes(`sections.${k}`))) {
+        return false;
+      }
+      if (data?.styleOverrides?.[k]?.display === 'none' || data?.styleOverrides?.[`section:${k}:root:section:0`]?.display === 'none') {
+        return false;
+      }
+      if (data[`${k}.visible`] !== undefined && !data[`${k}.visible`]) return false;
+      if (data[`${k}Visible`] !== undefined && !data[`${k}Visible`]) return false;
     }
 
-    if (data[`${key}.visible`] !== undefined) return Boolean(data[`${key}.visible`]);
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
-    if (data[`${key}Visible`] !== undefined) return Boolean(data[`${key}Visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
     // If explicit collection array is empty, hide section
-    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
-    if (Array.isArray(collection) && collection.length === 0) {
-      return false;
+    if (key === 'certificates' || key === 'certifications') {
+      const certs = normalizedData?.certificates || data?.certificates || data?.certifications;
+      if (!Array.isArray(certs) || certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = normalizedData?.education || data?.education;
+      if (!Array.isArray(edu) || edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = normalizedData?.experience || data?.experience;
+      if (!Array.isArray(exp) || exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = normalizedData?.projects || data?.projects;
+      if (!Array.isArray(proj) || proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = normalizedData?.skills || data?.skills;
+      if (!Array.isArray(sk) || sk.length === 0) return false;
     }
 
     return true;
   };
+
+  const sectionComponentMap = {
+    hero: <Hero key="hero" data={normalizedData} />,
+    about: <About key="about" data={normalizedData} />,
+    education: <Education key="education" data={normalizedData} />,
+    experience: <Experience key="experience" data={normalizedData} />,
+    projects: <Projects key="projects" data={normalizedData} />,
+    skills: <Skills key="skills" data={normalizedData} />,
+    certificates: <Certificates key="certificates" data={normalizedData} />,
+    contact: <Contact key="contact" data={normalizedData} />
+  };
+
+  const defaultMainSections = [
+    'hero',
+    'about',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certificates',
+    'contact'
+  ];
+
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
+    ? data.sectionOrder
+    : ((Array.isArray(data?.sections) && data.sections.length > 0)
+      ? data.sections
+      : defaultMainSections);
+
+  const mainSectionIds = [];
+  const added = new Set();
+
+  rawOrder.forEach((rawItem) => {
+    const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
+    let id = String(rawVal || '').toLowerCase().trim();
+    if (id === 'home' || id === 'intro') id = 'hero';
+    if (id === 'achievements' || id === 'awards' || id === 'certifications') id = 'certificates';
+    if (id === 'timeline' || id === 'work') id = 'experience';
+    if (id === 'academics') id = 'education';
+    if (id === 'portfolio') id = 'projects';
+    if (id === 'tech' || id === 'stack') id = 'skills';
+    if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
+    if (sectionComponentMap[id] && !added.has(id)) {
+      mainSectionIds.push(id);
+      added.add(id);
+    }
+  });
+
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
+
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
     <div
@@ -105,34 +203,18 @@ export default function Template(props = {}) {
       style={dynamicStyles}
     >
       {/* 00. Header / Navbar */}
-      {isSectionVisible('header') && <Header data={normalizedData} />}
+      {isSectionVisible('header') && <Header data={normalizedData} visibleSections={visibleSectionList} />}
 
-      {/* 01. Hero Section */}
-      {isSectionVisible('hero') && <Hero data={normalizedData} />}
-
-      {/* 02. About Section */}
-      {isSectionVisible('about') && <About data={normalizedData} />}
-
-      {/* 03. Education Section */}
-      {isSectionVisible('education') && <Education data={normalizedData} />}
-
-      {/* 04. Experience Section */}
-      {isSectionVisible('experience') && <Experience data={normalizedData} />}
-
-      {/* 05. Projects Section */}
-      {isSectionVisible('projects') && <Projects data={normalizedData} />}
-
-      {/* 06. Skills Section */}
-      {isSectionVisible('skills') && <Skills data={normalizedData} />}
-
-      {/* 07. Certificates Section */}
-      {isSectionVisible('certificates') && <Certificates data={normalizedData} />}
-
-      {/* 08. Contact Section */}
-      {isSectionVisible('contact') && <Contact data={normalizedData} />}
+      {/* Main Core Portfolio Sections (Dynamic Ordered & Filtered) */}
+      <main>
+        {mainSectionIds.map((secId) => {
+          if (!isSectionVisible(secId)) return null;
+          return sectionComponentMap[secId] || null;
+        })}
+      </main>
 
       {/* 09. Footer Section */}
-      {isSectionVisible('footer') && <Footer data={normalizedData} />}
+      {isSectionVisible('footer') && <Footer data={normalizedData} visibleSections={visibleSectionList} />}
     </div>
   );
 }

@@ -67,28 +67,64 @@ export default function Template(props = {}) {
   };
 
   const isSectionVisible = (sectionName) => {
-    const key = String(sectionName).toLowerCase();
+    const key = String(sectionName).toLowerCase().trim();
     
-    if (data?.deletedNodes?.[`section:${key}:root:section:0`] === true || data?.deletedNodes?.[key] === true) {
-      return false;
-    }
-    if (data?.hiddenNodes?.[`section:${key}:root:section:0`] === true || data?.hiddenNodes?.[key] === true) {
-      return false;
-    }
-    if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${key}`) || data.hiddenFields.includes(key))) {
-      return false;
+    const aliasMap = {
+      hero: ['hero', 'intro', 'home', 'header'],
+      about: ['about', 'bio'],
+      skills: ['skills', 'tech', 'stack', 'tools'],
+      projects: ['projects', 'portfolio', 'work', 'research'],
+      experience: ['experience', 'timeline', 'work', 'clinical'],
+      education: ['education', 'academics', 'training'],
+      certifications: ['certificates', 'certifications', 'awards', 'achievements', 'credentials'],
+      contact: ['contact', 'socials']
+    };
+
+    const keysToCheck = aliasMap[key] || [key];
+
+    for (const k of keysToCheck) {
+      if (data?.deletedNodes?.[`section:${k}:root:section:0`] === true || data?.deletedNodes?.[k] === true) {
+        return false;
+      }
+      if (data?.hiddenNodes?.[`section:${k}:root:section:0`] === true || data?.hiddenNodes?.[k] === true) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenFields) && (data.hiddenFields.includes(`sections.${k}`) || data.hiddenFields.includes(k))) {
+        return false;
+      }
+      if (Array.isArray(data?.hiddenSections) && (data.hiddenSections.includes(k) || data.hiddenSections.includes(`sections.${k}`))) {
+        return false;
+      }
+      if (data?.styleOverrides?.[k]?.display === 'none' || data?.styleOverrides?.[`section:${k}:root:section:0`]?.display === 'none') {
+        return false;
+      }
+      if (data[`${k}.visible`] !== undefined && !data[`${k}.visible`]) return false;
+      if (data[`${k}Visible`] !== undefined && !data[`${k}Visible`]) return false;
     }
 
-    if (data[`${key}.visible`] !== undefined) return Boolean(data[`${key}.visible`]);
     if (data[`${sectionName}.visible`] !== undefined) return Boolean(data[`${sectionName}.visible`]);
-    if (data[`${key}Visible`] !== undefined) return Boolean(data[`${key}Visible`]);
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
     // If explicit collection array is empty, hide section
-    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
-    if (Array.isArray(collection) && collection.length === 0) {
-      if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
-      return false;
+    if (key === 'certifications' || key === 'certificates') {
+      const certs = data?.certifications || data?.certificates || data?.awards || data?.credentials;
+      if (Array.isArray(certs) && certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = data?.education || data?.academics;
+      if (Array.isArray(edu) && edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = data?.experience || data?.timeline;
+      if (Array.isArray(exp) && exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = data?.projects || data?.portfolio || data?.research;
+      if (Array.isArray(proj) && proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = data?.skills || data?.tech || data?.tools;
+      if (Array.isArray(sk) && sk.length === 0) return false;
     }
 
     return true;
@@ -116,7 +152,8 @@ export default function Template(props = {}) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -129,10 +166,10 @@ export default function Template(props = {}) {
     const rawVal = typeof rawItem === 'object' && rawItem !== null ? (rawItem.id || rawItem.name || '') : rawItem;
     let id = String(rawVal || '').toLowerCase().trim();
     if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'certificates' || id === 'awards') id = 'certifications';
-    if (id === 'timeline' || id === 'work') id = 'experience';
-    if (id === 'academics') id = 'education';
-    if (id === 'portfolio') id = 'projects';
+    if (id === 'certificates' || id === 'awards' || id === 'credentials') id = 'certifications';
+    if (id === 'timeline' || id === 'work' || id === 'clinical') id = 'experience';
+    if (id === 'academics' || id === 'training') id = 'education';
+    if (id === 'portfolio' || id === 'research') id = 'projects';
     if (id === 'tech') id = 'skills';
     if (id === 'header' || id === 'footer' || id === 'navbar' || !id) return;
     if (sectionComponentMap[id] && !added.has(id)) {
@@ -141,12 +178,16 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
+
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
     <div
@@ -155,7 +196,7 @@ export default function Template(props = {}) {
       className="campuscv-template-root min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-sky-600 selection:text-white"
     >
       {/* 1. Header Navigation */}
-      {isSectionVisible('header') && <Header data={data} />}
+      {isSectionVisible('header') && <Header data={data} visibleSections={visibleSectionList} />}
 
       {/* Main Streamlined Sections Flow */}
       <main className="flex-grow">
@@ -166,7 +207,7 @@ export default function Template(props = {}) {
       </main>
 
       {/* Footer */}
-      {isSectionVisible('footer') && <Footer data={data} />}
+      {isSectionVisible('footer') && <Footer data={data} visibleSections={visibleSectionList} />}
     </div>
   );
 }

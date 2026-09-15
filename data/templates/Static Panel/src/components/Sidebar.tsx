@@ -84,19 +84,19 @@ export default function Sidebar({
     "contact"
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
-    ? data.sectionOrder
-    : ((Array.isArray(data?.sections) && data.sections.length > 0)
-      ? data.sections
-      : defaultNavOrder);
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawNavOrder = hasCustomOrder 
+    ? data.sectionOrder 
+    : (Array.isArray(data?.sections) && data.sections.length > 0 ? data.sections : defaultNavOrder);
 
   const orderedNavIds: string[] = [];
   const seenNav = new Set<string>();
 
-  rawOrder.forEach((rawId: string) => {
-    let id = String(rawId).toLowerCase().trim();
+  rawNavOrder.forEach((rawId: any) => {
+    const rawVal = typeof rawId === 'object' && rawId !== null ? (rawId.id || rawId.name || '') : rawId;
+    let id = String(rawVal || '').toLowerCase().trim();
     if (id === 'home' || id === 'intro') id = 'hero';
-    if (id === 'certifications') id = 'certificates';
+    if (id === 'certifications' || id === 'awards') id = 'certificates';
     if (id === 'timeline' || id === 'work') id = 'experience';
     if (id === 'academics') id = 'education';
     if (id === 'portfolio') id = 'projects';
@@ -107,12 +107,14 @@ export default function Sidebar({
     }
   });
 
-  defaultNavOrder.forEach((id) => {
-    if (!seenNav.has(id)) {
-      orderedNavIds.push(id);
-      seenNav.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultNavOrder.forEach((id) => {
+      if (!seenNav.has(id)) {
+        orderedNavIds.push(id);
+        seenNav.add(id);
+      }
+    });
+  }
 
   const navItems = orderedNavIds
     .map(id => allNavItemsMap[id])

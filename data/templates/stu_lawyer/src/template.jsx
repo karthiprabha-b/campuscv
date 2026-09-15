@@ -116,17 +116,32 @@ export default function Template(props = {}) {
 
     // Empty array visibility logic
     if (key === 'testimonials' || key === 'reviews') {
-      if (Array.isArray(data?.testimonials) && data.testimonials.length === 0) return false;
-      if (Array.isArray(data?.reviews) && data.reviews.length === 0) return false;
+      const test = data?.testimonials || data?.reviews;
+      if (Array.isArray(test) && test.length === 0) return false;
     }
-
     if (key === 'certificates' || key === 'certifications') {
-      const hasCerts = (Array.isArray(data?.certifications) && data.certifications.length > 0) ||
-        (Array.isArray(data?.certificates) && data.certificates.length > 0) ||
-        (Array.isArray(data?.awards) && data.awards.length > 0);
-      const isExplicitEmpty = (Array.isArray(data?.certifications) && data.certifications.length === 0) ||
-        (Array.isArray(data?.certificates) && data.certificates.length === 0);
-      if (isExplicitEmpty && !hasCerts) return false;
+      const certs = data?.certifications || data?.certificates || data?.awards;
+      if (Array.isArray(certs) && certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = data?.education || data?.academics;
+      if (Array.isArray(edu) && edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = data?.experience || data?.timeline;
+      if (Array.isArray(exp) && exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = data?.projects || data?.portfolio;
+      if (Array.isArray(proj) && proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = data?.skills || data?.tech;
+      if (Array.isArray(sk) && sk.length === 0) return false;
+    }
+    if (key === 'services') {
+      const srv = data?.services || data?.practice;
+      if (Array.isArray(srv) && srv.length === 0) return false;
     }
 
     return true;
@@ -161,7 +176,8 @@ export default function Template(props = {}) {
     'contact'
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -189,12 +205,14 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
 
   // Calculate visible sections for Navbar and Footer to dynamically reflect layer ordering & visibility
   const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));

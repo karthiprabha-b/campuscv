@@ -50,15 +50,30 @@ export default function Header({
   };
 
   const defaultOrder = ['Hero', 'About', 'Education', 'Experience', 'Projects', 'Skills', 'Certificates', 'Contact'];
-  const dynamicSections = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
-    ? data.sectionOrder
-    : defaultOrder;
+  const dynamicSections = Array.isArray((props as any)?.visibleSections) && (props as any).visibleSections.length > 0
+    ? (props as any).visibleSections
+    : (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : defaultOrder);
+
+  const hasCerts = Array.isArray(data?.certificates) ? data.certificates.length > 0 : (Array.isArray(data?.certifications) && data.certifications.length > 0);
+  const hasEdu = Array.isArray(data?.education) ? data.education.length > 0 : (data.education !== undefined ? false : true);
+  const hasExp = Array.isArray(data?.experience) ? data.experience.length > 0 : (data.experience !== undefined ? false : true);
+  const hasProj = Array.isArray(data?.projects) ? data.projects.length > 0 : (data.projects !== undefined ? false : true);
+  const hasSkills = Array.isArray(data?.skills) ? data.skills.length > 0 : (data.skills !== undefined ? false : true);
 
   const navItems = dynamicSections
     .filter((sec: any) => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');
       const lower = sName.toLowerCase().trim();
-      return lower && lower !== 'header' && lower !== 'footer' && lower !== 'sidebar' && lower !== 'navbar';
+      if (!lower || lower === 'header' || lower === 'footer' || lower === 'sidebar' || lower === 'navbar') return false;
+      if ((props as any)?.visibleSections) return true;
+      if (lower === 'certificates' || lower === 'certifications') return hasCerts;
+      if (lower === 'education') return hasEdu;
+      if (lower === 'experience') return hasExp;
+      if (lower === 'projects') return hasProj;
+      if (lower === 'skills') return hasSkills;
+      return true;
     })
     .map((sec: any) => {
       const sName = typeof sec === 'string' ? sec : (sec?.name || sec?.id || '');

@@ -86,10 +86,25 @@ export default function Template(props = {}) {
     if (data[key] && typeof data[key] === 'object' && data[key].visible !== undefined) return Boolean(data[key].visible);
 
     // If section array is explicitly empty in user's data, hide the section
-    const collection = data[key] || data?.[sectionName] || data?.data?.[key];
-    if (Array.isArray(collection) && collection.length === 0) {
-      if (key === 'skills' && Array.isArray(data.tools) && data.tools.length > 0) return true;
-      return false;
+    if (key === 'certificates' || key === 'certifications') {
+      const certs = data?.certificates || data?.certifications;
+      if (Array.isArray(certs) && certs.length === 0) return false;
+    }
+    if (key === 'education') {
+      const edu = data?.education || data?.academics;
+      if (Array.isArray(edu) && edu.length === 0) return false;
+    }
+    if (key === 'experience') {
+      const exp = data?.experience || data?.timeline;
+      if (Array.isArray(exp) && exp.length === 0) return false;
+    }
+    if (key === 'projects') {
+      const proj = data?.projects || data?.portfolio;
+      if (Array.isArray(proj) && proj.length === 0) return false;
+    }
+    if (key === 'skills') {
+      const sk = data?.skills || data?.tech;
+      if (Array.isArray(sk) && sk.length === 0) return false;
     }
 
     return true;
@@ -108,9 +123,7 @@ export default function Template(props = {}) {
       doc.getElementById('home');
 
     if (targetElement) {
-      try {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) {}
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -139,24 +152,11 @@ export default function Template(props = {}) {
   }, []);
 
   const sectionComponentMap = {
-    hero: (
-      <Hero
-        key="hero"
-        data={data}
-        onNavigate={handleNavigate}
-        onSelectService={(service) => setSelectedService(service)}
-      />
-    ),
+    hero: <Hero key="hero" data={data} />,
     about: <About key="about" data={data} />,
     education: <Education key="education" data={data} />,
     experience: <Experience key="experience" data={data} />,
-    projects: (
-      <Projects
-        key="projects"
-        data={data}
-        onSelectProject={(project) => setSelectedProject(project)}
-      />
-    ),
+    projects: <Projects key="projects" data={data} onSelectProject={setSelectedProject} />,
     skills: <Skills key="skills" data={data} />,
     certificates: <Certificates key="certificates" data={data} />,
     contact: <Contact key="contact" data={data} />,
@@ -173,7 +173,8 @@ export default function Template(props = {}) {
     'contact',
   ];
 
-  const rawOrder = (Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0)
+  const hasCustomOrder = Array.isArray(data?.sectionOrder) && data.sectionOrder.length > 0;
+  const rawOrder = hasCustomOrder
     ? data.sectionOrder
     : ((Array.isArray(data?.sections) && data.sections.length > 0)
       ? data.sections
@@ -197,12 +198,16 @@ export default function Template(props = {}) {
     }
   });
 
-  defaultMainSections.forEach((id) => {
-    if (!added.has(id)) {
-      mainSectionIds.push(id);
-      added.add(id);
-    }
-  });
+  if (!hasCustomOrder) {
+    defaultMainSections.forEach((id) => {
+      if (!added.has(id)) {
+        mainSectionIds.push(id);
+        added.add(id);
+      }
+    });
+  }
+
+  const visibleSectionList = mainSectionIds.filter((secId) => isSectionVisible(secId));
 
   return (
     <div
@@ -230,6 +235,7 @@ export default function Template(props = {}) {
             onNavigate={handleNavigate}
             onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
             isSectionVisible={isSectionVisible}
+            visibleSections={visibleSectionList}
           />
 
           {/* Right Main Content */}

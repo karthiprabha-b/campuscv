@@ -49,7 +49,16 @@ export default function Header(props = {}) {
         href
       };
     })
-    .filter(link => link.id !== 'navbar' && link.id !== 'footer' && link.id !== 'header');
+    .filter(link => {
+      if (link.id === 'navbar' || link.id === 'footer' || link.id === 'header') return false;
+      if (props?.visibleSections) return true; // already pre-filtered by isSectionVisible
+      if (link.id === 'certificates' && (!Array.isArray(norm.certificates) || norm.certificates.length === 0)) return false;
+      if (link.id === 'education' && (!Array.isArray(norm.education) || norm.education.length === 0)) return false;
+      if (link.id === 'experience' && (!Array.isArray(norm.experience) || norm.experience.length === 0)) return false;
+      if (link.id === 'projects' && (!Array.isArray(norm.projects) || norm.projects.length === 0)) return false;
+      if (link.id === 'skills' && (!Array.isArray(norm.skills) || norm.skills.length === 0)) return false;
+      return true;
+    });
 
   useEffect(() => {
     const handleScroll = () => {
