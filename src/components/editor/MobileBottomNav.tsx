@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Layers, LayoutTemplate, Plus, Eye, EyeOff, UploadCloud } from 'lucide-react';
+import { Layers, LayoutTemplate, Plus, Eye, EyeOff, UploadCloud, Palette } from 'lucide-react';
 import { useEditorContext } from '../../context/EditorContext';
 
 interface MobileBottomNavProps {
