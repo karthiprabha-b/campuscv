@@ -262,13 +262,14 @@ export function normalizeEngineeringData(rawPortfolio) {
   const p = rawPortfolio;
 
   // 1. Resolve Profile & Socials
-  const rawName = p.name || p.fullName || p.profile?.name || p.personal?.fullName || p.basics?.name || activeDef.profile.name;
-  const rawTitle = p.headline || p.title || p.role || p.profile?.title || p.personal?.headline || p.basics?.label || activeDef.profile.title;
-  const rawTagline = p.tagline || p.hero?.tagline || p.hero?.subtitle || activeDef.profile.tagline;
-  const rawBio = p.bio || p.aboutMe || p.summary || p.about?.story || p.about?.description || p.profile?.summary || activeDef.about.story;
-  const rawLocation = p.location || p.city || p.profile?.location || p.personal?.location || p.basics?.location?.city || activeDef.profile.location;
-  const rawEmail = p.email || p.contact?.email || p.personal?.email || p.basics?.email || activeDef.profile.email;
-  const rawPhone = p.phone || p.contact?.phone || p.personal?.phone || p.basics?.phone || activeDef.contact.phone;
+  const rawName = p.name || p.fullName || p.profile?.name || p.personal?.fullName || p.personal?.name || p.personalInfo?.name || p.hero?.name || p.basics?.name || activeDef.profile.name;
+  const rawTitle = p.headline || p.title || p.role || p.profile?.title || p.profile?.headline || p.personal?.headline || p.personal?.role || p.personal?.title || p.personalInfo?.title || p.hero?.subtitle || p.basics?.label || activeDef.profile.title;
+  const rawTagline = p.tagline || p.headline || p.personal?.headline || p.personal?.tagline || p.hero?.tagline || p.hero?.subtitle || rawTitle || activeDef.profile.tagline;
+  const rawBio = p.bio || p.aboutMe || p.summary || p.personal?.bio || p.personal?.summary || p.personalInfo?.bio || p.about?.story || p.about?.description || p.about?.bio || p.profile?.summary || p.profile?.bio || activeDef.about.story;
+  const rawLocation = p.location || p.city || p.personal?.location || p.personalInfo?.location || p.profile?.location || p.basics?.location?.city || activeDef.profile.location;
+  const rawEmail = p.email || p.contact?.email || p.personal?.email || p.personalInfo?.email || p.basics?.email || activeDef.profile.email;
+  const rawPhone = p.phone || p.contact?.phone || p.personal?.phone || p.personalInfo?.phone || p.basics?.phone || activeDef.contact.phone;
+  const rawNote = p.about?.handwrittenNote || p.personal?.handwrittenNote || p.tagline || p.hero?.subtitle || p.headline || p.personal?.headline || activeDef.profile.handwrittenNote;
 
   // Resolve Profile Image
   const rawAvatar = 
@@ -290,10 +291,10 @@ export function normalizeEngineeringData(rawPortfolio) {
     name: rawName,
     title: rawTitle,
     tagline: rawTagline,
-    handwrittenNote: p.about?.handwrittenNote || activeDef.profile.handwrittenNote,
+    handwrittenNote: rawNote,
     avatarUrl: rawAvatar,
     location: rawLocation,
-    availability: p.availability || p.profile?.availability || activeDef.profile.availability,
+    availability: p.availability || p.personal?.availability || p.profile?.availability || activeDef.profile.availability,
     experienceYears: p.experienceYears || (Array.isArray(p.experience) && p.experience.length > 0 ? `${p.experience.length}+` : activeDef.profile.experienceYears),
     email: rawEmail,
     github: rawGithub,
@@ -362,7 +363,7 @@ export function normalizeEngineeringData(rawPortfolio) {
   const about = {
     story: rawBio,
     philosophy: userPhilosophy,
-    handwrittenNote: p.about?.handwrittenNote || activeDef?.about?.handwrittenNote || rawNote || "Building scalable software with obsessive craft & speed."
+    handwrittenNote: rawNote
   };
 
   // 4. Resolve Education (100% user data preserved)
