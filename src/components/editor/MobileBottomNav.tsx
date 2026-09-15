@@ -11,7 +11,7 @@ interface MobileBottomNavProps {
   onPublish: () => void;
   isEditMode: boolean;
   toggleEditMode: () => void;
-  activeSheet: 'none' | 'layers' | 'templates' | 'add' | 'inspector';
+  activeSheet: 'none' | 'layers' | 'templates' | 'add' | 'inspector' | 'url' | 'design';
 }
 
 export default function MobileBottomNav({
