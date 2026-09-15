@@ -41,7 +41,7 @@ export default function MobileBottomNav({
         <span className="text-[10px] font-medium mt-1">Layers</span>
       </button>
 
-      {/* Templates Sheet Toggle */}
+      {/* Design (Themes, Fonts & Templates) Sheet Toggle */}
       <button
         onClick={onOpenTemplates}
         className={`flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all ${
@@ -50,8 +50,8 @@ export default function MobileBottomNav({
             : 'text-[#666674] hover:text-[#1f1f26]'
         }`}
       >
-        <LayoutTemplate className="w-5 h-5" />
-        <span className="text-[10px] font-medium mt-1">Templates</span>
+        <Palette className="w-5 h-5" />
+        <span className="text-[10px] font-medium mt-1">Design</span>
       </button>
 
       {/* Primary Center [+] Add Button */}

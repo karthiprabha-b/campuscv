@@ -253,49 +253,49 @@ export default function UniversalAddModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
+      <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs select-none">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-xl bg-white border border-zinc-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+          className="w-full max-w-xl bg-white border border-zinc-200 rounded-t-[28px] sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh]"
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
-                <Plus className="w-5 h-5" />
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-100 bg-zinc-50/70 shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-zinc-900 leading-none font-bricolage">
+                <h3 className="text-sm sm:text-base font-extrabold text-zinc-900 leading-tight font-bricolage">
                   Add Portfolio Content
                 </h3>
-                <p className="text-xs text-zinc-500 mt-1">
-                  Add real information to your portfolio. Your template controls how it looks.
+                <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5">
+                  Add real records to your portfolio. Your active template formats how it looks.
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-zinc-200/60 text-zinc-400 hover:text-zinc-700 transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl hover:bg-zinc-200/60 text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
             >
               <X className="w-4.5 h-4.5" />
             </button>
           </div>
 
           {/* Tab Filter & Help Trigger */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-100 bg-white">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border-b border-zinc-100 bg-white shrink-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 xs:pb-0">
               {[
                 { id: 'all', label: 'All Content' },
-                { id: 'content', label: 'Content Collections' },
-                { id: 'profile', label: 'Profile Information' },
+                { id: 'content', label: 'Collections' },
+                { id: 'profile', label: 'Profile Info' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                     activeTab === tab.id
                       ? 'bg-purple-600 text-white shadow-xs'
                       : 'text-zinc-600 hover:bg-zinc-100'
@@ -308,17 +308,17 @@ export default function UniversalAddModal({
 
             <button
               onClick={() => setShowHelpDrawer(!showHelpDrawer)}
-              className="inline-flex items-center gap-1.5 text-xs text-purple-700 font-bold hover:text-purple-900 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] sm:text-xs text-purple-700 font-bold hover:text-purple-900 transition-colors cursor-pointer self-end xs:self-auto shrink-0"
             >
-              <HelpCircle className="w-4 h-4 text-purple-600" />
+              <HelpCircle className="w-3.5 h-3.5 text-purple-600" />
               <span>How data works</span>
             </button>
           </div>
 
           {/* Help Drawer Banner */}
           {showHelpDrawer && (
-            <div className="bg-purple-50/80 border-b border-purple-100 px-6 py-3.5 text-xs text-purple-950 space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-purple-900">
+            <div className="bg-purple-50/80 border-b border-purple-100 px-4 sm:px-6 py-3 text-xs text-purple-950 space-y-1 shrink-0">
+              <div className="flex items-center gap-2 font-bold text-purple-900 text-xs">
                 <Info className="w-4 h-4 text-purple-600 shrink-0" />
                 <span>Structured Portfolio Architecture</span>
               </div>
@@ -329,22 +329,22 @@ export default function UniversalAddModal({
           )}
 
           {/* Options Grid */}
-          <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-3.5 sm:p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
             {filteredOptions.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => handleSelectOption(opt)}
-                className="group flex items-start gap-3 p-3.5 rounded-2xl border border-zinc-200 hover:border-purple-400 hover:bg-purple-50/50 transition-all text-left"
+                className="group flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl border border-zinc-200 hover:border-purple-400 hover:bg-purple-50/50 active:scale-[0.99] transition-all text-left cursor-pointer bg-white"
               >
-                <div className="w-10 h-10 rounded-xl bg-zinc-100 group-hover:bg-white flex items-center justify-center shrink-0 transition-colors shadow-xs">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-100 group-hover:bg-white flex items-center justify-center shrink-0 transition-colors shadow-xs">
                   {opt.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-zinc-900 group-hover:text-purple-700 transition-colors">
+                  <div className="flex items-center justify-between gap-1">
+                    <h4 className="text-xs font-bold text-zinc-900 group-hover:text-purple-700 transition-colors truncate">
                       {opt.label}
                     </h4>
-                    <span className="text-[10px] uppercase font-mono tracking-wider font-semibold text-zinc-400 group-hover:text-purple-600">
+                    <span className="text-[9px] uppercase font-mono tracking-wider font-semibold text-zinc-400 group-hover:text-purple-600 shrink-0">
                       {opt.section}
                     </span>
                   </div>
