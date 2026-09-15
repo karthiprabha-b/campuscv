@@ -475,10 +475,7 @@ function DashboardContent() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBillingSection, setShowBillingSection] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [previewModalConfig, setPreviewModalConfig] = useState<{ isOpen: boolean; overrideTemplateId?: string | null }>({
-    isOpen: false,
-    overrideTemplateId: null
-  });
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateRecord | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const templatesRef = useRef<HTMLDivElement>(null);
   const billingRef = useRef<HTMLDivElement>(null);
@@ -1188,9 +1185,19 @@ function DashboardContent() {
                       {/* Second row: Full Live Preview, QR code, Copy link */}
                       <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                         <button
-                          onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
+                          onClick={() => {
+                            const activeTmpl = templates.find(t => t.id === selectedPortfolio.templateId) || {
+                              id: selectedPortfolio.templateId,
+                              name: activeTemplate?.name || selectedPortfolio.name,
+                              category: selectedPortfolio.category || 'Portfolio',
+                              description: 'Active portfolio template',
+                              thumbnail: activeTemplate?.thumbnail || '',
+                              version: '1.0.0',
+                            } as TemplateRecord;
+                            setPreviewTemplate(activeTmpl);
+                          }}
                           className="flex items-center justify-center gap-1 sm:gap-1.5 h-9 sm:h-10 bg-violet-50 hover:bg-violet-100 border border-violet-200/80 text-[#7C3AED] rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer px-1.5 sm:px-2"
-                          title="Interactive Device Preview"
+                          title="Interactive Template Preview"
                         >
                           <Eye className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">Preview</span>
@@ -1245,8 +1252,18 @@ function DashboardContent() {
                         {getPublicPortfolioUrl(selectedPortfolio.username).replace(/^https?:\/\//, '')}
                       </div>
                       <button
-                        onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
-                        className="p-1 rounded-md text-zinc-400 hover:text-[#7C3AED] hover:bg-violet-50 transition-colors"
+                        onClick={() => {
+                          const activeTmpl = templates.find(t => t.id === selectedPortfolio.templateId) || {
+                            id: selectedPortfolio.templateId,
+                            name: activeTemplate?.name || selectedPortfolio.name,
+                            category: selectedPortfolio.category || 'Portfolio',
+                            description: 'Active portfolio template',
+                            thumbnail: activeTemplate?.thumbnail || '',
+                            version: '1.0.0',
+                          } as TemplateRecord;
+                          setPreviewTemplate(activeTmpl);
+                        }}
+                        className="p-1 rounded-md text-zinc-400 hover:text-[#7C3AED] hover:bg-violet-50 transition-colors cursor-pointer"
                         title="Open Fullscreen Preview"
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -1256,7 +1273,17 @@ function DashboardContent() {
                     {/* Interactive Aspect Ratio Preview container */}
                     <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-zinc-100/60 p-3 sm:p-6 lg:p-8">
                       <div 
-                        onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: null })}
+                        onClick={() => {
+                          const activeTmpl = templates.find(t => t.id === selectedPortfolio.templateId) || {
+                            id: selectedPortfolio.templateId,
+                            name: activeTemplate?.name || selectedPortfolio.name,
+                            category: selectedPortfolio.category || 'Portfolio',
+                            description: 'Active portfolio template',
+                            thumbnail: activeTemplate?.thumbnail || '',
+                            version: '1.0.0',
+                          } as TemplateRecord;
+                          setPreviewTemplate(activeTmpl);
+                        }}
                         className="w-full max-w-[520px] aspect-[16/10] relative rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-zinc-200 bg-white cursor-pointer group transition-all duration-300 hover:-translate-y-0.5"
                       >
                         {activeTemplate?.thumbnail ? (
@@ -1434,17 +1461,15 @@ function DashboardContent() {
 
                         {/* Action buttons pinned to bottom */}
                         <div className="pt-3 border-t border-zinc-100 flex items-center gap-2">
-                          {selectedPortfolio && (
-                            <button
-                              type="button"
-                              onClick={() => setPreviewModalConfig({ isOpen: true, overrideTemplateId: t.id })}
-                              className="h-9 px-2.5 rounded-xl border border-zinc-200 hover:border-violet-300 hover:bg-violet-50 text-zinc-600 hover:text-[#7C3AED] text-xs font-bold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer shadow-xs"
-                              title={`Preview ${t.name} with your portfolio content`}
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">Preview</span>
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTemplate(t)}
+                            className="h-9 px-3 rounded-xl border border-zinc-200 hover:border-violet-300 hover:bg-violet-50 text-zinc-700 hover:text-[#7C3AED] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                            title={`Preview original ${t.name} template showcase`}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Preview</span>
+                          </button>
 
                           {isLocked ? (
                             <button
@@ -2192,16 +2217,35 @@ function DashboardContent() {
         />
       )}
 
-      {/* Live Real Portfolio Preview Modal */}
-      {selectedPortfolio && (
+      {/* Authentic Real Template Preview Modal */}
+      {previewTemplate && (
         <UserPortfolioPreviewModal
-          isOpen={previewModalConfig.isOpen}
-          onClose={() => setPreviewModalConfig({ isOpen: false, overrideTemplateId: null })}
-          portfolio={selectedPortfolio}
-          overrideTemplateId={previewModalConfig.overrideTemplateId}
-          onOpenEditor={() => {
-            setPreviewModalConfig({ isOpen: false, overrideTemplateId: null });
-            router.push(`/editor/${selectedPortfolio.id}`);
+          isOpen={Boolean(previewTemplate)}
+          onClose={() => setPreviewTemplate(null)}
+          template={previewTemplate}
+          currentUser={user}
+          userPortfolio={selectedPortfolio}
+          onApplyTemplate={(tplId) => {
+            if (!user?.isPro || isExpired) {
+              setPreviewTemplate(null);
+              setActiveTab('billing');
+              alert("Subscription Required: Please choose and purchase a plan to apply templates.");
+              return;
+            }
+            handleApplyTemplateToPortfolio(tplId);
+            setPreviewTemplate(null);
+          }}
+          onUpgrade={() => {
+            const access = checkTemplateAccess(user, previewTemplate, userPortfolios.length);
+            setPreviewTemplate(null);
+            setUpgradeModalConfig({
+              isOpen: true,
+              templateName: previewTemplate.name,
+              requiredTier: access.requiredTier,
+              reason: access.reason,
+              currentUsageCount: userPortfolios.length,
+              planLimit: access.planLimit,
+            });
           }}
         />
       )}
