@@ -5,8 +5,6 @@ import {
   Monitor, 
   Tablet, 
   Smartphone, 
-  Sun, 
-  Moon, 
   X, 
   ExternalLink, 
   Pencil, 
@@ -737,30 +735,6 @@ export default function UserPortfolioPreviewModal({
                 title="Mobile View (390px)"
               >
                 <Smartphone className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Dark / Light Mode Toggle */}
-            <div className="flex items-center gap-0.5 bg-zinc-800/90 p-0.5 sm:p-1 rounded-xl border border-zinc-700/60">
-              <button
-                type="button"
-                onClick={() => setThemeMode('light')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  themeMode === 'light' ? 'bg-amber-500 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
-                }`}
-                title="Light Theme"
-              >
-                <Sun className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setThemeMode('dark')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  themeMode === 'dark' ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
-                }`}
-                title="Dark Theme"
-              >
-                <Moon className="w-3.5 h-3.5" />
               </button>
             </div>
 
