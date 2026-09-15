@@ -324,10 +324,45 @@ export function normalizeEngineeringData(rawPortfolio) {
   }
 
   // 3. Resolve About
+  const defaultPhilosophy = [
+    {
+      title: "Clean Architecture & Ergonomics",
+      desc: "Type safety, composable APIs, and modular abstractions that make teams move 10x faster without breaking production."
+    },
+    {
+      title: "Observability & Resilience First",
+      desc: "If it cannot be monitored and automatically recovered, it is not ready for production. Traces, SLOs, and circuit breakers by default."
+    },
+    {
+      title: "Obsession with User Experience",
+      desc: "Engineers should care deeply about latency, smooth micro-interactions, accessibility, and visual polish just as much as backend throughput."
+    }
+  ];
+
+  let userPhilosophy = defaultPhilosophy;
+  if (Array.isArray(p.about?.philosophy) && p.about.philosophy.length > 0) {
+    userPhilosophy = p.about.philosophy.map((item, idx) => ({
+      title: typeof item === 'string' ? `Principle ${idx + 1}` : (item.title || item.name || item.heading || item.principle || `Principle ${idx + 1}`),
+      desc: typeof item === 'string' ? item : (item.desc || item.description || item.text || item.summary || item.details || '')
+    }));
+  } else if (Array.isArray(p.principles) && p.principles.length > 0) {
+    userPhilosophy = p.principles.map((item, idx) => ({
+      title: typeof item === 'string' ? `Principle ${idx + 1}` : (item.title || item.name || item.heading || `Principle ${idx + 1}`),
+      desc: typeof item === 'string' ? item : (item.desc || item.description || item.text || item.summary || '')
+    }));
+  } else if (Array.isArray(p.coreValues) && p.coreValues.length > 0) {
+    userPhilosophy = p.coreValues.map((item, idx) => ({
+      title: typeof item === 'string' ? `Core Value ${idx + 1}` : (item.title || item.name || item.heading || `Core Value ${idx + 1}`),
+      desc: typeof item === 'string' ? item : (item.desc || item.description || item.text || item.summary || '')
+    }));
+  } else if (Array.isArray(activeDef?.about?.philosophy) && activeDef.about.philosophy.length > 0) {
+    userPhilosophy = activeDef.about.philosophy;
+  }
+
   const about = {
     story: rawBio,
-    philosophy: Array.isArray(p.about?.philosophy) && p.about.philosophy.length > 0 ? p.about.philosophy : activeDef.about.philosophy,
-    handwrittenNote: p.about?.handwrittenNote || activeDef.about.handwrittenNote
+    philosophy: userPhilosophy,
+    handwrittenNote: p.about?.handwrittenNote || activeDef?.about?.handwrittenNote || rawNote || "Building scalable software with obsessive craft & speed."
   };
 
   // 4. Resolve Education (100% user data preserved)

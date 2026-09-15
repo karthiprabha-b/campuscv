@@ -119,24 +119,44 @@ export default function About({ data = {} }) {
               </div>
 
               <div className="space-y-2.5">
-                {(about?.philosophy || []).map((item, idx) => (
-                  <div key={idx} className="p-3 sm:p-3.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25">
-                    <h4
-                      data-node-id={`text:about:philosophy:title:${idx}:0`}
-                      data-node-type="text"
-                      className="text-xs font-bold uppercase tracking-wider text-white"
-                    >
-                      {idx + 1}. {item.title}
-                    </h4>
-                    <p
-                      data-node-id={`text:about:philosophy:desc:${idx}:0`}
-                      data-node-type="text"
-                      className="text-xs text-white/90 mt-1 leading-relaxed"
-                    >
-                      {item.desc}
-                    </p>
-                  </div>
-                ))}
+                {((Array.isArray(about?.philosophy) && about.philosophy.length > 0)
+                  ? about.philosophy
+                  : [
+                      {
+                        title: "Clean Architecture & Ergonomics",
+                        desc: "Type safety, composable APIs, and modular abstractions that make teams move 10x faster without breaking production."
+                      },
+                      {
+                        title: "Observability & Resilience First",
+                        desc: "If it cannot be monitored and automatically recovered, it is not ready for production. Traces, SLOs, and circuit breakers by default."
+                      },
+                      {
+                        title: "Obsession with User Experience",
+                        desc: "Engineers should care deeply about latency, smooth micro-interactions, accessibility, and visual polish just as much as backend throughput."
+                      }
+                    ]
+                ).map((item, idx) => {
+                  const itemTitle = typeof item === 'string' ? `Principle ${idx + 1}` : (item.title || item.name || item.heading || item.principle || `Principle ${idx + 1}`);
+                  const itemDesc = typeof item === 'string' ? item : (item.desc || item.description || item.text || item.summary || item.details || 'Building robust, scalable production systems.');
+                  return (
+                    <div key={idx} className="p-3 sm:p-3.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25">
+                      <h4
+                        data-node-id={`text:about:philosophy:title:${idx}:0`}
+                        data-node-type="text"
+                        className="text-xs font-bold uppercase tracking-wider text-white"
+                      >
+                        {idx + 1}. {itemTitle}
+                      </h4>
+                      <p
+                        data-node-id={`text:about:philosophy:desc:${idx}:0`}
+                        data-node-type="text"
+                        className="text-xs text-white/90 mt-1 leading-relaxed"
+                      >
+                        {itemDesc}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
