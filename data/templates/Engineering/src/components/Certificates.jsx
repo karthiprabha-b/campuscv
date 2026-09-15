@@ -32,7 +32,7 @@ export default function Certificates({ data = {} }) {
 
         {/* Stadium Certificate Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-          {certificates.map((cert, idx) => (
+          {(certificates || []).map((cert, idx) => (
             <div
               key={cert.id || idx}
               data-node-id={`container:certificates:card:${idx}`}

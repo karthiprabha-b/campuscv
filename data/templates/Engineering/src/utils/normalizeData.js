@@ -531,7 +531,7 @@ export function normalizeEngineeringData(rawPortfolio) {
 
   const rawCerts = candidateCerts || (isExplicitEmptyCerts ? [] : (activeDef.certificates || []));
 
-  const certificates = rawCerts.map((cert, idx) => ({
+  const certificates = (rawCerts || []).map((cert, idx) => ({
     id: cert.id || `cert-${idx + 1}`,
     title: cert.title || cert.name || cert.certificateName || cert.award || `Professional Certification ${idx + 1}`,
     issuer: cert.issuer || cert.organization || cert.authority || cert.issuedBy || 'Issuing Organization',
@@ -545,21 +545,21 @@ export function normalizeEngineeringData(rawPortfolio) {
     location: rawLocation,
     phone: rawPhone,
     email: rawEmail,
-    responseTime: p.contact?.responseTime || activeDef.contact.responseTime,
-    telegram: p.contact?.telegram || p.socials?.telegram || activeDef.contact.telegram,
+    responseTime: p.contact?.responseTime || activeDef?.contact?.responseTime || 'Within 24 hours',
+    telegram: p.contact?.telegram || p.socials?.telegram || activeDef?.contact?.telegram || '@developer',
   };
 
   return {
-    profile,
-    stats,
-    about,
-    education: education || activeDef.education,
-    experience: experience || activeDef.experience,
-    projects: projects || activeDef.projects,
-    skills: skills || activeDef.skills,
-    skillCategories: skills || activeDef.skills,
-    certificates: certificates || activeDef.certificates,
-    contact,
+    profile: profile || activeDef?.profile || {},
+    stats: stats || activeDef?.stats || [],
+    about: about || activeDef?.about || {},
+    education: education || activeDef?.education || [],
+    experience: experience || activeDef?.experience || [],
+    projects: projects || activeDef?.projects || [],
+    skills: skills || activeDef?.skills || [],
+    skillCategories: skills || activeDef?.skills || [],
+    certificates: certificates || activeDef?.certificates || [],
+    contact: contact || activeDef?.contact || {},
   };
 }
 

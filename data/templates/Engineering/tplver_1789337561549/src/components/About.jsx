@@ -119,7 +119,7 @@ export default function About({ data = {} }) {
               </div>
 
               <div className="space-y-2.5">
-                {about.philosophy.map((item, idx) => (
+                {(about?.philosophy || []).map((item, idx) => (
                   <div key={idx} className="p-3 sm:p-3.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25">
                     <h4
                       data-node-id={`text:about:philosophy:title:${idx}:0`}
@@ -182,7 +182,7 @@ export default function About({ data = {} }) {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat, idx) => (
+                {(stats || []).map((stat, idx) => (
                   <div
                     key={idx}
                     data-node-id={`text:about:stats:${idx}:0`}

@@ -90,13 +90,13 @@ export default function Experience({ data = {} }) {
                 )}
 
                 {/* Key Achievements Bullet Points */}
-                {Array.isArray(item.achievements) && item.achievements.length > 0 && (
+                {Array.isArray(item?.achievements) && item.achievements.length > 0 && (
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-mono uppercase font-bold text-slate-400 tracking-wider">
                       Key Deliverables &amp; System Impact:
                     </h4>
                     <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
-                      {item.achievements.map((ach, aIdx) => (
+                      {(item.achievements || []).map((ach, aIdx) => (
                         <li key={aIdx} className="flex items-start gap-2.5">
                           <CheckCircle2 className="w-4 h-4 text-cyber-600 shrink-0 mt-0.5" />
                           <span data-node-id={`text:experience:achieve:${idx}:${aIdx}:0`} data-node-type="text">
@@ -109,10 +109,10 @@ export default function Experience({ data = {} }) {
                 )}
 
                 {/* Tech Stack Pills */}
-                {Array.isArray(item.techStack || item.technologies) && (item.techStack || item.technologies).length > 0 && (
+                {Array.isArray(item?.techStack || item?.technologies) && (item?.techStack || item?.technologies).length > 0 && (
                   <div className="pt-2">
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                      {(item.techStack || item.technologies).map((tech, tIdx) => (
+                      {(item?.techStack || item?.technologies || []).map((tech, tIdx) => (
                         <span
                           key={tIdx}
                           className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-800 text-xs font-mono shadow-xs"

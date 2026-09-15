@@ -101,13 +101,13 @@ export default function Education({ data = {} }) {
                 </div>
 
                 {/* Highlights */}
-                {Array.isArray(item.highlights) && item.highlights.length > 0 && (
+                {Array.isArray(item?.highlights) && item.highlights.length > 0 && (
                   <div className="space-y-2 pt-2">
                     <h5 className="text-xs font-mono uppercase font-bold text-slate-400 tracking-wider">
                       Research Thesis &amp; Highlights:
                     </h5>
                     <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
-                      {item.highlights.map((point, hIdx) => (
+                      {(item.highlights || []).map((point, hIdx) => (
                         <li key={hIdx} className="flex items-start gap-2.5">
                           <CheckCircle2 className="w-4 h-4 text-cyber-600 shrink-0 mt-0.5" />
                           <span data-node-id={`text:education:highlight:${idx}:${hIdx}:0`} data-node-type="text">
@@ -121,13 +121,13 @@ export default function Education({ data = {} }) {
               </div>
 
               {/* Coursework Tags */}
-              {Array.isArray(item.keyCourses) && item.keyCourses.length > 0 && (
+              {Array.isArray(item?.keyCourses) && item.keyCourses.length > 0 && (
                 <div className="pt-5 mt-5 border-t border-slate-100">
                   <h5 className="text-xs font-mono uppercase font-bold text-slate-400 tracking-wider mb-2">
                     Core Coursework:
                   </h5>
                   <div className="flex flex-wrap gap-1.5">
-                    {item.keyCourses.map((course, cIdx) => (
+                    {(item.keyCourses || []).map((course, cIdx) => (
                       <span
                         key={cIdx}
                         className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-mono"

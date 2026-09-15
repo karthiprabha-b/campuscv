@@ -448,114 +448,108 @@ export function normalizeEngineeringData(rawPortfolio) {
     });
   }
 
-  // 7. Resolve Skills (Group ALL uploaded user skills dynamically into 3 Pillars)
+  // 7. Resolve Skills (Group ALL user skills dynamically without losing categories)
   let skills = activeDef.skills;
   if (Array.isArray(p.skills) && p.skills.length > 0) {
-    const rawSkillList = [];
-    p.skills.forEach(sk => {
-      if (typeof sk === 'string') {
-        rawSkillList.push({ name: sk, level: 90, icon: 'Code2', tag: 'Proficient' });
-      } else if (sk && typeof sk === 'object') {
-        if (Array.isArray(sk.skills)) {
-          sk.skills.forEach(sItem => {
-            const sName = typeof sItem === 'string' ? sItem : (sItem.name || sItem.skill || '');
-            if (sName) {
-              rawSkillList.push({
-                name: sName,
-                level: typeof sItem === 'object' && sItem.level ? sItem.level : 90,
-                icon: (typeof sItem === 'object' && sItem.icon) ? sItem.icon : 'Code2',
-                tag: (typeof sItem === 'object' && sItem.tag) ? sItem.tag : 'Verified'
-              });
-            }
-          });
-        } else if (sk.name || sk.skill) {
-          rawSkillList.push({
-            name: sk.name || sk.skill,
-            level: sk.level || 90,
-            icon: sk.icon || 'Code2',
-            tag: sk.tag || 'Verified'
-          });
+    if (p.skills[0]?.category && Array.isArray(p.skills[0]?.skills)) {
+      skills = p.skills;
+    } else {
+      const groupedMap = new Map();
+      const unassigned = [];
+      p.skills.forEach(sk => {
+        if (!sk) return;
+        const name = typeof sk === 'string' ? sk : (sk.name || sk.skill || sk.title || '');
+        const category = typeof sk === 'object' && (sk.category || sk.group) ? (sk.category || sk.group) : null;
+        if (!name.trim()) return;
+        const level = typeof sk === 'object' && sk.level ? sk.level : 90;
+        const skillObj = {
+          name: name.trim(),
+          level: level,
+          icon: (typeof sk === 'object' && sk.icon) ? sk.icon : 'Code2',
+          tag: (typeof sk === 'object' && (sk.tag || sk.badge)) ? (sk.tag || sk.badge) : (level >= 90 ? 'Expert' : 'Advanced')
+        };
+        if (category && category.trim()) {
+          const catKey = category.trim();
+          if (!groupedMap.has(catKey)) groupedMap.set(catKey, []);
+          groupedMap.get(catKey).push(skillObj);
+        } else {
+          unassigned.push(skillObj);
         }
+      });
+
+      if (groupedMap.size > 0) {
+        skills = Array.from(groupedMap.entries()).map(([category, catSkills], i) => ({
+          id: `cat-${i + 1}`,
+          category,
+          title: category,
+          description: "Verified engineering competencies & technical expertise",
+          skills: catSkills
+        }));
+        if (unassigned.length > 0) {
+          skills[0].skills.push(...unassigned);
+        }
+      } else if (unassigned.length > 0) {
+        const numCats = unassigned.length >= 3 ? 3 : (unassigned.length === 2 ? 2 : 1);
+        const catNames = ["Core Technologies", "Systems & Frameworks", "Tools & Infrastructure"];
+        const cats = Array.from({ length: numCats }, (_, i) => ({
+          id: `cat-${i + 1}`,
+          category: catNames[i] || `Category ${i + 1}`,
+          title: catNames[i] || `Category ${i + 1}`,
+          description: "Verified engineering competencies and technical expertise",
+          skills: []
+        }));
+        unassigned.forEach((sk, idx) => {
+          cats[idx % numCats].skills.push(sk);
+        });
+        skills = cats;
       }
-    });
-
-    if (rawSkillList.length > 0) {
-      const perCategory = Math.ceil(rawSkillList.length / 3);
-      const cat1Skills = rawSkillList.slice(0, perCategory);
-      const cat2Skills = rawSkillList.slice(perCategory, perCategory * 2);
-      const cat3Skills = rawSkillList.slice(perCategory * 2);
-
-      const icons1 = ['Terminal', 'Cpu', 'Code2', 'Binary', 'Workflow', 'Activity'];
-      const icons2 = ['Server', 'Box', 'Cloud', 'Layers', 'GitBranch', 'Gauge'];
-      const icons3 = ['Layout', 'Palette', 'Database', 'Zap', 'Network', 'TerminalSquare'];
-
-      skills = [
-        {
-          id: "cat-1",
-          category: "Backend & Systems",
-          description: "Core languages, runtime architectures & event systems",
-          skills: (cat1Skills.length > 0 ? cat1Skills : activeDef.skills[0].skills).map((s, idx) => ({
-            ...s,
-            icon: icons1[idx % icons1.length]
-          }))
-        },
-        {
-          id: "cat-2",
-          category: "Cloud Native & DevOps",
-          description: "Container orchestration, observability & infrastructure as code",
-          skills: (cat2Skills.length > 0 ? cat2Skills : activeDef.skills[1].skills).map((s, idx) => ({
-            ...s,
-            icon: icons2[idx % icons2.length]
-          }))
-        },
-        {
-          id: "cat-3",
-          category: "Full-Stack Web & Tools",
-          description: "Modern frontend frameworks, API design & database engines",
-          skills: (cat3Skills.length > 0 ? cat3Skills : activeDef.skills[2].skills).map((s, idx) => ({
-            ...s,
-            icon: icons3[idx % icons3.length]
-          }))
-        }
-      ];
     }
   }
 
   // 8. Resolve Certificates (100% user data preserved)
-  let certificates = activeDef.certificates;
-  const rawCerts = p.certificates || p.certifications || p.credentials || [];
-  if (Array.isArray(rawCerts) && rawCerts.length > 0) {
-    certificates = rawCerts.map((cert, idx) => ({
-      id: cert.id || `cert-${idx + 1}`,
-      title: cert.title || cert.name || `Professional Certification ${idx + 1}`,
-      issuer: cert.issuer || cert.organization || cert.authority || 'Issuing Organization',
-      date: cert.date || cert.year || cert.issueDate || '2023',
-      verifyUrl: cert.verifyUrl || cert.url || cert.link || 'https://example.com',
-      badge: cert.badge || cert.level || 'Certified'
-    }));
-  }
+  const candidateCerts = (Array.isArray(p.certificates) && p.certificates.length > 0)
+    ? p.certificates
+    : ((Array.isArray(p.certifications) && p.certifications.length > 0)
+        ? p.certifications
+        : ((Array.isArray(p.awards) && p.awards.length > 0)
+            ? p.awards
+            : ((Array.isArray(p.credentials) && p.credentials.length > 0)
+                ? p.credentials
+                : null)));
+
+  const isExplicitEmptyCerts = (Array.isArray(p.certificates) && p.certificates.length === 0) ||
+    (Array.isArray(p.certifications) && p.certifications.length === 0);
+
+  const rawCerts = candidateCerts || (isExplicitEmptyCerts ? [] : (activeDef.certificates || []));
+
+  const certificates = (rawCerts || []).map((cert, idx) => ({
+    id: cert.id || `cert-${idx + 1}`,
+    title: cert.title || cert.name || cert.certificateName || cert.award || `Professional Certification ${idx + 1}`,
+    issuer: cert.issuer || cert.organization || cert.authority || cert.issuedBy || 'Issuing Organization',
+    date: cert.date || cert.year || cert.issueDate || '2023',
+    verifyUrl: cert.verifyUrl || cert.url || cert.link || cert.credentialUrl || '#',
+    badge: cert.badge || cert.level || 'Certified'
+  }));
 
   // 9. Resolve Contact
   const contact = {
     location: rawLocation,
     phone: rawPhone,
     email: rawEmail,
-    responseTime: p.contact?.responseTime || activeDef.contact.responseTime,
-    telegram: p.contact?.telegram || p.socials?.telegram || activeDef.contact.telegram,
+    responseTime: p.contact?.responseTime || activeDef?.contact?.responseTime || 'Within 24 hours',
+    telegram: p.contact?.telegram || p.socials?.telegram || activeDef?.contact?.telegram || '@developer',
   };
 
   return {
-    profile,
-    stats,
-    about,
-    education: education || activeDef.education,
-    experience: experience || activeDef.experience,
-    projects: projects || activeDef.projects,
-    skills: skills || activeDef.skills,
-    skillCategories: skills || activeDef.skills,
-    certificates: certificates || activeDef.certificates,
-    contact,
+    profile: profile || activeDef?.profile || {},
+    stats: stats || activeDef?.stats || [],
+    about: about || activeDef?.about || {},
+    education: education || activeDef?.education || [],
+    experience: experience || activeDef?.experience || [],
+    projects: projects || activeDef?.projects || [],
+    skills: skills || activeDef?.skills || [],
+    skillCategories: skills || activeDef?.skills || [],
+    certificates: certificates || activeDef?.certificates || [],
+    contact: contact || activeDef?.contact || {},
   };
-}
-
 export default normalizeEngineeringData;

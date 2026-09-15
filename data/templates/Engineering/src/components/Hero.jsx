@@ -76,7 +76,7 @@ export default function Hero({ data = {} }) {
 
             {/* Tech Badges Row */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
-              {techBadges.map((badge, idx) => (
+              {(techBadges || []).map((badge, idx) => (
                 <div
                   key={idx}
                   className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-[11px] sm:text-xs text-slate-200 font-mono shadow-sm"

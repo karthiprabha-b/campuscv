@@ -56,9 +56,9 @@ export default function Skills({ data = {} }) {
         {/* Category Pill Selector */}
         {safeCats.length > 1 && (
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 sm:mb-14">
-            {safeCats.map((cat, idx) => {
+            {(safeCats || []).map((cat, idx) => {
               const isActive = activeCategoryIndex === idx;
-              const catTitle = cat.category || cat.title || `Area ${idx + 1}`;
+              const catTitle = cat?.category || cat?.title || `Area ${idx + 1}`;
               return (
                 <button
                   key={`cat-btn-${idx}`}
@@ -79,10 +79,10 @@ export default function Skills({ data = {} }) {
                     boxShadow: '0 0 15px -2px rgba(var(--campuscv-accent-rgb), 0.5)'
                   } : {}}
                 >
-                  {getIcon(cat.icon || (idx === 0 ? 'Code2' : (idx === 1 ? 'Server' : 'Layers')))}
+                  {getIcon(cat?.icon || (idx === 0 ? 'Code2' : (idx === 1 ? 'Server' : 'Layers')))}
                   <span>{catTitle}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-slate-900/20 text-slate-950' : 'bg-slate-200/70 text-slate-600'}`}>
-                    {cat.skills?.length || 0}
+                    {cat?.skills?.length || 0}
                   </span>
                 </button>
               );
@@ -92,7 +92,7 @@ export default function Skills({ data = {} }) {
 
         {/* Stable Skill Tiles Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-          {currentSkills.map((skill, idx) => {
+          {(currentSkills || []).map((skill, idx) => {
             const skillName = typeof skill === 'string' ? skill : (skill.name || skill.title || skill.skill || `Skill ${idx + 1}`);
             const skillLevel = typeof skill === 'object' ? (skill.level || skill.proficiency || 90) : 90;
             const skillTag = typeof skill === 'object' ? (skill.tag || skill.badge || (skillLevel >= 90 ? 'Expert' : 'Advanced')) : 'Verified';
