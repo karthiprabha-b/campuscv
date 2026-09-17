@@ -629,7 +629,48 @@ export function initializeMockDb() {
     localStorage.setItem('portly_plans', JSON.stringify(defaultPlans));
   }
   if (!localStorage.getItem('portly_coupons')) {
-    localStorage.setItem('portly_coupons', JSON.stringify([]));
+    const starterCoupons: CouponCode[] = [
+      {
+        id: 'cpn-launch50',
+        code: 'LAUNCH50',
+        discountType: 'percent',
+        discountValue: 50,
+        discountPercent: 50,
+        maxUses: 1000,
+        usedCount: 0,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        isActive: true,
+        applicablePlanIds: [],
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'cpn-campus100',
+        code: 'CAMPUS100',
+        discountType: 'percent',
+        discountValue: 100,
+        discountPercent: 100,
+        maxUses: 500,
+        usedCount: 0,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        isActive: true,
+        applicablePlanIds: ['plan-test-5'],
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'cpn-promo20',
+        code: 'PROMO20',
+        discountType: 'percent',
+        discountValue: 20,
+        discountPercent: 20,
+        maxUses: 2000,
+        usedCount: 0,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        isActive: true,
+        applicablePlanIds: [],
+        createdAt: new Date().toISOString(),
+      }
+    ];
+    localStorage.setItem('portly_coupons', JSON.stringify(starterCoupons));
   }
   if (!localStorage.getItem('portly_transactions')) {
     localStorage.setItem('portly_transactions', JSON.stringify([]));
@@ -1030,8 +1071,22 @@ export const mockDb = {
         const data = await res.json();
         if (data.coupons && Array.isArray(data.coupons)) {
           const serverCoupons: CouponCode[] = data.coupons;
-          localStorage.setItem('portly_coupons', JSON.stringify(serverCoupons));
-          return serverCoupons;
+          const localCoupons = mockDb.getCoupons();
+          
+          // Merge server and local coupons, prioritizing server records
+          const mergedMap = new Map<string, CouponCode>();
+          localCoupons.forEach(c => {
+            if (c && c.code) mergedMap.set(c.code.trim().toUpperCase(), c);
+          });
+          serverCoupons.forEach(c => {
+            if (c && c.code) mergedMap.set(c.code.trim().toUpperCase(), c);
+          });
+          
+          const mergedList = Array.from(mergedMap.values());
+          if (mergedList.length > 0) {
+            localStorage.setItem('portly_coupons', JSON.stringify(mergedList));
+            return mergedList;
+          }
         }
       }
     } catch (e) {
@@ -1041,8 +1096,9 @@ export const mockDb = {
   },
   saveCoupon: (coupon: CouponCode) => {
     const list = mockDb.getCoupons();
-    const idx = list.findIndex(c => c.id === coupon.id || c.code.trim().toUpperCase() === coupon.code.trim().toUpperCase());
-    if (idx !== -1) list[idx] = coupon; else list.push(coupon);
+    const cleanCode = coupon.code.trim().toUpperCase();
+    const idx = list.findIndex(c => c.id === coupon.id || (c.code || '').trim().toUpperCase() === cleanCode);
+    if (idx !== -1) list[idx] = coupon; else list.unshift(coupon);
     localStorage.setItem('portly_coupons', JSON.stringify(list));
 
     if (typeof window !== 'undefined') {
@@ -1076,14 +1132,14 @@ export const mockDb = {
   },
   validateCoupon: (code: string, planId?: string): CouponCode | null => {
     if (!code) return null;
-    const now = new Date().toISOString();
+    const now = Date.now();
     const cleanCode = code.trim().toUpperCase();
     const allCoupons = mockDb.getCoupons();
 
     const isMatch = (c: CouponCode) => {
       if ((c.code || '').trim().toUpperCase() !== cleanCode) return false;
       if (!c.isActive) return false;
-      if (c.expiresAt && c.expiresAt < now) return false;
+      if (c.expiresAt && new Date(c.expiresAt).getTime() < now) return false;
       if (c.maxUses !== -1 && (c.usedCount || 0) >= c.maxUses) return false;
       if (c.applicablePlanIds && c.applicablePlanIds.length > 0 && planId && !c.applicablePlanIds.includes(planId)) {
         return false;
@@ -1098,7 +1154,7 @@ export const mockDb = {
     if (!code) return null;
     const cleanCode = code.trim().toUpperCase();
 
-    // 1. Always try server first — server is the source of truth
+    // 1. Try server first (source of truth)
     if (typeof window !== 'undefined') {
       try {
         const encoded = encodeURIComponent(cleanCode);
@@ -1107,19 +1163,12 @@ export const mockDb = {
         if (res.ok) {
           const data = await res.json();
           if (data.valid && data.coupon) {
-            // Update local cache with the fresh server copy
+            // Update local cache with fresh server copy
             mockDb.saveCoupon(data.coupon);
             return data.coupon;
-          } else {
-            // Server says invalid/deleted — remove it from local cache so it stops working
-            const local = mockDb.getCoupons();
-            const staleCoupon = local.find(c => (c.code || '').trim().toUpperCase() === cleanCode);
-            if (staleCoupon) {
-              const freshList = local.filter(c => (c.code || '').trim().toUpperCase() !== cleanCode);
-              localStorage.setItem('portly_coupons', JSON.stringify(freshList));
-            }
-            return null;
           }
+          // If server says invalid (expired, inactive, limit reached, etc.), return null WITHOUT wiping local cache
+          return null;
         }
       } catch (e) {
         console.warn('[MOCKDB] Server coupon validation unreachable, falling back to local cache:', e);
@@ -1129,19 +1178,25 @@ export const mockDb = {
     // 2. Fallback: use local cache only if server is unreachable
     return mockDb.validateCoupon(code, planId);
   },
-  useCoupon: (id: string) => {
+  useCoupon: async (idOrCode: string) => {
+    if (!idOrCode) return;
+    const clean = idOrCode.trim().toUpperCase();
     const list = mockDb.getCoupons();
-    const idx = list.findIndex(c => c.id === id);
+    const idx = list.findIndex(c => c.id === idOrCode || (c.code || '').trim().toUpperCase() === clean);
     if (idx !== -1) { 
       list[idx].usedCount = (list[idx].usedCount || 0) + 1; 
       localStorage.setItem('portly_coupons', JSON.stringify(list));
-      // Sync usage to server
-      if (typeof window !== 'undefined') {
-        fetch('/api/coupons', {
+    }
+    // Atomic server redemption
+    if (typeof window !== 'undefined') {
+      try {
+        await fetch('/api/coupons', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(list[idx]),
-        }).catch(() => {});
+          body: JSON.stringify({ action: 'redeem', code: clean, id: idOrCode }),
+        });
+      } catch (e) {
+        console.warn('[MOCKDB] Failed to redeem coupon on server:', e);
       }
     }
   },

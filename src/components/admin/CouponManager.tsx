@@ -40,17 +40,21 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim()) return;
+    const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode) return;
+
+    const days = Number(expiresDays) > 0 ? Number(expiresDays) : 365;
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
     const newCoupon: CouponCode = {
-      id: `cpn-${Date.now()}`,
-      code: code.trim().toUpperCase(),
+      id: `cpn-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      code: cleanCode,
       discountType,
-      discountValue: Number(discountValue),
-      discountPercent: discountType === 'percent' ? Number(discountValue) : undefined,
-      maxUses: Number(maxUses),
+      discountValue: Math.max(1, Number(discountValue) || 1),
+      discountPercent: discountType === 'percent' ? Math.min(100, Math.max(1, Number(discountValue) || 1)) : undefined,
+      maxUses: Number(maxUses) >= -1 ? Number(maxUses) : -1,
       usedCount: 0,
-      expiresAt: new Date(Date.now() + Number(expiresDays) * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt,
       isActive: true,
       applicablePlanIds: selectedPlanIds,
       createdAt: new Date().toISOString(),
@@ -130,10 +134,10 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-black text-slate-900 font-bricolage tracking-tight">Coupons &amp; Promotional Discounts</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-600 border border-orange-200 font-mono">
-              Promotions
+              Promotions ({coupons.length})
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">Generate coupon codes for percentage or fixed INR discounts during checkout.</p>
+          <p className="text-xs text-slate-500 mt-0.5">Generate coupon codes for percentage or fixed INR discounts during checkout. Persisted permanently in database.</p>
         </div>
 
         <button
@@ -197,10 +201,10 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
 
             {/* Max Uses */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600 uppercase font-mono">Max Uses</label>
+              <label className="text-[11px] font-bold text-slate-600 uppercase font-mono">Max Uses (-1 for ∞)</label>
               <input
                 type="number"
-                min="1"
+                min="-1"
                 value={maxUses}
                 onChange={e => setMaxUses(Number(e.target.value))}
                 className="w-full px-3 py-2 bg-white border border-orange-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500"
@@ -224,7 +228,7 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
           {/* Applicable Plans Checkboxes */}
           <div className="space-y-1.5 pt-2 border-t border-orange-200/80">
             <label className="text-[11px] font-bold text-slate-600 uppercase font-mono block">
-              Applicable Plans (Leave empty to apply to All Plans)
+              Applicable Plans (Leave unselected to apply to All Plans)
             </label>
             <div className="flex flex-wrap gap-2">
               {plans.map(p => {
@@ -267,16 +271,27 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
 
       {/* Coupons List Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {coupons.map((c) => {
+        {coupons.length === 0 ? (
+          <div className="col-span-full py-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-2xl">
+            No coupons found. Click "Create Coupon" above to add promotional codes.
+          </div>
+        ) : coupons.map((c) => {
           const isExpired = c.expiresAt && new Date(c.expiresAt).getTime() < Date.now();
+          const isDepleted = c.maxUses !== -1 && (c.usedCount || 0) >= c.maxUses;
           const isCopied = copiedCode === c.code;
+
+          // Resolve plan names
+          const planNames = (c.applicablePlanIds || []).map(pid => {
+            const found = plans.find(p => p.id === pid);
+            return found ? found.name : pid;
+          });
 
           return (
             <div
-              key={c.id}
+              key={c.id || c.code}
               className={`p-5 rounded-2xl border transition-all space-y-3 relative group ${
-                !c.isActive || isExpired
-                  ? 'bg-slate-50 border-slate-200 opacity-60'
+                !c.isActive || isExpired || isDepleted
+                  ? 'bg-slate-50 border-slate-200 opacity-65'
                   : 'bg-white border-slate-200 hover:border-orange-300 hover:shadow-md'
               }`}
             >
@@ -304,15 +319,34 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
                 </button>
               </div>
 
+              {/* Applicable Plans Badges */}
+              <div className="flex flex-wrap gap-1 items-center">
+                {planNames.length === 0 ? (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                    All Plans
+                  </span>
+                ) : (
+                  planNames.map((pn, pidx) => (
+                    <span key={pidx} className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+                      {pn}
+                    </span>
+                  ))
+                )}
+              </div>
+
               {/* Usage Stats & Expiry */}
               <div className="space-y-1 text-xs text-slate-600 pt-1 border-t border-slate-100">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Redeemed:</span>
-                  <span className="font-bold text-slate-800">{c.usedCount || 0} / {c.maxUses || '∞'} times</span>
+                  <span className="font-bold text-slate-800">
+                    {c.usedCount || 0} / {c.maxUses === -1 ? '∞' : c.maxUses} times
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Expires:</span>
-                  <span className="font-mono text-[11px] text-slate-600">{new Date(c.expiresAt).toLocaleDateString()}</span>
+                  <span className="font-mono text-[11px] text-slate-600">
+                    {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : 'Never'}
+                  </span>
                 </div>
               </div>
 
@@ -321,12 +355,16 @@ export default function CouponManager({ onUpdate }: CouponManagerProps) {
                 <button
                   onClick={() => handleToggleActive(c)}
                   className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase transition-colors cursor-pointer ${
-                    c.isActive && !isExpired
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    isExpired
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                      : isDepleted
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                        : c.isActive
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-500 border border-slate-200'
                   }`}
                 >
-                  {c.isActive && !isExpired ? 'Active' : 'Disabled'}
+                  {isExpired ? 'Expired' : isDepleted ? 'Max Reached' : c.isActive ? 'Active' : 'Disabled'}
                 </button>
 
                 <button

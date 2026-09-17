@@ -143,24 +143,39 @@ export default function UpgradePlanModal({
     setIsCheckingCoupon(true);
 
     try {
-      let valid = await mockDb.validateCouponAsync(trimmed);
-      if (!valid) {
-        valid = await mockDb.validateCouponAsync(trimmed, 'plan-test-5');
-      }
-      if (!valid) {
-        valid = await mockDb.validateCouponAsync(trimmed, 'plan-monthly');
-      }
-
-      if (valid) {
-        setAppliedCoupon(valid);
-        setCouponError(null);
+      const res = await fetch(`/api/coupons?validate=${encodeURIComponent(trimmed)}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.valid && data.coupon) {
+          setAppliedCoupon(data.coupon);
+          setCouponError(null);
+          mockDb.saveCoupon(data.coupon);
+        } else if (data.message) {
+          setCouponError(data.message);
+          setAppliedCoupon(null);
+        } else {
+          setCouponError('Invalid or expired coupon code');
+          setAppliedCoupon(null);
+        }
       } else {
-        setCouponError('Invalid, expired, or inapplicable coupon code');
-        setAppliedCoupon(null);
+        const local = mockDb.validateCoupon(trimmed);
+        if (local) {
+          setAppliedCoupon(local);
+          setCouponError(null);
+        } else {
+          setCouponError('Invalid or expired coupon code');
+          setAppliedCoupon(null);
+        }
       }
     } catch {
-      setCouponError('Failed to validate coupon');
-      setAppliedCoupon(null);
+      const local = mockDb.validateCoupon(trimmed);
+      if (local) {
+        setAppliedCoupon(local);
+        setCouponError(null);
+      } else {
+        setCouponError('Failed to validate coupon');
+        setAppliedCoupon(null);
+      }
     } finally {
       setIsCheckingCoupon(false);
     }

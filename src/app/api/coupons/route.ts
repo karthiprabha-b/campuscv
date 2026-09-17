@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { couponDb, DbCoupon } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,29 +12,42 @@ function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  if (!fs.existsSync(COUPONS_FILE)) {
-    fs.writeFileSync(COUPONS_FILE, JSON.stringify([], null, 2), 'utf-8');
-  }
 }
 
-function readCoupons(): any[] {
-  try {
-    ensureDataFile();
-    const content = fs.readFileSync(COUPONS_FILE, 'utf-8');
-    return JSON.parse(content || '[]');
-  } catch (err) {
-    console.error('[COUPONS API] Error reading coupons file:', err);
-    return [];
-  }
-}
-
-function writeCoupons(coupons: any[]): void {
+function writeJsonBackup(coupons: DbCoupon[]): void {
   try {
     ensureDataFile();
     fs.writeFileSync(COUPONS_FILE, JSON.stringify(coupons, null, 2), 'utf-8');
   } catch (err) {
-    console.error('[COUPONS API] Error writing coupons file:', err);
+    console.warn('[COUPONS API] Warning writing backup coupons file:', err);
   }
+}
+
+function getMergedCoupons(): DbCoupon[] {
+  let dbCoupons = couponDb.getAllCoupons();
+
+  // If DB is empty, try reading from backup JSON file
+  if (dbCoupons.length === 0) {
+    try {
+      if (fs.existsSync(COUPONS_FILE)) {
+        const fileContent = fs.readFileSync(COUPONS_FILE, 'utf-8');
+        const parsed = JSON.parse(fileContent || '[]');
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach((c: any) => {
+            if (c.code) couponDb.upsertCoupon(c);
+          });
+          dbCoupons = couponDb.getAllCoupons();
+        }
+      }
+    } catch (e) {
+      console.warn('[COUPONS API] Error reading backup coupons file:', e);
+    }
+  } else {
+    // Keep backup file synchronized with SQLite
+    writeJsonBackup(dbCoupons);
+  }
+
+  return dbCoupons;
 }
 
 // GET /api/coupons - List all active coupons, or validate a specific coupon code
@@ -43,44 +57,101 @@ export async function GET(req: NextRequest) {
     const codeToValidate = searchParams.get('validate')?.trim().toUpperCase();
     const planId = searchParams.get('planId') || undefined;
 
-    const coupons = readCoupons();
+    const coupons = getMergedCoupons();
 
     if (codeToValidate) {
       const now = new Date().toISOString();
-      const matched = coupons.find((c: any) =>
-        (c.code || '').trim().toUpperCase() === codeToValidate &&
-        c.isActive &&
-        (!c.expiresAt || c.expiresAt > now) &&
-        (c.maxUses === -1 || (c.usedCount || 0) < c.maxUses) &&
-        (!c.applicablePlanIds || c.applicablePlanIds.length === 0 || !planId || c.applicablePlanIds.includes(planId))
-      );
+      const matched = coupons.find((c) => (c.code || '').trim().toUpperCase() === codeToValidate);
 
-      if (matched) {
-        return NextResponse.json({ success: true, valid: true, coupon: matched });
-      } else {
-        return NextResponse.json({ success: true, valid: false, message: 'Invalid, expired, or inapplicable coupon code' }, { status: 404 });
+      if (!matched) {
+        return NextResponse.json({
+          success: true,
+          valid: false,
+          reason: 'not_found',
+          message: 'Invalid coupon code'
+        }, { status: 200 });
       }
+
+      if (!matched.isActive) {
+        return NextResponse.json({
+          success: true,
+          valid: false,
+          reason: 'inactive',
+          message: 'This coupon code is currently disabled'
+        }, { status: 200 });
+      }
+
+      if (matched.expiresAt && new Date(matched.expiresAt).getTime() < Date.now()) {
+        return NextResponse.json({
+          success: true,
+          valid: false,
+          reason: 'expired',
+          message: 'This coupon code has expired'
+        }, { status: 200 });
+      }
+
+      if (matched.maxUses !== -1 && (matched.usedCount || 0) >= matched.maxUses) {
+        return NextResponse.json({
+          success: true,
+          valid: false,
+          reason: 'limit_reached',
+          message: 'This coupon has reached its maximum redemption limit'
+        }, { status: 200 });
+      }
+
+      if (planId && matched.applicablePlanIds && matched.applicablePlanIds.length > 0 && !matched.applicablePlanIds.includes(planId)) {
+        return NextResponse.json({
+          success: true,
+          valid: false,
+          reason: 'inapplicable_plan',
+          message: 'This coupon is not valid for the selected plan',
+          coupon: matched
+        }, { status: 200 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        valid: true,
+        coupon: matched,
+        message: 'Coupon code applied successfully!'
+      }, { status: 200 });
     }
 
     return NextResponse.json({ success: true, count: coupons.length, coupons });
   } catch (error: any) {
+    console.error('[COUPONS GET API] Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to retrieve coupons' }, { status: 500 });
   }
 }
 
-// POST /api/coupons - Create or update a coupon
+// POST /api/coupons - Create, update, or redeem a coupon
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    if (!body || !body.code) {
+    if (!body) {
+      return NextResponse.json({ error: 'Request body is required' }, { status: 400 });
+    }
+
+    // Handle atomic redemption
+    if (body.action === 'redeem') {
+      const target = body.code || body.id;
+      if (!target) {
+        return NextResponse.json({ error: 'Coupon code or id is required to redeem' }, { status: 400 });
+      }
+      const redeemRes = couponDb.redeemCoupon(target);
+      const all = couponDb.getAllCoupons();
+      writeJsonBackup(all);
+      return NextResponse.json(redeemRes);
+    }
+
+    if (!body.code) {
       return NextResponse.json({ error: 'Coupon code is required' }, { status: 400 });
     }
 
-    const coupons = readCoupons();
     const cleanCode = body.code.trim().toUpperCase();
-    const couponId = body.id || `cpn-${Date.now()}`;
+    const couponId = body.id || `cpn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    const newCoupon = {
+    const savedCoupon = couponDb.upsertCoupon({
       id: couponId,
       code: cleanCode,
       discountType: body.discountType || 'percent',
@@ -92,24 +163,16 @@ export async function POST(req: NextRequest) {
       isActive: body.isActive !== undefined ? Boolean(body.isActive) : true,
       applicablePlanIds: Array.isArray(body.applicablePlanIds) ? body.applicablePlanIds : [],
       createdAt: body.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    });
 
-    const existingIndex = coupons.findIndex((c: any) => 
-      c.id === newCoupon.id || (c.code || '').trim().toUpperCase() === cleanCode
-    );
+    const all = couponDb.getAllCoupons();
+    writeJsonBackup(all);
 
-    if (existingIndex !== -1) {
-      coupons[existingIndex] = { ...coupons[existingIndex], ...newCoupon };
-    } else {
-      coupons.unshift(newCoupon);
-    }
+    console.log(`[COUPON PERSISTED SERVER] code="${cleanCode}" discount=${savedCoupon.discountValue}% (${savedCoupon.discountType}) plans=${JSON.stringify(savedCoupon.applicablePlanIds)}`);
 
-    writeCoupons(coupons);
-    console.log(`[COUPON PERSISTED SERVER] code="${cleanCode}" discount=${newCoupon.discountValue}% plans=${JSON.stringify(newCoupon.applicablePlanIds)}`);
-
-    return NextResponse.json({ success: true, coupon: newCoupon, count: coupons.length });
+    return NextResponse.json({ success: true, coupon: savedCoupon, count: all.length });
   } catch (error: any) {
+    console.error('[COUPONS POST API] Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to save coupon' }, { status: 500 });
   }
 }
@@ -125,21 +188,16 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Coupon id or code is required' }, { status: 400 });
     }
 
-    const coupons = readCoupons();
-    const cleanId = id ? id.trim() : '';
-    const cleanCode = code ? code.trim().toUpperCase() : '';
+    if (id) couponDb.deleteCoupon(id);
+    if (code) couponDb.deleteCoupon(code);
 
-    const filtered = coupons.filter((c: any) => {
-      const cId = String(c.id || '').trim();
-      const cCode = String(c.code || '').trim().toUpperCase();
-      if (cleanId && (cId === cleanId || cCode === cleanId.toUpperCase())) return false;
-      if (cleanCode && (cCode === cleanCode || cId === cleanCode)) return false;
-      return true;
-    });
+    const remaining = couponDb.getAllCoupons();
+    writeJsonBackup(remaining);
 
-    writeCoupons(filtered);
-    return NextResponse.json({ success: true, count: filtered.length, coupons: filtered });
+    return NextResponse.json({ success: true, count: remaining.length, coupons: remaining });
   } catch (error: any) {
+    console.error('[COUPONS DELETE API] Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to delete coupon' }, { status: 500 });
   }
 }
+
