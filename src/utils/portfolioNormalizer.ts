@@ -466,6 +466,20 @@ export function normalizePortfolio(raw: any): PortfolioData {
     const rawSummary = raw.aboutMe || raw.summary || raw.bio || raw.personal?.bio || raw.personal?.summary || raw.about?.description || raw.hero?.description || boundProps.aboutMe || canonicalProfile.personal?.summary || raw.profile?.summary || raw.profile?.bio || '';
     const cleanSummary = cleanBioParagraph(rawSummary);
 
+    const resolvedTheme = {
+      ...(boundProps.theme || {}),
+      ...(raw.theme || {}),
+      primaryColor: raw.userSelectedAccent || raw.theme?.primaryColor || raw.themeColor || raw.accentColor || boundProps.theme?.primaryColor || boundProps.primaryColor || '#8b5cf6',
+      accentColor: raw.userSelectedAccent || raw.theme?.accentColor || raw.theme?.primaryColor || raw.themeColor || raw.accentColor || boundProps.theme?.accentColor || '#8b5cf6'
+    };
+
+    const resolvedTypography = {
+      ...(boundProps.typography || {}),
+      ...(raw.typography || {}),
+      fontFamily: raw.userSelectedFont || raw.typography?.fontFamily || raw.fontPack || boundProps.typography?.fontFamily || 'Inter, sans-serif',
+      fontSize: raw.userSelectedFontSize || raw.typography?.fontSize || raw.baseFontSize || boundProps.typography?.fontSize || 16
+    };
+
     const normalizedObj: PortfolioData = {
       ...boundProps,
       ...raw,
@@ -481,6 +495,15 @@ export function normalizePortfolio(raw: any): PortfolioData {
       image: resolvedImg,
       email: emailVal,
       aboutMe: raw.aboutMe || cleanSummary,
+      theme: resolvedTheme,
+      themeColor: resolvedTheme.primaryColor,
+      accentColor: resolvedTheme.accentColor,
+      userSelectedAccent: raw.userSelectedAccent || resolvedTheme.primaryColor,
+      typography: resolvedTypography,
+      fontPack: raw.fontPack || raw.userSelectedFont || resolvedTypography.fontFamily,
+      userSelectedFont: raw.userSelectedFont || resolvedTypography.fontFamily,
+      baseFontSize: resolvedTypography.fontSize,
+      userSelectedFontSize: resolvedTypography.fontSize,
       hero: {
         ...(boundProps.hero || {}),
         ...(raw.hero || {}),
@@ -613,15 +636,6 @@ export function normalizePortfolio(raw: any): PortfolioData {
       hiddenFields: Array.isArray(raw.hiddenFields) ? raw.hiddenFields : [],
       hiddenSections: Array.isArray(raw.hiddenSections) ? raw.hiddenSections : [],
       styleOverrides: raw.styleOverrides || {},
-      theme: raw.theme,
-      themeColor: raw.themeColor || raw.theme?.primaryColor || raw.theme?.accentColor || raw.accentColor || raw.userSelectedAccent,
-      accentColor: raw.accentColor || raw.themeColor || raw.userSelectedAccent,
-      userSelectedAccent: raw.userSelectedAccent || raw.themeColor || raw.accentColor,
-      userSelectedFont: raw.userSelectedFont || raw.fontPack || raw.typography?.fontFamily,
-      userSelectedFontSize: raw.userSelectedFontSize || raw.baseFontSize || raw.typography?.fontSize,
-      typography: raw.typography,
-      fontPack: raw.fontPack,
-      baseFontSize: raw.baseFontSize,
 
       sectionFiles,
       templateCode,

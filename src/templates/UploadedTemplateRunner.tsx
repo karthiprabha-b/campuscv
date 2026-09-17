@@ -2486,6 +2486,65 @@ export default function UploadedTemplateRunner(props: UploadedTemplateRunnerProp
             --border-gold: rgba(${r}, ${g}, ${b}, 0.3) !important;
           ` : ''}
         }
+
+        ${hasUserAccent ? `
+          .uploaded-template-runner .bg-sky-600,
+          .uploaded-template-runner .bg-sky-700,
+          .uploaded-template-runner .bg-teal-600,
+          .uploaded-template-runner .bg-teal-700,
+          .uploaded-template-runner .bg-blue-600,
+          .uploaded-template-runner .bg-indigo-600,
+          .uploaded-template-runner .btn-primary,
+          .uploaded-template-runner [data-cv="hero.primaryButton"],
+          .uploaded-template-runner [data-cv-accent="true"] {
+            background-color: ${accentHex} !important;
+            color: ${contrastForeground} !important;
+          }
+
+          .uploaded-template-runner .hover\\:bg-sky-700:hover,
+          .uploaded-template-runner .hover\\:bg-teal-700:hover,
+          .uploaded-template-runner .hover\\:bg-blue-700:hover {
+            background-color: ${darkHex} !important;
+          }
+
+          .uploaded-template-runner .text-sky-600,
+          .uploaded-template-runner .text-sky-700,
+          .uploaded-template-runner .text-sky-800,
+          .uploaded-template-runner .text-teal-600,
+          .uploaded-template-runner .text-teal-700,
+          .uploaded-template-runner .text-blue-600,
+          .uploaded-template-runner .text-indigo-600 {
+            color: ${accentHex} !important;
+          }
+
+          .uploaded-template-runner .border-sky-500,
+          .uploaded-template-runner .border-sky-600,
+          .uploaded-template-runner .border-teal-500,
+          .uploaded-template-runner .border-teal-600 {
+            border-color: ${accentHex} !important;
+          }
+
+          .uploaded-template-runner .bg-sky-50,
+          .uploaded-template-runner .bg-teal-50 {
+            background-color: rgba(${r}, ${g}, ${b}, 0.08) !important;
+          }
+
+          .uploaded-template-runner .bg-sky-100,
+          .uploaded-template-runner .bg-teal-100 {
+            background-color: rgba(${r}, ${g}, ${b}, 0.15) !important;
+          }
+
+          .uploaded-template-runner .border-sky-200,
+          .uploaded-template-runner .border-teal-200,
+          .uploaded-template-runner .border-sky-100 {
+            border-color: rgba(${r}, ${g}, ${b}, 0.25) !important;
+          }
+
+          .uploaded-template-runner .from-sky-600.to-teal-700,
+          .uploaded-template-runner .from-sky-500.to-teal-600 {
+            background-image: linear-gradient(to bottom right, ${accentHex}, ${darkHex}) !important;
+          }
+        ` : ''}
         ${fontCSS}
         ${fontSizeCSS}
       `;

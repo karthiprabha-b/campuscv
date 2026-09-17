@@ -638,6 +638,63 @@ export default function IsolatedTemplateIframe(props: IsolatedTemplateIframeProp
         --gold-600: ${darkHex} !important;
         --border-gold: rgba(${r}, ${g}, ${b}, 0.3) !important;
       }
+
+      .bg-sky-600,
+      .bg-sky-700,
+      .bg-teal-600,
+      .bg-teal-700,
+      .bg-blue-600,
+      .bg-indigo-600,
+      .btn-primary,
+      [data-cv="hero.primaryButton"],
+      [data-cv-accent="true"] {
+        background-color: ${activeThemeColor} !important;
+        color: ${contrastForeground} !important;
+      }
+
+      .hover\\:bg-sky-700:hover,
+      .hover\\:bg-teal-700:hover,
+      .hover\\:bg-blue-700:hover {
+        background-color: ${darkHex} !important;
+      }
+
+      .text-sky-600,
+      .text-sky-700,
+      .text-sky-800,
+      .text-teal-600,
+      .text-teal-700,
+      .text-blue-600,
+      .text-indigo-600 {
+        color: ${activeThemeColor} !important;
+      }
+
+      .border-sky-500,
+      .border-sky-600,
+      .border-teal-500,
+      .border-teal-600 {
+        border-color: ${activeThemeColor} !important;
+      }
+
+      .bg-sky-50,
+      .bg-teal-50 {
+        background-color: rgba(${r}, ${g}, ${b}, 0.08) !important;
+      }
+
+      .bg-sky-100,
+      .bg-teal-100 {
+        background-color: rgba(${r}, ${g}, ${b}, 0.15) !important;
+      }
+
+      .border-sky-200,
+      .border-teal-200,
+      .border-sky-100 {
+        border-color: rgba(${r}, ${g}, ${b}, 0.25) !important;
+      }
+
+      .from-sky-600.to-teal-700,
+      .from-sky-500.to-teal-600 {
+        background-image: linear-gradient(to bottom right, ${activeThemeColor}, ${darkHex}) !important;
+      }
     `;
   }, [
     (runnerProps.data as any)?.theme?.primaryColor,
