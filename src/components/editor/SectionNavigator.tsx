@@ -14,17 +14,52 @@ interface SectionNavigatorProps {
 export default function SectionNavigator({ portfolio, onPortfolioChange }: SectionNavigatorProps) {
   const { detectedSections, setSelectedElement, setInspectorMode } = useEditorContext();
 
-  const activeSections = portfolio.sections || [
-    'hero', 'about', 'skills', 'projects', 'experience', 'contact'
-  ];
-
-  const isVisible = (id: string) => activeSections.includes(id);
+  const isVisible = (sectionId: string) => {
+    const deletedNodes = (portfolio as any).deletedNodes || {};
+    if (deletedNodes[`section:${sectionId}:root:section:0`] === true || deletedNodes[sectionId] === true) {
+      return false;
+    }
+    const hiddenNodes = (portfolio as any).hiddenNodes || {};
+    if (hiddenNodes[`section:${sectionId}:root:section:0`] === true || hiddenNodes[sectionId] === true) {
+      return false;
+    }
+    const styleOverrides = (portfolio as any).styleOverrides || {};
+    if (styleOverrides[sectionId]?.display === 'none' || styleOverrides[`section:${sectionId}:root:section:0`]?.display === 'none') {
+      return false;
+    }
+    const hiddenFields = portfolio.hiddenFields || [];
+    return !hiddenFields.includes(`sections.${sectionId}`) && !hiddenFields.includes(sectionId);
+  };
 
   const toggleVisibility = (id: string) => {
-    const updated = isVisible(id)
-      ? activeSections.filter(s => s !== id)
-      : [...activeSections, id];
-    onPortfolioChange({ ...portfolio, sections: updated });
+    const isCurrentlyHidden = !isVisible(id);
+    const hiddenFields = portfolio.hiddenFields || [];
+    const updatedHiddenFields = isCurrentlyHidden
+      ? hiddenFields.filter(f => f !== id && f !== `sections.${id}`)
+      : [...hiddenFields, id];
+
+    const updatedHiddenNodes = {
+      ...((portfolio as any).hiddenNodes || {}),
+      [id]: !isCurrentlyHidden,
+      [`section:${id}:root:section:0`]: !isCurrentlyHidden
+    };
+
+    const updatedStyleOverrides = {
+      ...((portfolio as any).styleOverrides || {}),
+      [id]: {
+        ...(((portfolio as any).styleOverrides || {})[id] || {}),
+        display: isCurrentlyHidden ? '' : 'none'
+      }
+    };
+
+    const updated: PortfolioData = {
+      ...portfolio,
+      hiddenFields: updatedHiddenFields,
+      hiddenNodes: updatedHiddenNodes,
+      styleOverrides: updatedStyleOverrides
+    } as any;
+
+    onPortfolioChange(updated);
   };
 
   const scrollToSection = useCallback((section: DetectedSection) => {

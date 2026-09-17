@@ -86,7 +86,7 @@ export default function CanvasOverlayEngine({ canvasRef, children }: CanvasOverl
     if (!container) return;
 
     const iframe = container.querySelector('iframe') as HTMLIFrameElement | null;
-    const scanContainer = (iframe?.contentDocument?.body || container) as HTMLElement;
+    const scanContainer = (iframe?.contentDocument?.body || (window as any).__CAMPUSCV_IFRAME_DOC__?.body || container) as HTMLElement;
 
     // Discover, classify, and register nodes on universal template DOM
     discoverAndRegisterNodes(scanContainer, portfolioData?.templateId || 'template');
@@ -109,6 +109,19 @@ export default function CanvasOverlayEngine({ canvasRef, children }: CanvasOverl
   const isScannedRef = useRef(false);
   const scanCanvasRef = useRef(scanCanvas);
   scanCanvasRef.current = scanCanvas;
+
+  useEffect(() => {
+    isScannedRef.current = false;
+    scanCanvasRef.current();
+    const t1 = setTimeout(() => scanCanvasRef.current(), 150);
+    const t2 = setTimeout(() => scanCanvasRef.current(), 500);
+    const t3 = setTimeout(() => scanCanvasRef.current(), 1200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [portfolioData?.templateId]);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -135,7 +148,7 @@ export default function CanvasOverlayEngine({ canvasRef, children }: CanvasOverl
         if (rescanTimerRef.current) clearTimeout(rescanTimerRef.current);
         rescanTimerRef.current = setTimeout(() => {
           scanCanvasRef.current();
-        }, 1000);
+        }, 800);
       }
     });
 

@@ -266,14 +266,30 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
       }
     };
     update();
+    const t1 = setTimeout(update, 100);
+    const t2 = setTimeout(update, 350);
+    const t3 = setTimeout(update, 800);
+    const t4 = setTimeout(update, 1500);
+
     const handleRendered = () => {
       update();
     };
     window.addEventListener('campuscv:template-rendered', handleRendered);
-    return () => {
-      window.removeEventListener('campuscv:template-rendered', handleRendered);
+    const handleMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'CAMPUSCV_TEMPLATE_READY') {
+        update();
+      }
     };
-  }, [portfolio.templateId]);
+    window.addEventListener('message', handleMsg);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      window.removeEventListener('campuscv:template-rendered', handleRendered);
+      window.removeEventListener('message', handleMsg);
+    };
+  }, [portfolio.templateId, (portfolio as any).layoutStyle]);
 
   // Auto-expand section if an element inside it is selected from the template
   useEffect(() => {
@@ -407,6 +423,41 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
         dataKey: 'testimonials',
         getItemLabel: (item, idx) => item.author || item.name || `Review #${idx + 1}`
       },
+      achievements: {
+        id: 'achievements',
+        label: 'Achievements',
+        icon: <Award className="w-3.5 h-3.5 text-amber-500" />,
+        dataKey: 'achievements',
+        getItemLabel: (item, idx) => item.title || item.name || `Achievement #${idx + 1}`
+      },
+      awards: {
+        id: 'awards',
+        label: 'Awards',
+        icon: <Award className="w-3.5 h-3.5 text-rose-500" />,
+        dataKey: 'awards',
+        getItemLabel: (item, idx) => item.title || item.name || `Award #${idx + 1}`
+      },
+      publications: {
+        id: 'publications',
+        label: 'Publications',
+        icon: <FileText className="w-3.5 h-3.5 text-indigo-500" />,
+        dataKey: 'publications',
+        getItemLabel: (item, idx) => item.title || item.name || `Publication #${idx + 1}`
+      },
+      gallery: {
+        id: 'gallery',
+        label: 'Gallery',
+        icon: <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />,
+        dataKey: 'gallery',
+        getItemLabel: (item, idx) => item.title || item.caption || `Image #${idx + 1}`
+      },
+      stats: {
+        id: 'stats',
+        label: 'Stats & Metrics',
+        icon: <Tag className="w-3.5 h-3.5 text-cyan-500" />,
+        dataKey: 'stats',
+        getItemLabel: (item, idx) => item.label ? `${item.label}: ${item.value || ''}` : `Stat #${idx + 1}`
+      },
       contact: {
         id: 'contact',
         label: 'Contact & Social',
@@ -416,6 +467,25 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
           { id: 'contact-socials', label: 'Social Links', fieldPath: 'socialLinks', icon: <Tag className="w-3 h-3 text-blue-500" />, selector: '#contact .socials, #contact a[href*="github"], #contact a[href*="linkedin"]' },
         ]
       },
+      footer: {
+        id: 'footer',
+        label: 'Footer',
+        icon: <FileText className="w-3.5 h-3.5 text-zinc-500" />
+      }
+    };
+
+    const normalizeSecId = (s: string) => {
+      const k = String(s || '').toLowerCase().trim();
+      if (k === 'certificates' || k === 'awards') return 'certifications';
+      if (k === 'timeline' || k === 'work' || k === 'workexperience') return 'experience';
+      if (k === 'academics') return 'education';
+      if (k === 'home' || k === 'intro' || k === 'header') return 'hero';
+      if (k === 'bio') return 'about';
+      if (k === 'tech' || k === 'stack') return 'skills';
+      if (k === 'portfolio') return 'projects';
+      if (k === 'reviews' || k === 'testimonial') return 'testimonials';
+      if (k === 'workflow') return 'process';
+      return k;
     };
 
     const templateKey = (portfolio.templateId || (portfolio as any).layoutStyle || '').toLowerCase().trim();
@@ -425,55 +495,63 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
        templateKey.includes('designer') ? TEMPLATE_SECTION_DEFAULTS['designer-portfolio'] :
        templateKey.includes('doctor') ? TEMPLATE_SECTION_DEFAULTS['doctor'] :
        templateKey.includes('cs') ? TEMPLATE_SECTION_DEFAULTS['cs-portfolio'] :
-       templateKey.includes('slash') ? TEMPLATE_SECTION_DEFAULTS['slash-model'] : null);
+       templateKey.includes('slash') ? TEMPLATE_SECTION_DEFAULTS['slash-model'] :
+       templateKey.includes('beaut') ? TEMPLATE_SECTION_DEFAULTS['beautician'] :
+       templateKey.includes('photo') ? TEMPLATE_SECTION_DEFAULTS['photography'] :
+       templateKey.includes('agri') ? TEMPLATE_SECTION_DEFAULTS['agri-student'] :
+       templateKey.includes('creative') ? TEMPLATE_SECTION_DEFAULTS['stu-creative-bold'] :
+       templateKey.includes('card') ? TEMPLATE_SECTION_DEFAULTS['card'] :
+       templateKey.includes('center') ? TEMPLATE_SECTION_DEFAULTS['centerd'] :
+       templateKey.includes('eng') ? TEMPLATE_SECTION_DEFAULTS['engineering'] :
+       null);
 
     const manifestSections = Array.isArray(portfolio.sections)
       ? portfolio.sections.map((s: any) => typeof s === 'string' ? s : s.id).filter(Boolean)
       : (Array.isArray((portfolio as any).templateSections) ? (portfolio as any).templateSections : []);
 
-    const normalizedManifest = manifestSections.map((s: string) => {
-      const k = String(s).toLowerCase().trim();
-      if (k === 'certificates' || k === 'awards') return 'certifications';
-      if (k === 'timeline') return 'experience';
-      if (k === 'home' || k === 'intro') return 'hero';
-      return k;
-    });
+    const defaultBaseline = templateBuiltin || ['hero', 'about', 'skills', 'projects', 'experience', 'education', 'certifications', 'contact'];
 
-    const baseTemplateSectionList = normalizedManifest.length > 0
-      ? normalizedManifest
-      : (templateBuiltin || ['hero', 'about', 'education', 'experience', 'projects', 'skills', 'certifications', 'contact']);
+    // Collect all candidate section IDs from all possible sources
+    const candidateSectionPool: string[] = [
+      ...defaultBaseline.map(normalizeSecId),
+      ...manifestSections.map(normalizeSecId),
+      ...liveDomSections.map(normalizeSecId),
+      ...(detectedSections || []).map(s => normalizeSecId(s.id)),
+    ];
 
-    // If user has customized sectionOrder, order available template sections accordingly
+    // Also include content-backed sections if data exists in portfolio
+    if (portfolio.education && portfolio.education.length > 0) candidateSectionPool.push('education');
+    if (portfolio.experience && portfolio.experience.length > 0) candidateSectionPool.push('experience');
+    if ((portfolio as any).timeline && (portfolio as any).timeline.length > 0) candidateSectionPool.push('experience');
+    if (portfolio.projects && portfolio.projects.length > 0) candidateSectionPool.push('projects');
+    if (portfolio.skills && portfolio.skills.length > 0) candidateSectionPool.push('skills');
+    if (portfolio.certifications && portfolio.certifications.length > 0) candidateSectionPool.push('certifications');
+    if ((portfolio as any).specialties && (portfolio as any).specialties.length > 0) candidateSectionPool.push('specialties');
+    if ((portfolio as any).services && (portfolio as any).services.length > 0) candidateSectionPool.push('services');
+    if ((portfolio as any).testimonials && (portfolio as any).testimonials.length > 0) candidateSectionPool.push('testimonials');
+    if ((portfolio as any).process && (portfolio as any).process.length > 0) candidateSectionPool.push('process');
+
+    // Build the ordered section IDs list
     const userOrder = (Array.isArray(portfolio.sectionOrder) && portfolio.sectionOrder.length > 0)
-      ? portfolio.sectionOrder.map((s: string) => s.toLowerCase().trim())
+      ? portfolio.sectionOrder.map(normalizeSecId)
       : [];
 
     const orderedSectionIds: string[] = [];
     const addedIds = new Set<string>();
 
-    if (userOrder.length > 0) {
-      userOrder.forEach((id: string) => {
-        let cleanId = id;
-        if (cleanId === 'certificates' || cleanId === 'awards') cleanId = 'certifications';
-        if (cleanId === 'timeline') cleanId = 'experience';
-        if (cleanId === 'home' || cleanId === 'intro') cleanId = 'hero';
+    // 1. First add customized user section order
+    userOrder.forEach((id: string) => {
+      if (id && !addedIds.has(id)) {
+        orderedSectionIds.push(id);
+        addedIds.add(id);
+      }
+    });
 
-        if (baseTemplateSectionList.includes(cleanId) && !addedIds.has(cleanId)) {
-          orderedSectionIds.push(cleanId);
-          addedIds.add(cleanId);
-        }
-      });
-    }
-
-    baseTemplateSectionList.forEach((id: string) => {
-      let cleanId = id.toLowerCase().trim();
-      if (cleanId === 'certificates' || cleanId === 'awards') cleanId = 'certifications';
-      if (cleanId === 'timeline') cleanId = 'experience';
-      if (cleanId === 'home' || cleanId === 'intro') cleanId = 'hero';
-
-      if (!addedIds.has(cleanId)) {
-        orderedSectionIds.push(cleanId);
-        addedIds.add(cleanId);
+    // 2. Then add all other candidate sections in order
+    candidateSectionPool.forEach((id: string) => {
+      if (id && !addedIds.has(id)) {
+        orderedSectionIds.push(id);
+        addedIds.add(id);
       }
     });
 
@@ -493,7 +571,7 @@ export default function SectionTree({ portfolio, onPortfolioChange, onOpenAddMod
     });
 
     return ordered.length > 0 ? ordered : Object.values(configMap);
-  }, [portfolio.sectionOrder, portfolio.sections, portfolio.templateId, (portfolio as any).layoutStyle, detectedSections]);
+  }, [portfolio.sectionOrder, portfolio.sections, portfolio.templateId, (portfolio as any).layoutStyle, portfolio.education, portfolio.experience, (portfolio as any).timeline, portfolio.projects, portfolio.skills, portfolio.certifications, (portfolio as any).specialties, (portfolio as any).services, (portfolio as any).testimonials, (portfolio as any).process, detectedSections, liveDomSections]);
 
   const toggleVisibility = (id: string) => {
     const isCurrentlyHidden = !isVisible(id);
