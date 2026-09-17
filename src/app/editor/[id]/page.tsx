@@ -46,6 +46,20 @@ interface PageProps {
 
 function setByPath(obj: any, path: string, value: any): void {
   if (!obj || !path) return;
+
+  // Special-case root map prefixes (contentOverrides, styleOverrides, imageOverrides, deletedNodes)
+  // so their sub-key is preserved as an exact dictionary key even if it contains dots or colons
+  if (path.startsWith('contentOverrides.') || path.startsWith('styleOverrides.') || path.startsWith('imageOverrides.') || path.startsWith('deletedNodes.')) {
+    const firstDotIdx = path.indexOf('.');
+    const rootKey = path.slice(0, firstDotIdx);
+    const subKey = path.slice(firstDotIdx + 1);
+    if (!obj[rootKey] || typeof obj[rootKey] !== 'object') {
+      obj[rootKey] = {};
+    }
+    obj[rootKey][subKey] = value;
+    return;
+  }
+
   const normalizedPath = path.replace(/\[(\d+)\]/g, '.$1');
   const parts = normalizedPath.split('.').filter(Boolean);
   let curr = obj;

@@ -467,6 +467,7 @@ function safeSetImageSrc(imgEl: HTMLImageElement | null, newSrc: string | null |
  * Applies a content/image/link/button override to a target element.
  */
 function applyContentOverrideToElement(targetEl: HTMLElement, override: any, nodeId?: string, portfolioData?: any): void {
+  const originalText = targetEl.innerText ? targetEl.innerText.trim() : '';
   const overrideObj = typeof override === 'object' && override !== null ? (override as any) : {};
   const type = typeof override === 'object' && override !== null ? overrideObj.type : 'text';
   const src = typeof override === 'object' && override !== null ? (overrideObj.src || overrideObj.url) : null;
@@ -504,31 +505,11 @@ function applyContentOverrideToElement(targetEl: HTMLElement, override: any, nod
       return;
     }
 
-    const originalText = targetEl.innerText ? targetEl.innerText.trim() : '';
-    const isExplicitTemplateBinding = Boolean(
-      targetEl.getAttribute('data-cv-field') ||
-      targetEl.getAttribute('data-cv') ||
-      targetEl.getAttribute('data-field') ||
-      targetEl.getAttribute('data-editable')
-    );
-
-    const isDisplayHeadline = (
-      targetEl.tagName === 'H1' ||
-      targetEl.classList.contains('font-heading') ||
-      Boolean(targetEl.closest('#hero h1, .hero h1'))
-    );
-
-    // Safeguard marketing display headlines:
-    // Skip stale/generic single-word name overrides on long multi-line display headlines
-    const isStaleNameOnHeadline = isDisplayHeadline && !isExplicitTemplateBinding && originalText.length > 25 && String(val).length < 20;
-
-    if (!isStaleNameOnHeadline) {
-      const hasAnimationStructure = Boolean(targetEl.querySelector('.letter, .word, .txt-fx'));
-      if (hasAnimationStructure && originalText === String(val).trim()) {
-        // Text is already matching; preserve the letter-split DOM structure for smooth animation
-      } else if (targetEl.innerText !== String(val)) {
-        targetEl.innerText = String(val);
-      }
+    const hasAnimationStructure = Boolean(targetEl.querySelector('.letter, .word, .txt-fx'));
+    if (hasAnimationStructure && originalText === String(val).trim()) {
+      // Text is already matching; preserve the letter-split DOM structure for smooth animation
+    } else if (targetEl.innerText !== String(val)) {
+      targetEl.innerText = String(val);
     }
   }
 }
@@ -943,8 +924,21 @@ export function applyPortfolioOverrides(
 
   const boundElements = Array.from(rootEl.querySelectorAll('[data-cv], [data-cv-field], [data-field], [data-editable]')) as HTMLElement[];
   for (const el of boundElements) {
+    const elNodeId = el.getAttribute('data-node-id') || el.id || '';
+    if (elNodeId && (mergedContent[elNodeId] !== undefined || (el.id && mergedContent[el.id] !== undefined))) {
+      continue;
+    }
+    const candidates = resolveNodeIdCandidates(elNodeId);
+    if (candidates.some(c => mergedContent[c] !== undefined)) {
+      continue;
+    }
+
     let fieldPath = el.getAttribute('data-cv') || el.getAttribute('data-cv-field') || el.getAttribute('data-field') || el.getAttribute('data-editable');
     if (!fieldPath) continue;
+    if (mergedContent[fieldPath] !== undefined) {
+      continue;
+    }
+
     if (!fieldPath.includes('.') && !fieldPath.includes('[')) {
       const colCtx = detectCollectionContext(el);
       if (colCtx.collection && colCtx.collectionIndex !== undefined) {
@@ -975,15 +969,6 @@ export function applyPortfolioOverrides(
     // 4.8 Universal Automatic Binding Engine Orchestration
     UniversalBindingEngine.bindPortfolioToDOM(rootEl, portfolioData);
 
-    // 4.85 Final Override Enforcement: Re-apply explicit content/image overrides so user edits take precedence over auto-binding
-    Object.entries(mergedContent).forEach(([nodeId, override]) => {
-      if (override === undefined || override === null) return;
-      if (deletedNodes[nodeId] === true) return;
-      const targetEl = resolveOverrideElement(rootEl, nodeId);
-      if (!targetEl) return;
-      applyContentOverrideToElement(targetEl, override, nodeId, portfolioData);
-    });
-
     // 4.9 Content-Driven Section Visibility Rules
     applySectionVisibilityRules(rootEl, portfolioData);
 
@@ -993,6 +978,15 @@ export function applyPortfolioOverrides(
       reorderDOMSections(rootEl, sectionOrder);
     }
   }
+
+  // 4.85 Final Override Enforcement: Re-apply explicit content/image overrides so user edits ALWAYS take precedence over any auto-binding
+  Object.entries(mergedContent).forEach(([nodeId, override]) => {
+    if (override === undefined || override === null) return;
+    if (deletedNodes[nodeId] === true) return;
+    const targetEl = resolveOverrideElement(rootEl, nodeId);
+    if (!targetEl) return;
+    applyContentOverrideToElement(targetEl, override, nodeId, portfolioData);
+  });
 
   // 6. Render Dynamically Added Elements (Headings, Text, Buttons, Images)
   const addedElements = portfolioData.addedElements || [];

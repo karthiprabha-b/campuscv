@@ -573,10 +573,92 @@ function TextElementInspector({ portfolio, onPortfolioChange, onRequestConfirm }
   const isButton = ['button', 'link'].includes(el.elementType);
   const targetNodeId = el.id || (el.el ? el.el.getAttribute('data-node-id') : null) || el.fieldPath;
 
+  const [localText, setLocalText] = useState(currentText);
+
+  useEffect(() => {
+    setLocalText(currentText);
+  }, [targetNodeId, currentText]);
+
   const existingStyle = (portfolio as any)?.styleOverrides?.[targetNodeId] || {};
   const currentTextAlign = existingStyle.textAlign || (el.el ? window.getComputedStyle(el.el).textAlign : 'left') || 'left';
   const currentTextColor = existingStyle.color || parseToHex(el.el ? window.getComputedStyle(el.el).color : '#0F172A', '#0F172A').hex;
   const currentTrans = parseTranslate(existingStyle.transform);
+
+  const handleTextCommit = (val: string) => {
+    if (!onFieldChange) return;
+
+    // 1. If el has fieldPath, update it directly
+    if (el.fieldPath) {
+      onFieldChange(el.fieldPath, val);
+    }
+
+    // 2. Set contentOverrides for targetNodeId
+    if (targetNodeId) {
+      onFieldChange(`contentOverrides.${targetNodeId}`, {
+        type: isButton ? 'button' : 'text',
+        value: val
+      });
+    }
+
+    // 3. Set contentOverrides for data-node-id if different
+    const explicitNodeId = el.el?.getAttribute('data-node-id');
+    if (explicitNodeId && explicitNodeId !== targetNodeId) {
+      onFieldChange(`contentOverrides.${explicitNodeId}`, {
+        type: isButton ? 'button' : 'text',
+        value: val
+      });
+    }
+
+    // 4. Semantic field synchronization
+    const fieldPathLower = (el.fieldPath || '').toLowerCase();
+    const targetIdLower = (targetNodeId || '').toLowerCase();
+    const tag = el.el?.tagName.toLowerCase() || '';
+    const sec = (el.sectionId || '').toLowerCase();
+    const dataCv = (el.el?.getAttribute('data-cv') || '').toLowerCase();
+
+    const isHeadline = fieldPathLower.includes('headline') || fieldPathLower.includes('tagline') || fieldPathLower.includes('role') || fieldPathLower.includes('title') ||
+      targetIdLower.includes('headline') || targetIdLower.includes('tagline') || targetIdLower.includes('role') ||
+      dataCv.includes('headline') || dataCv.includes('tagline') || dataCv.includes('role') ||
+      (sec === 'hero' && (tag === 'h1' || tag === 'h2'));
+
+    const isName = fieldPathLower.includes('name') || targetIdLower.includes('name') || dataCv.includes('name');
+
+    const isDesc = fieldPathLower.includes('description') || fieldPathLower.includes('bio') || fieldPathLower.includes('summary') || fieldPathLower.includes('about') ||
+      targetIdLower.includes('desc') || targetIdLower.includes('bio') || targetIdLower.includes('about') ||
+      dataCv.includes('description') || dataCv.includes('bio') || dataCv.includes('about');
+
+    if (isHeadline) {
+      onFieldChange('hero.title', val);
+      onFieldChange('hero.headline', val);
+      onFieldChange('title', val);
+      onFieldChange('headline', val);
+      onFieldChange('tagline', val);
+      onFieldChange('role', val);
+      onFieldChange('personal.headline', val);
+    }
+
+    if (isName) {
+      onFieldChange('name', val);
+      onFieldChange('hero.name', val);
+      onFieldChange('personal.fullName', val);
+      onFieldChange('personal.name', val);
+    }
+
+    if (isDesc) {
+      onFieldChange('hero.description', val);
+      onFieldChange('about.description', val);
+      onFieldChange('aboutMe', val);
+      onFieldChange('personal.bio', val);
+      onFieldChange('personal.summary', val);
+    }
+
+    // 5. Update DOM directly for instant visual feedback
+    if (el.el) {
+      el.el.innerText = val;
+      const childSpan = el.el.querySelector('span:only-child');
+      if (childSpan) (childSpan as HTMLElement).innerText = val;
+    }
+  };
 
   const applyStyle = (property: string, value: string) => {
     if (el.el) (el.el.style as any)[property] = value;
@@ -621,16 +703,15 @@ function TextElementInspector({ portfolio, onPortfolioChange, onRequestConfirm }
           <label className={labelCls}>Content (Expandable)</label>
           <textarea
             rows={4}
-            defaultValue={currentText}
+            value={localText}
             className={`${inputCls} resize-y min-h-[90px] max-h-[350px] font-medium`}
             style={{ minHeight: '90px' }}
             onChange={(e) => {
-              if (onFieldChange) onFieldChange(el.fieldPath, e.target.value);
-              if (el.el) el.el.textContent = e.target.value;
+              setLocalText(e.target.value);
+              handleTextCommit(e.target.value);
             }}
             onBlur={(e) => {
-              if (onFieldChange) onFieldChange(el.fieldPath, e.target.value);
-              if (el.el) el.el.textContent = e.target.value;
+              handleTextCommit(e.target.value);
             }}
           />
         </div>
@@ -1555,16 +1636,98 @@ function UniversalNodeInspector() {
 
   const handleTextCommit = (val: string) => {
     if (!onFieldChange) return;
-    onFieldChange(`contentOverrides.${nodeId}`, { ...contentOverride, type: selectedNode.type, value: val });
+    onFieldChange(`contentOverrides.${nodeId}`, { ...contentOverride, type: selectedNode.type || 'text', value: val });
 
-    const colName = selectedNode.collection || (selectedNode.sectionId === 'projects' ? 'projects' : undefined);
+    // Collection item field synchronization
+    const colName = selectedNode.collection || (selectedNode.sectionId === 'projects' ? 'projects' : (selectedNode.sectionId === 'experience' ? 'experience' : (selectedNode.sectionId === 'skills' ? 'skills' : (selectedNode.sectionId === 'education' ? 'education' : undefined))));
     const colIdx = selectedNode.collectionIndex !== undefined ? selectedNode.collectionIndex : selectedNode.index;
-    const fieldName = selectedNode.field;
+    const fieldName = selectedNode.field || (selectedNode.tag === 'h3' || selectedNode.tag === 'h4' ? 'title' : (selectedNode.tag === 'p' ? 'description' : undefined));
     if (colName && colIdx !== undefined && colIdx >= 0 && fieldName) {
       onFieldChange(`${colName}.${colIdx}.${fieldName}`, val);
+      if (fieldName === 'title' && colName === 'experience') onFieldChange(`${colName}.${colIdx}.role`, val);
+      if (fieldName === 'role' && colName === 'experience') onFieldChange(`${colName}.${colIdx}.title`, val);
     }
 
-    if (selectedNode.el) selectedNode.el.innerText = val;
+    // Semantic field synchronization for Hero / Profile / About / Contact
+    const lowNodeId = (nodeId || '').toLowerCase();
+    const sec = (selectedNode.sectionId || '').toLowerCase();
+    const tag = (selectedNode.tag || '').toLowerCase();
+    const dataCv = (selectedNode.el?.getAttribute('data-cv') || '').toLowerCase();
+
+    const isHeadline = dataCv.includes('headline') || dataCv.includes('tagline') || dataCv.includes('role') ||
+      lowNodeId.includes('headline') || lowNodeId.includes('tagline') || lowNodeId.includes('role') ||
+      (sec === 'hero' && (tag === 'h1' || tag === 'h2' || lowNodeId.includes('h1') || lowNodeId.includes('h2')));
+
+    const isName = dataCv.includes('name') || dataCv.includes('fullname') || dataCv.includes('author') ||
+      lowNodeId.includes('name') || lowNodeId.includes('author') ||
+      ((sec === 'hero' || sec === 'profile') && lowNodeId.includes('name'));
+
+    const isDesc = dataCv.includes('description') || dataCv.includes('bio') || dataCv.includes('summary') || dataCv.includes('about') ||
+      lowNodeId.includes('desc') || lowNodeId.includes('bio') || lowNodeId.includes('about') || lowNodeId.includes('summary') ||
+      (sec === 'hero' && (tag === 'p' || lowNodeId.includes(':p:'))) ||
+      (sec === 'about' && (tag === 'p' || lowNodeId.includes(':p:')));
+
+    const isAvailability = dataCv.includes('availability') || lowNodeId.includes('avail') || lowNodeId.includes('status');
+    const isLocation = dataCv.includes('location') || lowNodeId.includes('location');
+    const isEmail = dataCv.includes('email') || lowNodeId.includes('email') || lowNodeId.includes('mail');
+
+    if (isHeadline) {
+      onFieldChange('hero.title', val);
+      onFieldChange('hero.headline', val);
+      onFieldChange('title', val);
+      onFieldChange('headline', val);
+      onFieldChange('tagline', val);
+      onFieldChange('role', val);
+      onFieldChange('personal.headline', val);
+    }
+
+    if (isName) {
+      onFieldChange('name', val);
+      onFieldChange('hero.name', val);
+      onFieldChange('personal.fullName', val);
+      onFieldChange('personal.name', val);
+    }
+
+    if (isDesc) {
+      if (sec === 'about') {
+        onFieldChange('about.description', val);
+        onFieldChange('aboutMe', val);
+        onFieldChange('personal.bio', val);
+        onFieldChange('personal.summary', val);
+      } else {
+        onFieldChange('hero.description', val);
+        onFieldChange('about.description', val);
+        onFieldChange('aboutMe', val);
+        onFieldChange('personal.bio', val);
+        onFieldChange('personal.summary', val);
+      }
+    }
+
+    if (isAvailability) {
+      onFieldChange('availability', val);
+      onFieldChange('hero.availability', val);
+      onFieldChange('personal.availability', val);
+    }
+
+    if (isLocation) {
+      onFieldChange('location', val);
+      onFieldChange('hero.location', val);
+      onFieldChange('contact.location', val);
+      onFieldChange('personal.location', val);
+    }
+
+    if (isEmail) {
+      onFieldChange('email', val);
+      onFieldChange('contact.email', val);
+      onFieldChange('ownerEmail', val);
+    }
+
+    // Direct DOM reflection
+    if (selectedNode.el) {
+      selectedNode.el.innerText = val;
+      const childSpan = selectedNode.el.querySelector('span:only-child');
+      if (childSpan) (childSpan as HTMLElement).innerText = val;
+    }
   };
 
   const handleButtonCommit = (newLabel: string, newHref: string, newTarget?: string) => {
