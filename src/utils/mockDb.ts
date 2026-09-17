@@ -629,48 +629,7 @@ export function initializeMockDb() {
     localStorage.setItem('portly_plans', JSON.stringify(defaultPlans));
   }
   if (!localStorage.getItem('portly_coupons')) {
-    const starterCoupons: CouponCode[] = [
-      {
-        id: 'cpn-launch50',
-        code: 'LAUNCH50',
-        discountType: 'percent',
-        discountValue: 50,
-        discountPercent: 50,
-        maxUses: 1000,
-        usedCount: 0,
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        isActive: true,
-        applicablePlanIds: [],
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'cpn-campus100',
-        code: 'CAMPUS100',
-        discountType: 'percent',
-        discountValue: 100,
-        discountPercent: 100,
-        maxUses: 500,
-        usedCount: 0,
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        isActive: true,
-        applicablePlanIds: ['plan-test-5'],
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'cpn-promo20',
-        code: 'PROMO20',
-        discountType: 'percent',
-        discountValue: 20,
-        discountPercent: 20,
-        maxUses: 2000,
-        usedCount: 0,
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        isActive: true,
-        applicablePlanIds: [],
-        createdAt: new Date().toISOString(),
-      }
-    ];
-    localStorage.setItem('portly_coupons', JSON.stringify(starterCoupons));
+    localStorage.setItem('portly_coupons', JSON.stringify([]));
   }
   if (!localStorage.getItem('portly_transactions')) {
     localStorage.setItem('portly_transactions', JSON.stringify([]));
@@ -1071,22 +1030,8 @@ export const mockDb = {
         const data = await res.json();
         if (data.coupons && Array.isArray(data.coupons)) {
           const serverCoupons: CouponCode[] = data.coupons;
-          const localCoupons = mockDb.getCoupons();
-          
-          // Merge server and local coupons, prioritizing server records
-          const mergedMap = new Map<string, CouponCode>();
-          localCoupons.forEach(c => {
-            if (c && c.code) mergedMap.set(c.code.trim().toUpperCase(), c);
-          });
-          serverCoupons.forEach(c => {
-            if (c && c.code) mergedMap.set(c.code.trim().toUpperCase(), c);
-          });
-          
-          const mergedList = Array.from(mergedMap.values());
-          if (mergedList.length > 0) {
-            localStorage.setItem('portly_coupons', JSON.stringify(mergedList));
-            return mergedList;
-          }
+          localStorage.setItem('portly_coupons', JSON.stringify(serverCoupons));
+          return serverCoupons;
         }
       }
     } catch (e) {
