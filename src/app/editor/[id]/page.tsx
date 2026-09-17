@@ -48,15 +48,52 @@ function setByPath(obj: any, path: string, value: any): void {
   if (!obj || !path) return;
 
   // Special-case root map prefixes (contentOverrides, styleOverrides, imageOverrides, deletedNodes)
-  // so their sub-key is preserved as an exact dictionary key even if it contains dots or colons
+  // so their sub-key is preserved as an exact dictionary key even if it contains colons
   if (path.startsWith('contentOverrides.') || path.startsWith('styleOverrides.') || path.startsWith('imageOverrides.') || path.startsWith('deletedNodes.')) {
     const firstDotIdx = path.indexOf('.');
     const rootKey = path.slice(0, firstDotIdx);
-    const subKey = path.slice(firstDotIdx + 1);
+    const remainder = path.slice(firstDotIdx + 1);
     if (!obj[rootKey] || typeof obj[rootKey] !== 'object') {
       obj[rootKey] = {};
     }
-    obj[rootKey][subKey] = value;
+
+    if (rootKey === 'styleOverrides') {
+      const styleProps = ['color', 'backgroundColor', 'background', 'fontSize', 'fontWeight', 'textAlign', 'borderRadius', 'borderWidth', 'borderStyle', 'borderColor', 'padding', 'paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight', 'transform', 'display', 'visibility'];
+      const lastDotIdx = remainder.lastIndexOf('.');
+      if (lastDotIdx !== -1) {
+        const potentialProp = remainder.slice(lastDotIdx + 1);
+        if (styleProps.includes(potentialProp)) {
+          const nodeId = remainder.slice(0, lastDotIdx);
+          if (!obj.styleOverrides[nodeId] || typeof obj.styleOverrides[nodeId] !== 'object') {
+            obj.styleOverrides[nodeId] = {};
+          }
+          obj.styleOverrides[nodeId][potentialProp] = value;
+          return;
+        }
+      }
+      obj.styleOverrides[remainder] = typeof value === 'object' && value !== null ? value : { ...(obj.styleOverrides[remainder] || {}), [remainder]: value };
+      return;
+    }
+
+    if (rootKey === 'contentOverrides') {
+      const contentProps = ['alt', 'src', 'url', 'value', 'label', 'href', 'target', 'type'];
+      const lastDotIdx = remainder.lastIndexOf('.');
+      if (lastDotIdx !== -1) {
+        const potentialProp = remainder.slice(lastDotIdx + 1);
+        if (contentProps.includes(potentialProp)) {
+          const nodeId = remainder.slice(0, lastDotIdx);
+          if (!obj.contentOverrides[nodeId] || typeof obj.contentOverrides[nodeId] !== 'object') {
+            obj.contentOverrides[nodeId] = {};
+          }
+          obj.contentOverrides[nodeId][potentialProp] = value;
+          return;
+        }
+      }
+      obj.contentOverrides[remainder] = value;
+      return;
+    }
+
+    obj[rootKey][remainder] = value;
     return;
   }
 
@@ -497,6 +534,153 @@ function EditorInner({ id }: { id: string }) {
         if (updated.personal) {
           updated.personal.profilePhoto = imgSrc;
           updated.personal.avatarUrl = imgSrc;
+        }
+      }
+
+      // Auto-sync text fields across all aliases (hero.title, heroHeadline, headline, hero.subtitle, hero.description, heroDescription, aboutMe, etc.)
+      const textVal = typeof value === 'object' && value !== null ? (value.value || value.label || value.text) : (typeof value === 'string' ? value : null);
+      if (typeof textVal === 'string') {
+        const fieldPathLower = fieldPath.toLowerCase();
+
+        const isHeadlineKey =
+          fieldPathLower.includes('headline') ||
+          fieldPathLower.includes('hero.title') ||
+          fieldPathLower.includes('tagline') ||
+          fieldPathLower.includes('role') ||
+          (fieldPathLower.startsWith('contentoverrides.') && (fieldPathLower.includes('headline') || fieldPathLower.includes('h1') || fieldPathLower.includes('tagline') || fieldPathLower.includes('role')));
+
+        const isBioOrSubtitleKey =
+          fieldPathLower.includes('description') ||
+          fieldPathLower.includes('aboutme') ||
+          fieldPathLower.includes('summary') ||
+          fieldPathLower.includes('bio') ||
+          fieldPathLower.includes('subtitle') ||
+          (fieldPathLower.startsWith('contentoverrides.') && (fieldPathLower.includes('description') || fieldPathLower.includes(':p:') || fieldPathLower.includes('bio') || fieldPathLower.includes('about') || fieldPathLower.includes('summary')));
+
+        const isNameKey =
+          fieldPathLower === 'name' ||
+          fieldPathLower === 'fullname' ||
+          fieldPathLower === 'hero.name' ||
+          fieldPathLower === 'personal.fullname' ||
+          fieldPathLower === 'personal.name' ||
+          (fieldPathLower.startsWith('contentoverrides.') && (fieldPathLower.includes(':name:') || fieldPathLower.includes('author')));
+
+        const isAvailabilityKey =
+          fieldPathLower.includes('availability') ||
+          fieldPathLower.includes('status') ||
+          (fieldPathLower.startsWith('contentoverrides.') && fieldPathLower.includes('availability'));
+
+        const isLocationKey =
+          fieldPathLower.includes('location') ||
+          fieldPathLower.includes('city') ||
+          (fieldPathLower.startsWith('contentoverrides.') && fieldPathLower.includes('location'));
+
+        if (isHeadlineKey) {
+          if (!updated.hero || typeof updated.hero !== 'object') updated.hero = {};
+          updated.hero.title = textVal;
+          updated.hero.headline = textVal;
+          updated.heroHeadline = textVal;
+          updated.headline = textVal;
+          updated.title = textVal;
+          updated.tagline = textVal;
+          updated.role = textVal;
+          if (!updated.personal || typeof updated.personal !== 'object') updated.personal = {};
+          updated.personal.headline = textVal;
+          updated.personal.role = textVal;
+          if (updated.profile && typeof updated.profile === 'object') {
+            updated.profile.headline = textVal;
+          }
+          if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+            if (!updated.canonicalProfile.personal) updated.canonicalProfile.personal = {} as any;
+            updated.canonicalProfile.personal.headline = textVal;
+            updated.canonicalProfile.personal.role = textVal;
+          }
+          if (updated.data && typeof updated.data === 'object') {
+            updated.data.heroHeadline = textVal;
+            updated.data.headline = textVal;
+            updated.data.title = textVal;
+            if (updated.data.hero) {
+              updated.data.hero.title = textVal;
+              updated.data.hero.headline = textVal;
+            }
+          }
+        }
+
+        if (isBioOrSubtitleKey) {
+          if (!updated.hero || typeof updated.hero !== 'object') updated.hero = {};
+          updated.hero.description = textVal;
+          updated.hero.subtitle = textVal;
+          updated.heroDescription = textVal;
+          if (!updated.about || typeof updated.about !== 'object') updated.about = {};
+          updated.about.description = textVal;
+          updated.about.bio = textVal;
+          updated.aboutMe = textVal;
+          updated.summary = textVal;
+          updated.bio = textVal;
+          if (!updated.personal || typeof updated.personal !== 'object') updated.personal = {};
+          updated.personal.bio = textVal;
+          updated.personal.summary = textVal;
+          if (updated.profile && typeof updated.profile === 'object') {
+            updated.profile.summary = textVal;
+            updated.profile.bio = textVal;
+          }
+          if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+            if (!updated.canonicalProfile.personal) updated.canonicalProfile.personal = {} as any;
+            updated.canonicalProfile.personal.summary = textVal;
+            updated.canonicalProfile.personal.bio = textVal;
+          }
+          if (updated.data && typeof updated.data === 'object') {
+            updated.data.heroDescription = textVal;
+            updated.data.aboutMe = textVal;
+            updated.data.summary = textVal;
+            updated.data.bio = textVal;
+            if (updated.data.hero) {
+              updated.data.hero.description = textVal;
+              updated.data.hero.subtitle = textVal;
+            }
+          }
+        }
+
+        if (isNameKey) {
+          updated.name = textVal;
+          updated.fullName = textVal;
+          if (!updated.hero || typeof updated.hero !== 'object') updated.hero = {};
+          updated.hero.name = textVal;
+          if (!updated.personal || typeof updated.personal !== 'object') updated.personal = {};
+          updated.personal.fullName = textVal;
+          updated.personal.name = textVal;
+          if (updated.profile && typeof updated.profile === 'object') {
+            updated.profile.fullName = textVal;
+            updated.profile.name = textVal;
+          }
+          if (updated.canonicalProfile && typeof updated.canonicalProfile === 'object') {
+            if (!updated.canonicalProfile.personal) updated.canonicalProfile.personal = {} as any;
+            updated.canonicalProfile.personal.fullName = textVal;
+            updated.canonicalProfile.personal.name = textVal;
+          }
+          if (updated.data && typeof updated.data === 'object') {
+            updated.data.name = textVal;
+            updated.data.fullName = textVal;
+            if (updated.data.hero) updated.data.hero.name = textVal;
+          }
+        }
+
+        if (isAvailabilityKey) {
+          updated.availability = textVal;
+          if (!updated.hero || typeof updated.hero !== 'object') updated.hero = {};
+          updated.hero.availability = textVal;
+          if (!updated.personal || typeof updated.personal !== 'object') updated.personal = {};
+          updated.personal.availability = textVal;
+        }
+
+        if (isLocationKey) {
+          updated.location = textVal;
+          if (!updated.hero || typeof updated.hero !== 'object') updated.hero = {};
+          updated.hero.location = textVal;
+          if (!updated.contact || typeof updated.contact !== 'object') updated.contact = {};
+          updated.contact.location = textVal;
+          if (!updated.personal || typeof updated.personal !== 'object') updated.personal = {};
+          updated.personal.location = textVal;
         }
       }
 
